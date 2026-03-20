@@ -223,6 +223,7 @@ function handleSaveDay(d) {
   deleteRowsByDate(custTab, date, 0);
 
   dayTab.appendRow([date, visitors, reservations, rate]);
+  sortSheetByDate(dayTab);
 
   const customers = d.customers || [];
   customers.forEach((c, i) => {
@@ -238,6 +239,7 @@ function handleSaveDay(d) {
       c.email_addr  || ''
     ]);
   });
+  if (customers.length > 0) sortSheetByDate(custTab);
 
   return { success: true, rate, spreadsheet_id: ss.getId() };
 }
