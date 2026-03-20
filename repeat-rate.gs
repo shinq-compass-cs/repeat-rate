@@ -280,19 +280,24 @@ function handleCsv(p) {
 // ─── 重複行クリーンアップ（同日付は最後の行だけ残す）────────────────
 // handleSaveDay の冒頭で呼ぶことで既存重複も解消する
 
-function deduplicateSheet(sheet, dateCol) {
+// deduplicateSheet:
+//   日次タブ → dateCol=0, indexCol=undefined → 日付をキーに最終行を残す
+//   顧客タブ → dateCol=0, indexCol=1        → (日付+番号)を複合キーに最終行を残す
+function deduplicateSheet(sheet, dateCol, indexCol) {
   const vals = sheet.getDataRange().getValues();
-  if (vals.length < 3) return; // ヘッダー + 1行以下なら不要
-  // 日付ごとの最終行インデックスを記録
+  if (vals.length < 3) return;
   const lastRow = {};
   for (let i = 1; i < vals.length; i++) {
-    const d = fmtDate(vals[i][dateCol]);
-    lastRow[d] = i; // 上書きで最後のインデックスが残る
+    const key = indexCol !== undefined
+      ? fmtDate(vals[i][dateCol]) + '_' + String(vals[i][indexCol])
+      : fmtDate(vals[i][dateCol]);
+    lastRow[key] = i;
   }
-  // 後ろから走査して「最終行でない行」を削除
   for (let i = vals.length - 1; i >= 1; i--) {
-    const d = fmtDate(vals[i][dateCol]);
-    if (lastRow[d] !== i) sheet.deleteRow(i + 1);
+    const key = indexCol !== undefined
+      ? fmtDate(vals[i][dateCol]) + '_' + String(vals[i][indexCol])
+      : fmtDate(vals[i][dateCol]);
+    if (lastRow[key] !== i) sheet.deleteRow(i + 1);
   }
 }
 
