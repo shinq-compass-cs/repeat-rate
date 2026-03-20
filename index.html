@@ -766,8 +766,17 @@ function renderChart() {
   const ctx = document.getElementById('rate-chart').getContext('2d');
   let labels, dataPoints;
   if (chartMode === 'daily') {
-    const sorted = [...allDays].sort((a, b) => a.date > b.date ? 1 : -1).slice(-30);
-    labels = sorted.map(d => d.date.slice(5)); dataPoints = sorted.map(d => d.rate);
+    // 今月の1日〜末日を固定で並べる
+    const now = new Date(), year = now.getFullYear(), mon = now.getMonth();
+    const daysInMonth = new Date(year, mon + 1, 0).getDate();
+    const dataByDate = {};
+    allDays.forEach(d => { dataByDate[d.date] = d.rate; });
+    labels = []; dataPoints = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const ds = year + '-' + pad(mon + 1) + '-' + pad(day);
+      labels.push(String(day));
+      dataPoints.push(dataByDate[ds] !== undefined ? dataByDate[ds] : null);
+    }
   } else {
     const byM = {};
     allDays.forEach(d => { const ym = d.date.slice(0, 7); if (!byM[ym]) byM[ym] = {v:0,r:0}; byM[ym].v += d.visitors; byM[ym].r += d.reservations; });
@@ -775,7 +784,7 @@ function renderChart() {
     labels = months.map(m => m.slice(2).replace('-', '/'));
     dataPoints = months.map(m => byM[m].v > 0 ? Math.round(byM[m].r / byM[m].v * 100) : 0);
   }
-  const bgColors = dataPoints.map(r => r >= 70 ? 'rgba(46,138,110,.75)' : r >= 50 ? 'rgba(176,122,58,.75)' : 'rgba(168,69,69,.75)');
+  const bgColors = dataPoints.map(r => r === null ? 'transparent' : r >= 70 ? 'rgba(46,138,110,.75)' : r >= 50 ? 'rgba(176,122,58,.75)' : 'rgba(168,69,69,.75)');
   if (chartInstance) chartInstance.destroy();
   chartInstance = new Chart(ctx, {
     type: 'bar',
