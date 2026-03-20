@@ -586,8 +586,8 @@ function openPastForm(dateStr) {
   document.getElementById('past-date-label').textContent = fmtDate(dateStr) + 'のデータ';
   document.getElementById('past-calendar').style.display = 'none';
   document.getElementById('past-form').style.display     = 'block';
-  // 本日の入力フォームが開いている場合のみ閉じる（保存済み表示はそのまま残す）
-  document.getElementById('today-input').style.display  = 'none';
+  // 本日セクションを保存済み表示に戻す（相互排他：入力欄は片方しか開かない）
+  initTodaySection();
   const existing = allDays.find(d => d.date === dateStr);
   if (existing) { buf.p.v = String(existing.visitors); buf.p.r = String(existing.reservations); }
   else           { buf.p.v = '0'; buf.p.r = '0'; }
