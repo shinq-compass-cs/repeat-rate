@@ -494,6 +494,7 @@ let allCustomers = [];
 let chartMode = 'daily';
 let chartInstance = null;
 let pastDate = '';
+let calMonthOffset = 0; // 0=今月, -1=先月, etc.
 
 // 入力バッファ（t=today, p=past / v=visitors, r=reservations）
 const buf = { t: { v: '0', r: '0' }, p: { v: '0', r: '0' } };
