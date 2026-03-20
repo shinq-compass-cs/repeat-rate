@@ -619,13 +619,24 @@ function editToday() { showTodayInput(); }
 // ===================================================================
 // カレンダー
 // ===================================================================
+function shiftCalMonth(delta) {
+  calMonthOffset += delta;
+  // 未来月には進めない
+  if (calMonthOffset > 0) calMonthOffset = 0;
+  renderCalendar();
+}
+
 function renderCalendar() {
-  const now = new Date(), year = now.getFullYear(), mon = now.getMonth();
+  const base = new Date(); base.setDate(1); base.setMonth(base.getMonth() + calMonthOffset);
+  const year = base.getFullYear(), mon = base.getMonth();
   const daysInMonth = new Date(year, mon + 1, 0).getDate();
   const firstDow    = new Date(year, mon, 1).getDay();
   const dataByDate  = {}; allDays.forEach(d => { dataByDate[d.date] = d; });
   const today = todayStr();
   document.getElementById('cal-month-label').textContent = year + '年' + (mon + 1) + '月';
+  // 翌月ボタン：今月より先には進めない
+  const nextBtn = document.getElementById('cal-nav-next');
+  if (nextBtn) nextBtn.disabled = calMonthOffset >= 0;
   const grid = document.getElementById('cal-grid');
   grid.innerHTML = ['日','月','火','水','木','金','土'].map(d => `<div class="cal-dow">${d}</div>`).join('');
   for (let i = 0; i < firstDow; i++) grid.insertAdjacentHTML('beforeend', '<div class="cal-day empty"></div>');
