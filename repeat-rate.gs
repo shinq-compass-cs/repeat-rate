@@ -21,9 +21,10 @@ function doPost(e) {
     const d = JSON.parse(e.postData.contents);
     switch (d.action) {
       case 'login':   return ok(handleLogin(d));
-      case 'saveDay': return ok(handleSaveDay(d));
-      case 'getData': return ok(handleGetData(d));
-      default:        return ok({ success: false, error: 'unknown action: ' + d.action });
+      case 'saveDay':  return ok(handleSaveDay(d));
+      case 'getData':  return ok(handleGetData(d));
+      case 'cleanup':  return ok(runCleanup2049());
+      default:         return ok({ success: false, error: 'unknown action: ' + d.action });
     }
   } catch (err) {
     return ok({ success: false, error: err.message });
