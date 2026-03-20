@@ -299,32 +299,54 @@ function handleGetData(d) {
   const dayTab  = ss.getSheetByName('日次');
   const cusTab  = ss.getSheetByName('顧客');
 
+  const fmt = getSheetFormat(cusTab);
+
   // ログイン時に既存の重複行をシートから削除（今後も重複しない状態を維持）
-  deduplicateSheet(dayTab, 0);        // 日次: 日付キー
-  deduplicateSheet(cusTab, 0, 1);     // 顧客: 日付+番号の複合キー
+  deduplicateSheet(dayTab, 0);
+  deduplicateSheet(cusTab, fmt.dateCol, fmt.indexCol);
 
   const dayRows = dayTab.getDataRange().getValues();
   const cusRows = cusTab.getDataRange().getValues();
 
-  // 同日付が複数ある場合は最後の行を優先（dedup）
   const dayMap = {};
   dayRows.slice(1).forEach(r => {
     const d = fmtDate(r[0]);
     dayMap[d] = { date: d, visitors: Number(r[1]), reservations: Number(r[2]), rate: Number(r[3]) };
   });
   const cusMap = {};
-  cusRows.slice(1).forEach(r => {
-    const d = fmtDate(r[0]);
-    if (!cusMap[d]) cusMap[d] = [];
-    cusMap[d].push({
-      date: d, index: Number(r[1]),
-      last_name:  String(r[2] || ''), first_name: String(r[3] || ''),
-      reserved:   r[4] === '○',
-      menu:       String(r[5] || ''), price:    String(r[6] || ''),
-      gender:     String(r[7] || ''), phone:    String(r[8] || ''),
-      email_addr: String(r[9] || '')
+  if (fmt.type === 'new') {
+    // 新フォーマット: Q(16)=来店日, R(17)=番号, S(18)=次回予約の有無
+    cusRows.slice(1).forEach(r => {
+      const d = fmtDate(r[16]);
+      if (!d) return;
+      if (!cusMap[d]) cusMap[d] = [];
+      const parts = String(r[0] || '').trim().split(/\s+/);
+      cusMap[d].push({
+        date: d, index: Number(r[17]),
+        last_name:  parts[0] || '', first_name: parts.slice(1).join(' ') || '',
+        reserved:   r[18] === '○',
+        menu:       '',
+        price:      String(r[10] || ''), // K: 施術
+        gender:     String(r[2]  || ''), // C: 性別
+        phone:      String(r[5]  || ''), // F: 電話番号
+        email_addr: String(r[8]  || '')  // I: メールアドレス
+      });
     });
-  });
+  } else {
+    // 旧フォーマット: A(0)=日付, B(1)=番号
+    cusRows.slice(1).forEach(r => {
+      const d = fmtDate(r[0]);
+      if (!cusMap[d]) cusMap[d] = [];
+      cusMap[d].push({
+        date: d, index: Number(r[1]),
+        last_name:  String(r[2] || ''), first_name: String(r[3] || ''),
+        reserved:   r[4] === '○',
+        menu:       String(r[5] || ''), price:    String(r[6] || ''),
+        gender:     String(r[7] || ''), phone:    String(r[8] || ''),
+        email_addr: String(r[9] || '')
+      });
+    });
+  }
 
   return {
     success: true,
