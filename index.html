@@ -279,7 +279,10 @@ input.count-display-today:focus { border-color: var(--primary-light); background
       </div>
 
       <!-- 今日データなし・過去フォーム表示中のプレースホルダー -->
-      <div id="today-empty" style="display:none;text-align:center;padding:16px 0;color:var(--gray-400);font-size:13px;">本日のデータはまだ入力されていません</div>
+      <div id="today-empty" style="display:none;text-align:center;padding:16px 0;">
+        <div style="font-size:13px;color:var(--gray-400);margin-bottom:10px;">本日のデータはまだ入力されていません</div>
+        <button class="edit-btn" onclick="showTodayInput()">入力する</button>
+      </div>
 
       <!-- 保存済み表示 -->
       <div id="today-saved" style="display:none">
