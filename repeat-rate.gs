@@ -123,6 +123,10 @@ function handleSaveDay(d) {
   const dayTab  = ss.getSheetByName('日次');
   const custTab = ss.getSheetByName('顧客');
 
+  // 既存の重複行を事前クリーンアップ（同日付は最後の行だけ残す）
+  deduplicateSheet(dayTab,  0);
+  deduplicateSheet(custTab, 0);
+
   const date         = String(d.date         || '').trim();
   const visitors     = parseInt(d.visitors,     10) || 0;
   const reservations = parseInt(d.reservations, 10) || 0;
