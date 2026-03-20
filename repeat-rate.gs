@@ -257,6 +257,20 @@ function handleCsv(p) {
 
 // ─── ユーティリティ ──────────────────────────────────────────────────
 
+// スプレッドシートの日付セル（Date型）を YYYY-MM-DD 文字列に統一する
+function fmtDate(v) {
+  if (v instanceof Date) {
+    return Utilities.formatDate(v, 'Asia/Tokyo', 'yyyy-MM-dd');
+  }
+  const s = String(v).trim();
+  // すでに YYYY-MM-DD 形式ならそのまま返す
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // 念のため Date パースを試みる
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) return Utilities.formatDate(d, 'Asia/Tokyo', 'yyyy-MM-dd');
+  return s;
+}
+
 function ok(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
