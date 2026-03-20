@@ -181,8 +181,15 @@ function handleGetData(d) {
   if (!ssId) return { success: true, days: [], customers: [] };
 
   const ss      = SpreadsheetApp.openById(ssId);
-  const dayRows = ss.getSheetByName('日次').getDataRange().getValues();
-  const cusRows = ss.getSheetByName('顧客').getDataRange().getValues();
+  const dayTab  = ss.getSheetByName('日次');
+  const cusTab  = ss.getSheetByName('顧客');
+
+  // ログイン時に既存の重複行をシートから削除（今後も重複しない状態を維持）
+  deduplicateSheet(dayTab, 0);
+  deduplicateSheet(cusTab, 0);
+
+  const dayRows = dayTab.getDataRange().getValues();
+  const cusRows = cusTab.getDataRange().getValues();
 
   // 同日付が複数ある場合は最後の行を優先（dedup）
   const dayMap = {};
