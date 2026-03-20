@@ -1034,7 +1034,8 @@ function downloadCsv() {
 // 初期化
 // ===================================================================
 function initEntryDate() {
-  document.getElementById('entry-date').value = todayStr();
+  selectedDate = todayStr();
+  // カレンダーはloadData()後のrenderAll()で描画される
 }
 
 // ===================================================================
