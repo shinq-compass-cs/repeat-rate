@@ -693,6 +693,8 @@ function np(key, sec, field) {
   if (key === 'del')        val = val.length > 1 ? val.slice(0, -1) : '0';
   else if (key === 'clear') val = '0';
   else { val = val === '0' ? key : val + key; if (parseInt(val, 10) > 99) val = key; }
+  // 予約数は施術回数を上限とする
+  if (field === 'r') { const cap = parseInt(buf[sec].v, 10) || 0; if (parseInt(val, 10) > cap) val = String(cap); }
   buf[sec][field] = val;
   setDisplay(sec);
   if (field === 'v') updateCustomerRows(sec, parseInt(val, 10));
