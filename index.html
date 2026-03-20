@@ -592,6 +592,8 @@ function openPastForm(dateStr) {
 function showPastCalendar() {
   document.getElementById('past-form').style.display     = 'none';
   document.getElementById('past-calendar').style.display = 'block';
+  // 本日セクションを元の状態に戻す
+  initTodaySection();
 }
 
 // ===================================================================
