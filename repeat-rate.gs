@@ -322,6 +322,45 @@ function ok(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+// ─── 管理用関数（GAS エディタから直接実行）──────────────────────────
+
+// repeat_rate_index にサロン2049を登録 + 既存重複データをクリーンアップ
+function setupSalon2049() {
+  const SALON_ID = '2049';
+  const SALON_SS = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
+  const SALON_NAME = '春日鍼灸治療院';
+
+  // repeat_rate_index に登録（未登録の場合のみ追加）
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  let idx = master.getSheetByName(INDEX_TAB);
+  if (!idx) {
+    idx = master.insertSheet(INDEX_TAB);
+    idx.appendRow(['salon_id', 'spreadsheet_id', 'salon_name', 'created_at']);
+    idx.setFrozenRows(1);
+  }
+  const rows = idx.getDataRange().getValues();
+  let found = false;
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]).trim() === SALON_ID) {
+      Logger.log('既に登録済み: ' + rows[i][1]);
+      found = true; break;
+    }
+  }
+  if (!found) {
+    idx.appendRow([SALON_ID, SALON_SS, SALON_NAME,
+      new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })]);
+    Logger.log('インデックス登録完了');
+  }
+
+  // 重複データクリーンアップ
+  const ss = SpreadsheetApp.openById(SALON_SS);
+  const dayTab = ss.getSheetByName('日次');
+  const cusTab = ss.getSheetByName('顧客');
+  deduplicateSheet(dayTab, 0);
+  deduplicateSheet(cusTab, 0, 1);
+  Logger.log('重複クリーンアップ完了');
+}
+
 // ─── テスト関数（clasp run testLogin で実行）─────────────────────────
 // GAS 変更後に毎回 clasp run testAll で動作確認する
 
