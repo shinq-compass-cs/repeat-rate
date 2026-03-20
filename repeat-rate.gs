@@ -155,7 +155,7 @@ function handleSaveDay(d) {
 function deleteRowsByDate(sheet, date, col) {
   const vals = sheet.getDataRange().getValues();
   for (let i = vals.length - 1; i >= 1; i--) {
-    if (String(vals[i][col]).trim() === date) sheet.deleteRow(i + 1);
+    if (fmtDate(vals[i][col]) === date) sheet.deleteRow(i + 1);
   }
 }
 
