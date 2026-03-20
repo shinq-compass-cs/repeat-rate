@@ -507,7 +507,7 @@ function renderMonthlyStats() {
     document.getElementById('monthly-badge').textContent = ''; return;
   }
   document.getElementById('monthly-rate-val').innerHTML = rate + '<span style="font-size:22px;font-weight:400">%</span>';
-  document.getElementById('monthly-sub').textContent = '累計 ' + tv + '人来店 / ' + tr + '人予約（' + md.length + '日間）';
+  document.getElementById('monthly-sub').textContent = '累計 ' + tv + '回施術 / ' + tr + '回予約（' + md.length + '日間）';
   const badge = document.getElementById('monthly-badge');
   if (rate >= 70) { badge.textContent = '◎ 良好';  badge.className = 'monthly-badge good'; }
   else if (rate >= 50) { badge.textContent = '○ 標準'; badge.className = 'monthly-badge ok'; }
