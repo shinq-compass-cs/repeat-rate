@@ -628,8 +628,8 @@ function renderCalendar() {
       continue;
     }
     const rec = dataByDate[ds];
-    const rateClass = rec ? (rec.rate >= 70 ? 'good' : rec.rate >= 50 ? 'ok' : 'low') : '';
-    const rh = rec ? `<span class="cal-day-rate ${rateClass}">${rec.rate}%</span>` : '';
+    const rateClass = rec && rec.rate !== null ? (rec.rate >= 70 ? 'good' : rec.rate >= 50 ? 'ok' : 'low') : '';
+    const rh = rec ? (rec.rate !== null ? `<span class="cal-day-rate ${rateClass}">${rec.rate}%</span>` : `<span class="cal-day-rate">—</span>`) : '';
     if (ds === today) {
       // 本日：rate 表示あり・クリック不可（本日のデータは上の「本日のデータ」で入力）
       grid.insertAdjacentHTML('beforeend', `<div class="cal-day today">${d}${rh}</div>`);
