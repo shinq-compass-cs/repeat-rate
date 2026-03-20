@@ -996,18 +996,8 @@ function prefillCustomers(custs, n) {
 }
 
 function prefillTodayData() {
-  const today = allDays.find(d => d.date === todayStr());
-  if (!today) return;
-  inputBuf.visitors     = String(today.visitors);
-  inputBuf.reservations = String(today.reservations);
-  document.getElementById('visitor-display').textContent     = today.visitors;
-  document.getElementById('reservation-display').textContent = today.reservations;
-  document.getElementById('visitor-label').textContent       = today.visitors;
-  updateCustomerRows(today.visitors);
-  const cust = allCustomers.filter(c => c.date === todayStr());
-  if (cust.length) prefillCustomers(cust, today.visitors);
-  updateLiveRate();
-  updateSaveBtn();
+  // 今日を選択状態にしてフォームを初期化
+  selectDate(todayStr());
 }
 
 function resetEntry() {
