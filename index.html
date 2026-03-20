@@ -388,23 +388,26 @@ input.count-display-today:focus { border-color: var(--primary-light); background
         <div style="font-size:13px;color:var(--gray-600);font-weight:600;margin-bottom:16px;padding:8px 12px;background:var(--accent-light);border-radius:var(--radius-sm)" id="past-date-label"></div>
 
         <div class="count-section">
-          <div class="count-label">① 何人が来店しましたか？</div>
-          <input type="text" inputmode="numeric" class="count-display" id="p-visitor-display" value="0"
-                 oninput="onCountInput('p','v',this.value)">
-          <div class="numpad">
-            <button class="numpad-btn" onclick="np('1','p','v')">1</button>
-            <button class="numpad-btn" onclick="np('2','p','v')">2</button>
-            <button class="numpad-btn" onclick="np('3','p','v')">3</button>
-            <button class="numpad-btn" onclick="np('4','p','v')">4</button>
-            <button class="numpad-btn" onclick="np('5','p','v')">5</button>
-            <button class="numpad-btn" onclick="np('6','p','v')">6</button>
-            <button class="numpad-btn" onclick="np('7','p','v')">7</button>
-            <button class="numpad-btn" onclick="np('8','p','v')">8</button>
-            <button class="numpad-btn" onclick="np('9','p','v')">9</button>
-            <button class="numpad-btn del"   onclick="np('del','p','v')">⌫</button>
-            <button class="numpad-btn"       onclick="np('0','p','v')">0</button>
-            <button class="numpad-btn clear" onclick="np('clear','p','v')">消去</button>
+          <div class="count-label">① 何回施術しましたか？</div>
+          <div class="today-counter">
+            <button class="pm-btn minus" onclick="npPm('p','v',-1)">−</button>
+            <input type="text" inputmode="numeric" class="count-display-today" id="p-visitor-display" value="0"
+                   oninput="onCountInput('p','v',this.value)">
+            <button class="pm-btn plus"  onclick="npPm('p','v',+1)">＋</button>
           </div>
+          <div class="numrow">
+            <button class="numrow-btn" onclick="np('0','p','v')">0</button>
+            <button class="numrow-btn" onclick="np('1','p','v')">1</button>
+            <button class="numrow-btn" onclick="np('2','p','v')">2</button>
+            <button class="numrow-btn" onclick="np('3','p','v')">3</button>
+            <button class="numrow-btn" onclick="np('4','p','v')">4</button>
+            <button class="numrow-btn" onclick="np('5','p','v')">5</button>
+            <button class="numrow-btn" onclick="np('6','p','v')">6</button>
+            <button class="numrow-btn" onclick="np('7','p','v')">7</button>
+            <button class="numrow-btn" onclick="np('8','p','v')">8</button>
+            <button class="numrow-btn" onclick="np('9','p','v')">9</button>
+          </div>
+          <button class="numrow-clear-btn" onclick="np('clear','p','v')">消去</button>
         </div>
 
         <hr class="section-divider">
