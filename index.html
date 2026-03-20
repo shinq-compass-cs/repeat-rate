@@ -541,6 +541,7 @@ async function loadData() {
     allDays      = (res.days || []).sort((a, b) => a.date > b.date ? -1 : 1);
     allCustomers = res.customers || [];
     // 過去セクションをカレンダー表示にリセット（ログアウト→再ログイン時の状態残りを防ぐ）
+    calMonthOffset = 0;
     document.getElementById('past-form').style.display     = 'none';
     document.getElementById('past-calendar').style.display = 'block';
     renderMonthlyStats();
