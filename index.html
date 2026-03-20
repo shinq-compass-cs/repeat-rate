@@ -632,8 +632,11 @@ function openPastForm(dateStr) {
   document.getElementById('past-date-label').textContent = fmtDate(dateStr) + 'のデータ';
   document.getElementById('past-calendar').style.display = 'none';
   document.getElementById('past-form').style.display     = 'block';
-  // 過去データセクションの見出しが画面上部に来るようスクロール
-  document.getElementById('past-section-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // 過去データセクションの見出しが画面上部に来るようスクロール（ヘッダー高さを考慮）
+  const card = document.getElementById('past-section-card');
+  const headerH = document.querySelector('.app-header').offsetHeight;
+  const top = card.getBoundingClientRect().top + window.scrollY - headerH - 8;
+  window.scrollTo({ top, behavior: 'smooth' });
   // 本日入力欄を閉じる（相互排他）。initTodaySection は呼ばない（past-form が再度閉じられるのを防ぐ）
   document.getElementById('today-input').style.display = 'none';
   const todayRec = allDays.find(d => d.date === todayStr());
