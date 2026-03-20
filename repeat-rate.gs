@@ -211,9 +211,11 @@ function handleSaveDay(d) {
   const dayTab  = ss.getSheetByName('日次');
   const custTab = ss.getSheetByName('顧客');
 
+  const fmt = getSheetFormat(custTab);
+
   // 既存の重複行を事前クリーンアップ
-  deduplicateSheet(dayTab,  0);     // 日次: 日付キー
-  deduplicateSheet(custTab, 0, 1);  // 顧客: 日付+番号の複合キー
+  deduplicateSheet(dayTab, 0);
+  deduplicateSheet(custTab, fmt.dateCol, fmt.indexCol);
 
   const date         = String(d.date         || '').trim();
   const visitors     = parseInt(d.visitors,     10) || 0;
@@ -222,26 +224,49 @@ function handleSaveDay(d) {
 
   // 同日付を削除（上書き保存）
   deleteRowsByDate(dayTab,  date, 0);
-  deleteRowsByDate(custTab, date, 0);
+  deleteRowsByDate(custTab, date, fmt.dateCol);
 
   dayTab.appendRow([date, visitors, reservations, rate]);
-  sortSheetByDate(dayTab);
+  sortSheetByDate(dayTab, 1);
 
   const customers = d.customers || [];
-  customers.forEach((c, i) => {
-    custTab.appendRow([
-      date, i + 1,
-      c.last_name   || '',
-      c.first_name  || '',
-      c.reserved    ? '○' : '',
-      c.menu        || '',
-      c.price       || '',
-      c.gender      || '',
-      c.phone       || '',
-      c.email_addr  || ''
-    ]);
-  });
-  if (customers.length > 0) sortSheetByDate(custTab);
+  if (fmt.type === 'new') {
+    customers.forEach((c, i) => {
+      const fullName = ((c.last_name || '') + ' ' + (c.first_name || '')).trim();
+      const price = c.price || '';
+      custTab.appendRow([
+        fullName,           // A: 氏名
+        '',                 // B: 氏名（かな）
+        c.gender || '',     // C: 性別
+        '',                 // D: 誕生日
+        '',                 // E: 年齢
+        c.phone || '',      // F: 電話番号
+        '',                 // G: 郵便番号
+        '',                 // H: 住所
+        c.email_addr || '', // I: メールアドレス
+        price,              // J: 総売上
+        price,              // K: 施術
+        '0',                // L: 物販
+        price,              // M: 顧客単価
+        '',                 // N: 来店回数
+        date,               // O: 初回来店
+        date,               // P: 最終来店
+        date,               // Q: 来店日
+        i + 1,              // R: 番号
+        c.reserved ? '○' : '' // S: 次回予約の有無
+      ]);
+    });
+  } else {
+    customers.forEach((c, i) => {
+      custTab.appendRow([
+        date, i + 1,
+        c.last_name || '', c.first_name || '',
+        c.reserved ? '○' : '',
+        c.menu || '', c.price || '', c.gender || '', c.phone || '', c.email_addr || ''
+      ]);
+    });
+  }
+  if (customers.length > 0) sortSheetByDate(custTab, fmt.dateCol + 1);
 
   return { success: true, rate, spreadsheet_id: ss.getId() };
 }
