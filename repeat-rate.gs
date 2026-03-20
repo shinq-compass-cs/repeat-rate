@@ -32,7 +32,45 @@ function doPost(e) {
 
 function doGet(e) {
   if ((e.parameter.action || '') === 'csv') return handleCsv(e.parameter);
+  // 一時クリーンアップ（使用後削除）
+  if (e.parameter.action === 'cleanup' && e.parameter.key === 'shinq2049cleanup') {
+    return ContentService.createTextOutput(JSON.stringify(runCleanup2049()));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
+}
+
+function runCleanup2049() {
+  try {
+    const SALON_ID = '2049';
+    const SALON_SS = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
+    const master = SpreadsheetApp.openById(MASTER_SS_ID);
+    let idx = master.getSheetByName(INDEX_TAB);
+    if (!idx) {
+      idx = master.insertSheet(INDEX_TAB);
+      idx.appendRow(['salon_id', 'spreadsheet_id', 'salon_name', 'created_at']);
+      idx.setFrozenRows(1);
+    }
+    const rows = idx.getDataRange().getValues();
+    let found = false;
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]).trim() === SALON_ID) { found = true; break; }
+    }
+    if (!found) {
+      idx.appendRow([SALON_ID, SALON_SS, '春日鍼灸治療院',
+        new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })]);
+    }
+    const ss = SpreadsheetApp.openById(SALON_SS);
+    const dayTab = ss.getSheetByName('日次');
+    const cusTab = ss.getSheetByName('顧客');
+    const dayBefore = dayTab.getLastRow() - 1;
+    const cusBefore = cusTab.getLastRow() - 1;
+    deduplicateSheet(dayTab, 0);
+    deduplicateSheet(cusTab, 0, 1);
+    const dayAfter = dayTab.getLastRow() - 1;
+    const cusAfter = cusTab.getLastRow() - 1;
+    return { success: true, index: found ? '登録済み' : '新規登録',
+             day: dayBefore + '行→' + dayAfter + '行', cus: cusBefore + '行→' + cusAfter + '行' };
+  } catch(e) { return { success: false, error: e.message }; }
 }
 
 // ─── ログイン ────────────────────────────────────────────────────────
