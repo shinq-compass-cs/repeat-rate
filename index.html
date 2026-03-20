@@ -381,7 +381,11 @@ input.count-display-today:focus { border-color: var(--primary-light); background
       <!-- カレンダー -->
       <div id="past-calendar">
         <div style="font-size:12px;color:var(--gray-400);margin-bottom:10px;">過去の日付をタップするとデータを入力・修正できます</div>
-        <div class="cal-month-label" id="cal-month-label"></div>
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="shiftCalMonth(-1)">＜</button>
+          <div class="cal-month-label" id="cal-month-label"></div>
+          <button class="cal-nav-btn" onclick="shiftCalMonth(+1)" id="cal-nav-next">＞</button>
+        </div>
         <div class="cal-grid" id="cal-grid"></div>
         <div class="csv-area">
           <button class="csv-btn" onclick="downloadCsv()">CSVダウンロード</button>
