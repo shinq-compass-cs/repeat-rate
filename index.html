@@ -698,7 +698,9 @@ function setDisplay(sec) {
 // ±ボタン用（本日のデータ用実験UI）
 function npPm(sec, field, delta) {
   const cur = parseInt(buf[sec][field], 10) || 0;
-  const next = Math.max(0, Math.min(99, cur + delta));
+  let next = Math.max(0, Math.min(99, cur + delta));
+  // 予約数は来店数を上限とする
+  if (field === 'r') next = Math.min(next, parseInt(buf[sec].v, 10) || 0);
   buf[sec][field] = String(next);
   setDisplay(sec);
   if (field === 'v') updateCustomerRows(sec, next);
