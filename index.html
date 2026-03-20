@@ -141,16 +141,17 @@ input.count-display-today {
   outline: none; transition: border-color .2s, background .2s;
 }
 input.count-display-today:focus { border-color: var(--primary-light); background: #eef3fb; }
-.numrow { display: flex; gap: 4px; justify-content: center; margin-bottom: 4px; }
+.numrow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 4px; }
 .numrow-btn {
-  flex: 1; background: var(--gray-100); border: none; border-radius: var(--radius-sm);
+  background: var(--gray-100); border: none; border-radius: var(--radius-sm);
   font-size: 16px; font-weight: 600; padding: 12px 0; cursor: pointer;
   transition: background .15s, transform .1s; color: var(--gray-800); font-family: 'Inter',sans-serif;
   min-width: 0;
 }
 .numrow-btn:hover  { background: var(--gray-200); }
 .numrow-btn:active { transform: scale(.95); }
-.numrow-clear { font-size: 11px; font-weight: 700; color: var(--danger); background: var(--danger-light); }
+.numrow-clear-btn { width: 100%; padding: 10px 0; margin-top: 2px; font-size: 12px; font-weight: 700; color: var(--danger); background: var(--danger-light); border: none; border-radius: var(--radius-sm); cursor: pointer; transition: opacity .15s; }
+.numrow-clear-btn:hover { opacity: .8; }
 
 /* ===== ライブリピート率 ===== */
 .live-rate { text-align: center; padding: 10px; margin-bottom: 14px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 700; display: none; }
