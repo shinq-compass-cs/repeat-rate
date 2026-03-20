@@ -719,7 +719,7 @@ function setDisplay(sec) {
   document.getElementById(sec + '-visitor-label').textContent      = v;
 }
 
-// ±ボタン用（本日のデータ用実験UI）
+// ±ボタン用
 function npPm(sec, field, delta) {
   const cur = parseInt(buf[sec][field], 10) || 0;
   let next = Math.max(0, Math.min(99, cur + delta));
