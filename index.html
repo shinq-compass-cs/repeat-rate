@@ -840,13 +840,12 @@ function collectCustomers(sec) {
 // 保存（①②の数値が正 — チェックボックス数より優先）
 // ===================================================================
 async function saveToday() { await saveData('t', todayStr()); }
-async function savePast()  { await saveData('p', pastDate); showPastCalendar(); }
+async function savePast()  { const ok = await saveData('p', pastDate); if (ok) showPastCalendar(); }
 
 async function saveData(sec, date) {
   const v = parseInt(buf[sec].v, 10) || 0;
   const r = parseInt(buf[sec].r, 10) || 0;
-  if (v <= 0) return;
-  if (r > v) { showToast('次回予約数が来店人数を超えています'); return; }
+  if (r > v) { showToast('次回予約数が施術回数を超えています'); return false; }
   showLoading(true);
   try {
     const res = await gasPost({
@@ -855,7 +854,7 @@ async function saveData(sec, date) {
     });
     if (!res.success) throw new Error(res.error);
     showToast('保存しました');
-    const rate = v > 0 ? Math.round(r / v * 100) : 0;
+    const rate = v > 0 ? Math.round(r / v * 100) : null;
     allDays = allDays.filter(d => d.date !== date);
     allDays.unshift({ date, visitors: v, reservations: r, rate });
     allDays.sort((a, b) => a.date > b.date ? -1 : 1);
@@ -863,7 +862,8 @@ async function saveData(sec, date) {
     collectCustomers(sec).forEach((c, i) => allCustomers.push({ date, index: i + 1, ...c }));
     renderMonthlyStats(); renderCalendar(); renderChart();
     if (sec === 't') showTodaySaved({ visitors: v, reservations: r, rate });
-  } catch (err) { showToast('保存エラー: ' + err.message); }
+    return true;
+  } catch (err) { showToast('保存エラー: ' + err.message); return false; }
   finally { showLoading(false); }
 }
 
