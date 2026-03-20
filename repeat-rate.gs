@@ -393,12 +393,26 @@ function deduplicateSheet(sheet, dateCol, indexCol) {
 
 // ─── 日付ソート ──────────────────────────────────────────────────────
 
-// ヘッダー行を除いてA列（日付）昇順でソートする
-function sortSheetByDate(sheet) {
+// ヘッダー行を除いて日付列（1-indexed）昇順でソートする
+function sortSheetByDate(sheet, dateColOneBased) {
+  const col = dateColOneBased || 1;
   const lastRow = sheet.getLastRow();
-  if (lastRow < 3) return; // ヘッダー+1行以下はソート不要
+  if (lastRow < 3) return;
   sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn())
-    .sort({ column: 1, ascending: true });
+    .sort({ column: col, ascending: true });
+}
+
+// ─── フォーマット判定 ─────────────────────────────────────────────────
+
+// 顧客タブのフォーマットを判定する
+// 新フォーマット（19列）: A列ヘッダー = '氏名', 日付=Q列(16), 番号=R列(17)（0-indexed）
+// 旧フォーマット（10列）: A列ヘッダー = '日付', 日付=A列(0), 番号=B列(1)（0-indexed）
+function getSheetFormat(sheet) {
+  if (sheet.getLastRow() < 1 || sheet.getLastColumn() < 1) return { type: 'new', dateCol: 16, indexCol: 17 };
+  const h = String(sheet.getRange(1, 1, 1, 1).getValues()[0][0]).trim();
+  return h === '氏名'
+    ? { type: 'new', dateCol: 16, indexCol: 17 }
+    : { type: 'old', dateCol: 0,  indexCol: 1  };
 }
 
 // ─── ユーティリティ ──────────────────────────────────────────────────
