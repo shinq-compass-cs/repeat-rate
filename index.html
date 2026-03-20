@@ -659,6 +659,18 @@ function showPastCalendar() {
   document.getElementById('past-calendar').style.display = 'block';
   // 本日セクションを元の状態に戻す
   initTodaySection();
+  // リピート率グラフへスクロール
+  setTimeout(() => scrollToCard('chart-section-card'), 50);
+}
+
+// ヘッダー高さを考慮してセクションカードまでスクロール
+function scrollToCard(id) {
+  const card = document.getElementById(id);
+  if (!card) return;
+  const headerH = document.querySelector('.app-header').offsetHeight;
+  let top = 0, el = card;
+  while (el) { top += el.offsetTop; el = el.offsetParent; }
+  window.scrollTo({ top: top - headerH - 8, behavior: 'smooth' });
 }
 
 // ===================================================================
