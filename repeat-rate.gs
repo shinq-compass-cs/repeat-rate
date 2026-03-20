@@ -309,3 +309,41 @@ function ok(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
+// ─── テスト関数（clasp run testLogin で実行）─────────────────────────
+// GAS 変更後に毎回 clasp run testAll で動作確認する
+
+function testAll() {
+  const results = [];
+
+  // テスト1: ログイン（サンプルデータ）
+  try {
+    const r = handleLogin({ salon_id: '38290', email: 'sample@shinkyuu-compass.jp' });
+    // 成功でも失敗でもエラーが出なければ OK（認証失敗は正常動作）
+    results.push('login: ' + (r.success ? 'OK (認証成功)' : 'OK (認証失敗は正常: ' + r.error + ')'));
+  } catch (e) {
+    results.push('login: ERROR - ' + e.message);
+  }
+
+  // テスト2: repeat_rate_index タブ存在確認
+  try {
+    const master = SpreadsheetApp.openById(MASTER_SS_ID);
+    const idx = master.getSheetByName(INDEX_TAB);
+    results.push('index_tab: ' + (idx ? 'OK (存在)' : 'NG (タブなし)'));
+  } catch (e) {
+    results.push('index_tab: ERROR - ' + e.message);
+  }
+
+  // テスト3: fmtDate の動作確認
+  try {
+    const d = new Date('2026-03-20');
+    const r = fmtDate(d);
+    results.push('fmtDate: ' + (r === '2026-03-20' ? 'OK' : 'NG: ' + r));
+  } catch (e) {
+    results.push('fmtDate: ERROR - ' + e.message);
+  }
+
+  const summary = results.join('\n');
+  Logger.log(summary);
+  return summary;
+}
