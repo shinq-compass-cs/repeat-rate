@@ -717,7 +717,9 @@ function updateLiveRate(sec) {
 
 function updateSaveBtn(sec) {
   const v = parseInt(buf[sec].v, 10) || 0;
-  const dis = v <= 0;
+  const r = parseInt(buf[sec].r, 10) || 0;
+  // 来店数が0、または予約数が来店数を超えている場合は保存不可
+  const dis = v <= 0 || r > v;
   document.getElementById(sec + '-save-btn').disabled = dis;
   const csBtn = document.getElementById(sec + '-customers-save-btn');
   if (csBtn) csBtn.disabled = dis;
