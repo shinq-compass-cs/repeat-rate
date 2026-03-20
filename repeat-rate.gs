@@ -266,6 +266,25 @@ function handleCsv(p) {
     .setMimeType(ContentService.MimeType.CSV);
 }
 
+// ─── 重複行クリーンアップ（同日付は最後の行だけ残す）────────────────
+// handleSaveDay の冒頭で呼ぶことで既存重複も解消する
+
+function deduplicateSheet(sheet, dateCol) {
+  const vals = sheet.getDataRange().getValues();
+  if (vals.length < 3) return; // ヘッダー + 1行以下なら不要
+  // 日付ごとの最終行インデックスを記録
+  const lastRow = {};
+  for (let i = 1; i < vals.length; i++) {
+    const d = fmtDate(vals[i][dateCol]);
+    lastRow[d] = i; // 上書きで最後のインデックスが残る
+  }
+  // 後ろから走査して「最終行でない行」を削除
+  for (let i = vals.length - 1; i >= 1; i--) {
+    const d = fmtDate(vals[i][dateCol]);
+    if (lastRow[d] !== i) sheet.deleteRow(i + 1);
+  }
+}
+
 // ─── ユーティリティ ──────────────────────────────────────────────────
 
 // スプレッドシートの日付セル（Date型）を YYYY-MM-DD 文字列に統一する
