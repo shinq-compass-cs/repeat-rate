@@ -473,6 +473,7 @@ let allDays = [];    // [{ date, visitors, reservations, rate }]
 let allCustomers = []; // [{ date, ... }]
 let chartMode = 'daily';
 let chartInstance = null;
+let selectedDate = ''; // カレンダーで選択中の日付
 
 // 入力バッファ
 const inputBuf = { visitors: '0', reservations: '0' };
