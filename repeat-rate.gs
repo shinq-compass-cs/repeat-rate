@@ -123,9 +123,9 @@ function handleSaveDay(d) {
   const dayTab  = ss.getSheetByName('日次');
   const custTab = ss.getSheetByName('顧客');
 
-  // 既存の重複行を事前クリーンアップ（同日付は最後の行だけ残す）
-  deduplicateSheet(dayTab,  0);
-  deduplicateSheet(custTab, 0);
+  // 既存の重複行を事前クリーンアップ
+  deduplicateSheet(dayTab,  0);     // 日次: 日付キー
+  deduplicateSheet(custTab, 0, 1);  // 顧客: 日付+番号の複合キー
 
   const date         = String(d.date         || '').trim();
   const visitors     = parseInt(d.visitors,     10) || 0;
