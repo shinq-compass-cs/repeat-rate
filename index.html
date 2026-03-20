@@ -545,8 +545,84 @@ async function loadData() {
 function renderAll() {
   renderMonthlyStats();
   renderTodaySummary();
+  renderCalendar();
   renderChart();
   renderHistory();
+}
+
+// ===================================================================
+// カレンダー
+// ===================================================================
+function renderCalendar() {
+  const now   = new Date();
+  const year  = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDow    = new Date(year, month, 1).getDay(); // 0=日
+
+  const dataByDate = {};
+  allDays.forEach(d => { dataByDate[d.date] = d; });
+
+  document.getElementById('cal-month-label').textContent =
+    year + '年' + (month + 1) + '月';
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML =
+    ['日','月','火','水','木','金','土']
+    .map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  // 月初の空白セル
+  for (let i = 0; i < firstDow; i++) {
+    grid.insertAdjacentHTML('beforeend', '<div class="cal-day empty"></div>');
+  }
+
+  const today = todayStr();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = year + '-' + pad(month + 1) + '-' + pad(d);
+    const rec = dataByDate[dateStr];
+    let rateHtml = '';
+    if (rec) {
+      const cls = rec.rate >= 70 ? 'good' : rec.rate >= 50 ? 'ok' : 'low';
+      rateHtml = `<span class="cal-day-rate ${cls}">${rec.rate}%</span>`;
+    }
+    const cls = [
+      'cal-day',
+      dateStr === today        ? 'today'    : '',
+      dateStr === selectedDate ? 'selected' : '',
+    ].filter(Boolean).join(' ');
+    grid.insertAdjacentHTML('beforeend',
+      `<div class="${cls}" onclick="selectDate('${dateStr}')">${d}${rateHtml}</div>`
+    );
+  }
+}
+
+function selectDate(dateStr) {
+  selectedDate = dateStr;
+  renderCalendar(); // 選択状態を再描画
+
+  // 選択日付ラベル
+  document.getElementById('selected-date-label').textContent =
+    dateStr.replace(/(\d{4})-(\d{2})-(\d{2})/, '$1年$2月$3日のデータ');
+
+  // 既存データ復元
+  const existing = allDays.find(d => d.date === dateStr);
+  if (existing) {
+    inputBuf.visitors     = String(existing.visitors);
+    inputBuf.reservations = String(existing.reservations);
+    document.getElementById('visitor-display').textContent     = existing.visitors;
+    document.getElementById('reservation-display').textContent = existing.reservations;
+    document.getElementById('visitor-label').textContent       = existing.visitors;
+    updateCustomerRows(existing.visitors);
+    const cust = allCustomers.filter(c => c.date === dateStr);
+    if (cust.length) prefillCustomers(cust, existing.visitors);
+  } else {
+    resetEntry();
+  }
+  updateLiveRate();
+  updateSaveBtn();
+
+  // 入力欄へスクロール
+  document.getElementById('selected-date-label').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ===================================================================
