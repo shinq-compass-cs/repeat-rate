@@ -77,10 +77,28 @@ function runCleanup2049() {
 // ─── ログイン ────────────────────────────────────────────────────────
 // しんきゅうコンパス マスターシートの月次タブ or 無料体験タブで照合
 
-const MASTER_LOGIN_EMAILS = [
-  'info@shinq-compass.jp', // 社内ログイン用
-  'test',                  // 実装テスト用
-];
+// マスターログインメールはスプレッドシートの settings タブで管理（コード変更・デプロイ不要）
+function getMasterLoginEmails() {
+  try {
+    const master = SpreadsheetApp.openById(MASTER_SS_ID);
+    let sheet = master.getSheetByName('settings');
+    if (!sheet) {
+      // 初回：settingsタブを自動作成
+      sheet = master.insertSheet('settings');
+      sheet.appendRow(['master_login_email']);
+      sheet.appendRow(['info@shinq-compass.jp']);
+      sheet.appendRow(['test']);
+      sheet.getRange('A1').setFontWeight('bold');
+      sheet.setFrozenRows(1);
+    }
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return [];
+    return sheet.getRange(2, 1, lastRow - 1, 1).getValues()
+      .map(r => String(r[0]).trim().toLowerCase()).filter(v => v);
+  } catch(e) {
+    return []; // 読み取りエラー時はマスターログイン無効
+  }
+}
 
 function handleLogin(d) {
   const sid   = String(d.salon_id || '').trim();
