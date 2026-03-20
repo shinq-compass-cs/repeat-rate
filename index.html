@@ -355,26 +355,16 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--gray-50); colo
       </div>
     </div>
 
-    <!-- グラフ -->
-    <div class="chart-card">
-      <div class="chart-header">
-        <div class="chart-title">リピート率グラフ</div>
-        <div class="chart-toggle">
-          <button class="toggle-btn active" id="btn-daily"   onclick="switchChart('daily')">日次</button>
-          <button class="toggle-btn"        id="btn-monthly" onclick="switchChart('monthly')">月次</button>
-        </div>
-      </div>
-      <canvas id="rate-chart" height="180"></canvas>
-    </div>
-
     <!-- データ入力 -->
     <div class="entry-card">
       <div class="entry-card-title">📋 データ入力</div>
 
-      <div class="entry-date-row">
-        <span class="entry-date-label">日付：</span>
-        <input type="date" id="entry-date" class="entry-date-input" onchange="onDateChange()">
+      <!-- カレンダー -->
+      <div class="cal-section">
+        <div class="cal-month-label" id="cal-month-label"></div>
+        <div class="cal-grid" id="cal-grid"></div>
       </div>
+      <div class="selected-date-label" id="selected-date-label"></div>
 
       <!-- 来店人数 -->
       <div class="count-section">
