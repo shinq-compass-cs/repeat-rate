@@ -666,8 +666,8 @@ function showPastCalendar() {
   document.getElementById('past-calendar').style.display = 'block';
   // 本日セクションを元の状態に戻す
   initTodaySection();
-  // リピート率グラフへスクロール
-  setTimeout(() => scrollToCard('chart-section-card'), 50);
+  // リピート率グラフへスクロール（DOM変更後にレイアウトが確定してからスクロール）
+  setTimeout(() => requestAnimationFrame(() => scrollToCard('chart-section-card')), 150);
 }
 
 // ヘッダー高さを考慮してセクションカードまでスクロール
