@@ -199,7 +199,10 @@ input.count-display-today:focus { border-color: var(--primary-light); background
 .customers-save-btn:disabled { background: var(--gray-400); cursor: not-allowed; }
 
 /* ===== カレンダー ===== */
-.cal-month-label { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 10px; }
+.cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.cal-month-label { font-size: 14px; font-weight: 700; color: var(--primary); }
+.cal-nav-btn { background: none; border: 1px solid var(--gray-200); border-radius: 6px; padding: 4px 12px; font-size: 14px; cursor: pointer; color: var(--gray-600); }
+.cal-nav-btn:disabled { opacity: .3; cursor: default; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
 .cal-dow { text-align: center; font-size: 10px; color: var(--gray-400); padding: 4px 0; font-weight: 600; }
 .cal-day { text-align: center; padding: 6px 2px; border-radius: 6px; font-size: 13px; cursor: pointer; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
