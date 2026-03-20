@@ -180,20 +180,31 @@ function handleGetData(d) {
   const dayRows = ss.getSheetByName('日次').getDataRange().getValues();
   const cusRows = ss.getSheetByName('顧客').getDataRange().getValues();
 
-  return {
-    success: true,
-    spreadsheet_id: ssId,
-    days: dayRows.slice(1).map(r => ({
-      date: String(r[0]), visitors: Number(r[1]), reservations: Number(r[2]), rate: Number(r[3])
-    })),
-    customers: cusRows.slice(1).map(r => ({
-      date: String(r[0]), index: Number(r[1]),
+  // 同日付が複数ある場合は最後の行を優先（dedup）
+  const dayMap = {};
+  dayRows.slice(1).forEach(r => {
+    const d = fmtDate(r[0]);
+    dayMap[d] = { date: d, visitors: Number(r[1]), reservations: Number(r[2]), rate: Number(r[3]) };
+  });
+  const cusMap = {};
+  cusRows.slice(1).forEach(r => {
+    const d = fmtDate(r[0]);
+    if (!cusMap[d]) cusMap[d] = [];
+    cusMap[d].push({
+      date: d, index: Number(r[1]),
       last_name:  String(r[2] || ''), first_name: String(r[3] || ''),
       reserved:   r[4] === '○',
       menu:       String(r[5] || ''), price:    String(r[6] || ''),
       gender:     String(r[7] || ''), phone:    String(r[8] || ''),
       email_addr: String(r[9] || '')
-    }))
+    });
+  });
+
+  return {
+    success: true,
+    spreadsheet_id: ssId,
+    days: Object.values(dayMap),
+    customers: Object.values(cusMap).flat()
   };
 }
 
