@@ -99,7 +99,7 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--gray-50); colo
 .edit-btn { width: 100%; padding: 11px; background: var(--gray-100); color: var(--gray-600); border: 1px solid var(--gray-200); border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; }
 .edit-btn:hover { background: var(--gray-200); }
 
-/* ===== テンキー ===== */
+/* ===== テンキー（過去データ用・従来グリッド） ===== */
 .count-section { margin-bottom: 18px; }
 .count-label { font-size: 13px; color: var(--gray-600); margin-bottom: 8px; font-weight: 500; }
 
@@ -122,6 +122,35 @@ input.count-display:focus { border-color: var(--primary-light); background: #eef
 .numpad-btn:active { transform: scale(.95); }
 .numpad-btn.del   { font-size: 18px; color: var(--gray-600); }
 .numpad-btn.clear { font-size: 12px; font-weight: 700; color: var(--danger); background: var(--danger-light); }
+
+/* ===== ±ボタン + 横一列キー（本日のデータ用・実験UI） ===== */
+.today-counter { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.pm-btn {
+  flex-shrink: 0; width: 52px; height: 52px; border: none; border-radius: 50%;
+  font-size: 28px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .15s, transform .1s; font-family: 'Inter',sans-serif;
+}
+.pm-btn.minus { background: var(--gray-200); color: var(--gray-600); }
+.pm-btn.plus  { background: var(--primary);  color: #fff; }
+.pm-btn:hover  { opacity: .85; }
+.pm-btn:active { transform: scale(.92); }
+input.count-display-today {
+  font-family: 'Inter',sans-serif; font-size: 48px; font-weight: 700; text-align: center;
+  color: var(--primary); background: var(--gray-50); border-radius: var(--radius-sm);
+  padding: 10px; flex: 1; border: 1.5px solid transparent;
+  outline: none; transition: border-color .2s, background .2s;
+}
+input.count-display-today:focus { border-color: var(--primary-light); background: #eef3fb; }
+.numrow { display: flex; gap: 4px; justify-content: center; margin-bottom: 4px; }
+.numrow-btn {
+  flex: 1; background: var(--gray-100); border: none; border-radius: var(--radius-sm);
+  font-size: 16px; font-weight: 600; padding: 12px 0; cursor: pointer;
+  transition: background .15s, transform .1s; color: var(--gray-800); font-family: 'Inter',sans-serif;
+  min-width: 0;
+}
+.numrow-btn:hover  { background: var(--gray-200); }
+.numrow-btn:active { transform: scale(.95); }
+.numrow-clear { font-size: 11px; font-weight: 700; color: var(--danger); background: var(--danger-light); }
 
 /* ===== ライブリピート率 ===== */
 .live-rate { text-align: center; padding: 10px; margin-bottom: 14px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 700; display: none; }
