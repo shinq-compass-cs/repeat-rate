@@ -576,11 +576,11 @@ function initTodaySection() {
 }
 
 function showTodaySaved(rec) {
-  const cls = rec.rate >= 70 ? 'good' : rec.rate >= 50 ? 'ok' : 'low';
+  const cls = rec.rate !== null ? (rec.rate >= 70 ? 'good' : rec.rate >= 50 ? 'ok' : 'low') : '';
   document.getElementById('t-res-v').textContent    = rec.visitors;
   document.getElementById('t-res-r').textContent    = rec.reservations;
   const el = document.getElementById('t-res-rate');
-  el.textContent = rec.rate + '%'; el.className = 'saved-result-val ' + cls;
+  el.textContent = rec.rate !== null ? rec.rate + '%' : '—'; el.className = 'saved-result-val ' + cls;
   document.getElementById('today-empty').style.display = 'none';
   document.getElementById('today-saved').style.display = 'block';
   document.getElementById('today-input').style.display = 'none';
