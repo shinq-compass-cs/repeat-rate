@@ -555,13 +555,19 @@ function renderCalendar() {
   for (let i = 0; i < firstDow; i++) grid.insertAdjacentHTML('beforeend', '<div class="cal-day empty"></div>');
   for (let d = 1; d <= daysInMonth; d++) {
     const ds = year + '-' + pad(mon + 1) + '-' + pad(d);
-    if (ds >= today) {
-      grid.insertAdjacentHTML('beforeend', `<div class="cal-day ${ds === today ? 'today' : 'future'}">${d}</div>`);
+    if (ds > today) {
+      grid.insertAdjacentHTML('beforeend', `<div class="cal-day future">${d}</div>`);
       continue;
     }
     const rec = dataByDate[ds];
-    let rh = rec ? `<span class="cal-day-rate ${rec.rate >= 70 ? 'good' : rec.rate >= 50 ? 'ok' : 'low'}">${rec.rate}%</span>` : '';
-    grid.insertAdjacentHTML('beforeend', `<div class="cal-day" onclick="openPastForm('${ds}')">${d}${rh}</div>`);
+    const rateClass = rec ? (rec.rate >= 70 ? 'good' : rec.rate >= 50 ? 'ok' : 'low') : '';
+    const rh = rec ? `<span class="cal-day-rate ${rateClass}">${rec.rate}%</span>` : '';
+    if (ds === today) {
+      // 本日：rate 表示あり・クリック不可（本日のデータは上の「本日のデータ」で入力）
+      grid.insertAdjacentHTML('beforeend', `<div class="cal-day today">${d}${rh}</div>`);
+    } else {
+      grid.insertAdjacentHTML('beforeend', `<div class="cal-day" onclick="openPastForm('${ds}')">${d}${rh}</div>`);
+    }
   }
 }
 
