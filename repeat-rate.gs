@@ -242,7 +242,7 @@ function handleCsv(p) {
 
   // 日付別データを顧客行に変換
   const dataRows = cusRows.slice(1).map(r => {
-    const date       = String(r[0] || '');
+    const date       = fmtDate(r[0]);
     const last_name  = String(r[2] || '');
     const first_name = String(r[3] || '');
     const gender     = String(r[7] || '');
