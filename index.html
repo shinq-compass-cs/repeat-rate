@@ -621,8 +621,10 @@ function openPastForm(dateStr) {
   document.getElementById('past-date-label').textContent = fmtDate(dateStr) + 'のデータ';
   document.getElementById('past-calendar').style.display = 'none';
   document.getElementById('past-form').style.display     = 'block';
-  // 本日セクションを保存済み表示に戻す（相互排他：入力欄は片方しか開かない）
-  initTodaySection();
+  // 本日入力欄を閉じる（相互排他）。initTodaySection は呼ばない（past-form が再度閉じられるのを防ぐ）
+  document.getElementById('today-input').style.display = 'none';
+  const todayRec = allDays.find(d => d.date === todayStr());
+  if (todayRec) showTodaySaved(todayRec);
   const existing = allDays.find(d => d.date === dateStr);
   if (existing) { buf.p.v = String(existing.visitors); buf.p.r = String(existing.reservations); }
   else           { buf.p.v = '0'; buf.p.r = '0'; }
