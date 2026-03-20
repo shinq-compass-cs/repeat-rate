@@ -141,7 +141,10 @@ input.count-display-today {
   outline: none; transition: border-color .2s, background .2s;
 }
 input.count-display-today:focus { border-color: var(--primary-light); background: #eef3fb; }
-.numrow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 4px; }
+.numrow { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-bottom: 4px; }
+@media (max-width: 600px) {
+  .numrow { grid-template-columns: repeat(5, 1fr); }
+}
 .numrow-btn {
   background: var(--gray-100); border: none; border-radius: var(--radius-sm);
   font-size: 16px; font-weight: 600; padding: 12px 0; cursor: pointer;
