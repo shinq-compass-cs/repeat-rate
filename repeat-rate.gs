@@ -77,10 +77,36 @@ function runCleanup2049() {
 // ─── ログイン ────────────────────────────────────────────────────────
 // しんきゅうコンパス マスターシートの月次タブ or 無料体験タブで照合
 
+const MASTER_LOGIN_EMAIL = 'info@shinq-compass.jp'; // 社内マスターログイン用
+
 function handleLogin(d) {
   const sid   = String(d.salon_id || '').trim();
   const email = String(d.email    || '').trim().toLowerCase();
   if (!sid || !email) return { success: false, error: 'サロンIDとメールアドレスを入力してください' };
+
+  // 社内マスターログイン：あらゆるサロンIDでログイン可能
+  if (email === MASTER_LOGIN_EMAIL) {
+    const master = SpreadsheetApp.openById(MASTER_SS_ID);
+    const now  = new Date();
+    const yymm = String(now.getFullYear()).slice(2) + String(now.getMonth() + 1).padStart(2, '0');
+    for (const tabName of [yymm, '無料体験']) {
+      const sheet = master.getSheetByName(tabName);
+      if (!sheet) continue;
+      const rows = sheet.getDataRange().getValues();
+      if (rows.length < 2) continue;
+      const h  = rows[0].map(v => String(v).trim());
+      const ci = h.findIndex(v => v === 'サロンID');
+      const ni = h.findIndex(v => v === '院名');
+      if (ci < 0) continue;
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][ci]).trim() === sid) {
+          return { success: true, salon_name: ni >= 0 ? String(rows[i][ni]).trim() : '' };
+        }
+      }
+    }
+    // 月次タブに存在しないサロンIDでも社内用としてログイン許可
+    return { success: true, salon_name: '' };
+  }
 
   const master = SpreadsheetApp.openById(MASTER_SS_ID);
   const now  = new Date();
