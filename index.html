@@ -412,15 +412,15 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--gray-50); colo
       <!-- ライブリピート率 -->
       <div id="live-rate" class="live-rate"></div>
 
+      <!-- 保存ボタン（②の直下） -->
+      <button class="save-btn" id="save-btn" onclick="saveDay()" disabled>保存する</button>
+
       <!-- 顧客入力欄 -->
       <div id="customers-section" class="customers-section" style="display:none">
         <hr class="section-divider">
         <div class="customers-header">③ 来店者の記録（任意）</div>
         <div id="customer-rows"></div>
       </div>
-
-      <!-- 保存ボタン -->
-      <button class="save-btn" id="save-btn" onclick="saveDay()" disabled>保存する</button>
     </div>
 
     <!-- 履歴テーブル -->
@@ -442,6 +442,18 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--gray-50); colo
           <tr><td colspan="4" style="text-align:center;color:var(--gray-400);padding:20px">データなし</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- グラフ（最下部） -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">リピート率グラフ</div>
+        <div class="chart-toggle">
+          <button class="toggle-btn active" id="btn-daily"   onclick="switchChart('daily')">日次</button>
+          <button class="toggle-btn"        id="btn-monthly" onclick="switchChart('monthly')">月次</button>
+        </div>
+      </div>
+      <canvas id="rate-chart" height="180"></canvas>
     </div>
 
   </div><!-- /main-content -->
