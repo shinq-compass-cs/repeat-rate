@@ -566,6 +566,7 @@ function showTodaySaved(rec) {
   document.getElementById('t-res-r').textContent    = rec.reservations;
   const el = document.getElementById('t-res-rate');
   el.textContent = rec.rate + '%'; el.className = 'saved-result-val ' + cls;
+  document.getElementById('today-empty').style.display = 'none';
   document.getElementById('today-saved').style.display = 'block';
   document.getElementById('today-input').style.display = 'none';
 }
@@ -574,11 +575,15 @@ function showTodayInput() {
   // 過去フォームが開いていたら閉じてカレンダーに戻す（相互排他）
   document.getElementById('past-form').style.display     = 'none';
   document.getElementById('past-calendar').style.display = 'block';
-  document.getElementById('today-saved').style.display = 'none';
-  document.getElementById('today-input').style.display = 'block';
+  document.getElementById('today-empty').style.display  = 'none';
+  document.getElementById('today-saved').style.display  = 'none';
+  document.getElementById('today-input').style.display  = 'block';
   const today = allDays.find(d => d.date === todayStr());
-  if (today) { buf.t.v = String(today.visitors); buf.t.r = String(today.reservations); }
-  else        { buf.t.v = '0'; buf.t.r = '0'; }
+  if (today) {
+    // 保存済みデータがあれば上書き
+    buf.t.v = String(today.visitors); buf.t.r = String(today.reservations);
+  }
+  // 保存済みデータなし → buf.t を保持（入力途中の値を維持）
   setDisplay('t');
   updateCustomerRows('t', parseInt(buf.t.v, 10));
   const cust = allCustomers.filter(c => c.date === todayStr());
