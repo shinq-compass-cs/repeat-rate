@@ -124,9 +124,9 @@ input.count-display:focus { border-color: var(--primary-light); background: #eef
 .numpad-btn.clear { font-size: 12px; font-weight: 700; color: var(--danger); background: var(--danger-light); }
 
 /* ===== ±ボタン + 横一列キー（本日のデータ用・実験UI） ===== */
-.today-counter { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.today-counter { display: grid; grid-template-columns: 52px 1fr 52px; gap: 10px; margin-bottom: 10px; width: 100%; }
 .pm-btn {
-  flex-shrink: 0; width: 52px; height: 52px; border: none; border-radius: 50%;
+  width: 52px; height: 52px; border: none; border-radius: 50%;
   font-size: 28px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: background .15s, transform .1s; font-family: 'Inter',sans-serif;
 }
