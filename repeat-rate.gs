@@ -212,10 +212,44 @@ function handleCsv(p) {
   }
   if (!ssId) return ContentService.createTextOutput('データなし');
 
-  const cusRows = SpreadsheetApp.openById(ssId).getSheetByName('顧客').getDataRange().getValues();
-  const csv     = cusRows.map(r =>
-    r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')
-  ).join('\n');
+  const ss      = SpreadsheetApp.openById(ssId);
+  const cusRows = ss.getSheetByName('顧客').getDataRange().getValues();
+  const dayRows = ss.getSheetByName('日次').getDataRange().getValues();
+
+  // 来店回数マップ（顧客名をキーに累計）
+  const visitCount = {};
+  cusRows.slice(1).forEach(r => {
+    const key = (String(r[2]) + String(r[3])).trim();
+    if (key) visitCount[key] = (visitCount[key] || 0) + 1;
+  });
+
+  // ヘッダー（しんきゅう予約 user_list 16列形式）
+  const header = ['氏名','氏名（かな）','性別','誕生日','年齢','電話番号','郵便番号','住所',
+                  'メールアドレス','総売上','施術','物販','顧客単価','来店回数','初回来店','最終来店'];
+
+  const q = s => '"' + String(s).replace(/"/g, '""') + '"';
+
+  // 日付別データを顧客行に変換
+  const dataRows = cusRows.slice(1).map(r => {
+    const date       = String(r[0] || '');
+    const last_name  = String(r[2] || '');
+    const first_name = String(r[3] || '');
+    const gender     = String(r[7] || '');
+    const phone      = String(r[8] || '');
+    const email      = String(r[9] || '');
+    const price      = String(r[6] || '0');
+    const fullName   = (last_name + ' ' + first_name).trim();
+    const key        = (last_name + first_name).trim();
+    const visits     = visitCount[key] || 1;
+    const ts         = date ? date + ' 00:00:00' : '';
+
+    return [header, [
+      fullName, '', gender, '', '', phone, '', '', email,
+      price, price, '0', price, visits, ts, ts
+    ]];
+  }).map(([, row]) => row.map(q).join(','));
+
+  const csv = [header.map(q).join(','), ...dataRows].join('\n');
 
   return ContentService.createTextOutput('\uFEFF' + csv) // BOM付きUTF-8
     .setMimeType(ContentService.MimeType.CSV);
