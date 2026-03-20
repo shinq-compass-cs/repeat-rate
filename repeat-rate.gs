@@ -77,7 +77,10 @@ function runCleanup2049() {
 // ─── ログイン ────────────────────────────────────────────────────────
 // しんきゅうコンパス マスターシートの月次タブ or 無料体験タブで照合
 
-const MASTER_LOGIN_EMAIL = 'info@shinq-compass.jp'; // 社内マスターログイン用
+const MASTER_LOGIN_EMAILS = [
+  'info@shinq-compass.jp', // 社内ログイン用
+  'test',                  // 実装テスト用
+];
 
 function handleLogin(d) {
   const sid   = String(d.salon_id || '').trim();
