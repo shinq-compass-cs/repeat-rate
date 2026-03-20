@@ -257,6 +257,37 @@ body { font-family: 'Noto Sans JP', sans-serif; background: var(--gray-50); colo
 }
 #toast.show { opacity: 1; }
 
+/* ===== カレンダー ===== */
+.cal-section { margin-bottom: 20px; }
+.cal-month-label { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 12px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal-dow { text-align: center; font-size: 10px; color: var(--gray-400); padding: 4px 2px; font-weight: 600; }
+.cal-day {
+  text-align: center; padding: 6px 2px; border-radius: 6px; font-size: 13px; cursor: pointer;
+  line-height: 1.2; min-height: 42px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.cal-day:hover { background: var(--gray-100); }
+.cal-day.today { background: var(--primary); color: #fff; font-weight: 700; }
+.cal-day.selected { outline: 2px solid var(--accent); outline-offset: -2px; }
+.cal-day.today.selected { background: var(--primary); outline: 2px solid var(--accent); }
+.cal-day-rate { font-size: 9px; display: block; margin-top: 2px; font-weight: 700; }
+.cal-day-rate.good { color: var(--accent); }
+.cal-day-rate.ok   { color: var(--warning); }
+.cal-day-rate.low  { color: var(--danger); }
+.cal-day.today .cal-day-rate { color: rgba(255,255,255,.85); }
+.cal-day.empty { cursor: default; pointer-events: none; }
+.selected-date-label {
+  font-size: 13px; color: var(--gray-600); font-weight: 500; margin-bottom: 16px;
+  padding: 8px 12px; background: var(--accent-light); border-radius: var(--radius-sm);
+}
+
+/* ===== 顧客行 overflow 修正 ===== */
+.customer-row { overflow: hidden; }
+.customer-row-top { flex-wrap: nowrap; }
+.customer-name-inputs { min-width: 0; overflow: hidden; }
+.customer-name-input { min-width: 0; width: 100%; }
+
 @media (max-width: 400px) {
   .login-card { padding: 36px 24px; }
   .monthly-rate { font-size: 56px; }
