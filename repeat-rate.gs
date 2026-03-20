@@ -389,6 +389,16 @@ function deduplicateSheet(sheet, dateCol, indexCol) {
   }
 }
 
+// ─── 日付ソート ──────────────────────────────────────────────────────
+
+// ヘッダー行を除いてA列（日付）昇順でソートする
+function sortSheetByDate(sheet) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 3) return; // ヘッダー+1行以下はソート不要
+  sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn())
+    .sort({ column: 1, ascending: true });
+}
+
 // ─── ユーティリティ ──────────────────────────────────────────────────
 
 // スプレッドシートの日付セル（Date型）を YYYY-MM-DD 文字列に統一する
