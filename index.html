@@ -679,6 +679,17 @@ function setDisplay(sec) {
   document.getElementById(sec + '-visitor-label').textContent      = v;
 }
 
+// ±ボタン用（本日のデータ用実験UI）
+function npPm(sec, field, delta) {
+  const cur = parseInt(buf[sec][field], 10) || 0;
+  const next = Math.max(0, Math.min(99, cur + delta));
+  buf[sec][field] = String(next);
+  setDisplay(sec);
+  if (field === 'v') updateCustomerRows(sec, next);
+  if (field === 'r') syncReserveCheckboxes(sec, next);
+  updateLiveRate(sec); updateSaveBtn(sec);
+}
+
 function updateLiveRate(sec) {
   const v = parseInt(buf[sec].v, 10) || 0, r = parseInt(buf[sec].r, 10) || 0;
   const el = document.getElementById(sec + '-live-rate');
