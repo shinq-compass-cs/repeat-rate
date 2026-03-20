@@ -632,7 +632,13 @@ function openPastForm(dateStr) {
   // 本日入力欄を閉じる（相互排他）。initTodaySection は呼ばない（past-form が再度閉じられるのを防ぐ）
   document.getElementById('today-input').style.display = 'none';
   const todayRec = allDays.find(d => d.date === todayStr());
-  if (todayRec) showTodaySaved(todayRec);
+  if (todayRec) {
+    showTodaySaved(todayRec);
+  } else {
+    // 今日データなし → プレースホルダーを表示
+    document.getElementById('today-saved').style.display = 'none';
+    document.getElementById('today-empty').style.display = 'block';
+  }
   const existing = allDays.find(d => d.date === dateStr);
   if (existing) { buf.p.v = String(existing.visitors); buf.p.r = String(existing.reservations); }
   else           { buf.p.v = '0'; buf.p.r = '0'; }
