@@ -735,7 +735,13 @@ function npPm(sec, field, delta) {
 function updateLiveRate(sec) {
   const v = parseInt(buf[sec].v, 10) || 0, r = parseInt(buf[sec].r, 10) || 0;
   const el = document.getElementById(sec + '-live-rate');
-  if (v <= 0 || r > v) { el.style.display = 'none'; return; }
+  if (r > v) {
+    el.style.display = 'block';
+    el.textContent = '次回予約数が施術回数を超えています';
+    el.className = 'live-rate live-rate-err';
+    return;
+  }
+  if (v <= 0) { el.style.display = 'none'; return; }
   const rate = Math.round(r / v * 100);
   el.style.display = 'block'; el.textContent = 'リピート率：' + rate + '%';
   el.className = 'live-rate ' + (rate >= 70 ? 'good' : rate >= 50 ? 'ok' : 'low');
