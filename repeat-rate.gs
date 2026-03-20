@@ -185,8 +185,8 @@ function handleGetData(d) {
   const cusTab  = ss.getSheetByName('顧客');
 
   // ログイン時に既存の重複行をシートから削除（今後も重複しない状態を維持）
-  deduplicateSheet(dayTab, 0);
-  deduplicateSheet(cusTab, 0);
+  deduplicateSheet(dayTab, 0);        // 日次: 日付キー
+  deduplicateSheet(cusTab, 0, 1);     // 顧客: 日付+番号の複合キー
 
   const dayRows = dayTab.getDataRange().getValues();
   const cusRows = cusTab.getDataRange().getValues();
