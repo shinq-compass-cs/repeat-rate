@@ -687,6 +687,8 @@ function openPastForm(dateStr) {
   const existing = allDays.find(d => d.date === dateStr);
   if (existing) { buf.p.v = String(existing.visitors); buf.p.r = String(existing.reservations); }
   else           { buf.p.v = '0'; buf.p.r = '0'; }
+  // フォームを開いたらフレッシュ状態にリセット
+  buf.p.vf = true; buf.p.rf = true;
   setDisplay('p');
   updateCustomerRows('p', parseInt(buf.p.v, 10));
   const cust = allCustomers.filter(c => c.date === dateStr);
