@@ -210,9 +210,9 @@ function getOrCreateSalonSS(sid, sname) {
   const custTab = ss.insertSheet('顧客');
   custTab.appendRow(['氏名','氏名（かな）','性別','誕生日','年齢','電話番号','郵便番号','住所',
                      'メールアドレス','総売上','施術','物販','顧客単価','来店回数','初回来店','最終来店',
-                     '来店日','番号','次回予約の有無']);
+                     '来店日','番号','次回予約の有無','メニュー']);
   custTab.setFrozenRows(1);
-  custTab.getRange('A1:S1').setFontWeight('bold');
+  custTab.getRange('A1:T1').setFontWeight('bold');
 
   idx.appendRow([
     sid, ss.getId(), sname || '',
