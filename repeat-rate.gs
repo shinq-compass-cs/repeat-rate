@@ -283,7 +283,8 @@ function handleSaveDay(d) {
         '',                 // P: 最終来店（空欄）
         date,               // Q: 来店日
         i + 1,              // R: 番号
-        c.reserved ? '○' : '' // S: 次回予約の有無
+        c.reserved ? '○' : '', // S: 次回予約の有無
+        c.menu || ''        // T: メニュー
       ]);
     });
   } else {
