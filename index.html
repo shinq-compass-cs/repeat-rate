@@ -880,7 +880,7 @@ function collectCustomers(sec) {
     const g = f => (row.querySelector(`[data-field="${f}"]`) || {}).value || '';
     const cb = row.querySelector('[data-field="reserved"]');
     return { last_name: g('last_name'), first_name: g('first_name'), reserved: cb ? cb.checked : false,
-             menu: g('menu'), price: g('price'), gender: g('gender'), phone: g('phone'), email_addr: g('email_addr') };
+             menu: g('menu'), gender: g('gender'), phone: g('phone'), email_addr: g('email_addr') };
   });
 }
 
