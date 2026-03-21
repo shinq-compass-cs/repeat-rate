@@ -573,9 +573,43 @@ function runMigrationAll() {
       results.push(sid + ': ERROR - ' + e.message);
     }
   }
+  // 初回来店・最終来店クリア
+  for (const sid of ['1795', '2049']) {
+    try {
+      const msg = clearFirstLastVisit(sid);
+      results.push(sid + ' (O/Pクリア): ' + msg);
+    } catch(e) {
+      results.push(sid + ' (O/Pクリア): ERROR - ' + e.message);
+    }
+  }
   const summary = results.join('\n');
   Logger.log(summary);
   return summary;
+}
+
+function clearFirstLastVisit(sid) {
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const idx    = master.getSheetByName(INDEX_TAB);
+  if (!idx) return 'インデックスタブなし';
+  const rows = idx.getDataRange().getValues();
+  let ssId = null;
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); break; }
+  }
+  if (!ssId) return 'スプレッドシートIDが見つかりません';
+
+  const custTab = SpreadsheetApp.openById(ssId).getSheetByName('顧客');
+  if (!custTab) return '顧客タブなし';
+
+  const lastRow = custTab.getLastRow();
+  if (lastRow < 2) return 'データなし';
+
+  // O列（15）・P列（16）を空欄にする（新フォーマットのみ対象）
+  const fmt = getSheetFormat(custTab);
+  if (fmt.type !== 'new') return '旧フォーマット（スキップ）';
+
+  custTab.getRange(2, 15, lastRow - 1, 2).clearContent();
+  return '完了（' + (lastRow - 1) + '行クリア）';
 }
 
 function migrateCustTab(sid) {
