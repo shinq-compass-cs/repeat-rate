@@ -55,6 +55,47 @@ function doGet(e) {
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
+// R列（番号）を YYYYMMDD_NNN 形式に、S列（次回予約の有無）を 1/0 に一括変換
+function migrateRSColumns() {
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const idx    = master.getSheetByName(INDEX_TAB);
+  if (!idx) return { success: false, error: 'INDEX_TAB not found' };
+  const rows = idx.getDataRange().getValues();
+  const results = [];
+  for (let i = 1; i < rows.length; i++) {
+    const ssId = String(rows[i][1] || '').trim();
+    if (!ssId) continue;
+    try {
+      const ss   = SpreadsheetApp.openById(ssId);
+      const cust = ss.getSheetByName('顧客');
+      if (!cust) continue;
+      const lastRow = cust.getLastRow();
+      if (lastRow < 2) { results.push(ssId + ': no data rows'); continue; }
+      const data = cust.getRange(2, 1, lastRow - 1, 19).getValues(); // A〜S列
+      let changed = 0;
+      data.forEach((r, ri) => {
+        const dateStr = fmtDate(r[16]); // Q列（0-indexed=16）
+        if (!dateStr) return;
+        const dateKey = dateStr.replace(/-/g, '');
+        // R列（index 17）: 既存の番号（整数または文字列）を取得してゼロパディング
+        const rawIdx = r[17];
+        const numPart = parseInt(String(rawIdx).replace(/[^0-9]/g, '')) || (ri + 1);
+        const newR = dateKey + '_' + String(numPart).padStart(3, '0');
+        // S列（index 18）: '○'→1, ''→0, すでに 0/1 なら変換しない
+        const rawS = r[18];
+        const newS = (rawS === '○' || rawS === 1) ? 1 : 0;
+        cust.getRange(ri + 2, 18).setValue(newR); // R列
+        cust.getRange(ri + 2, 19).setValue(newS); // S列
+        changed++;
+      });
+      results.push(ssId + ': ' + changed + '行変換');
+    } catch (e) {
+      results.push(ssId + ': error - ' + e.message);
+    }
+  }
+  return { success: true, results };
+}
+
 function addMenuColumnToExistingSheets() {
   // 管理済みのすべてのサロンSSにT列「メニュー」ヘッダーを追加（未設定の場合のみ）
   const master = SpreadsheetApp.openById(MASTER_SS_ID);
