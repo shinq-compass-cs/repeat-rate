@@ -235,11 +235,10 @@ function handleSaveDay(d) {
   const customers = d.customers || [];
   if (fmt.type === 'new') {
     customers.forEach((c, i) => {
-      const fullName = ((c.last_name || '') + ' ' + (c.first_name || '')).trim();
       const price = c.price || '';
       custTab.appendRow([
-        fullName,           // A: 氏名
-        '',                 // B: 氏名（かな）
+        c.last_name || '',  // A: 氏名
+        c.first_name || '', // B: 氏名（かな）
         c.gender || '',     // C: 性別
         '',                 // D: 誕生日
         '',                 // E: 年齢
