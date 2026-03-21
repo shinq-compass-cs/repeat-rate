@@ -615,6 +615,7 @@ function showTodayInput() {
   updateCustomerRows('t', parseInt(buf.t.v, 10));
   const cust = allCustomers.filter(c => c.date === todayStr());
   if (cust.length) prefillCustomers('t', cust, parseInt(buf.t.v, 10));
+  else syncReserveCheckboxes('t', parseInt(buf.t.r, 10));
   updateLiveRate('t'); updateSaveBtn('t');
 }
 
