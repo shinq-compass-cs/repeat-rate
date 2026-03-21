@@ -717,9 +717,18 @@ function scrollToCard(id) {
 // ===================================================================
 function np(key, sec, field) {
   let val = buf[sec][field];
-  if (key === 'del')        val = val.length > 1 ? val.slice(0, -1) : '0';
-  else if (key === 'clear') val = '0';
-  else { val = key; } // ボタン押下で値を直接セット（追記でなく置換）
+  const fk = field + 'f'; // フレッシュフラグのキー
+  if (key === 'del') {
+    val = val.length > 1 ? val.slice(0, -1) : '0';
+    if (val === '0') buf[sec][fk] = true;
+  } else if (key === 'clear') {
+    val = '0'; buf[sec][fk] = true;
+  } else {
+    // フレッシュ or 現在値が'0' → 置換。そうでなければ追記（2桁入力対応）
+    val = (buf[sec][fk] || val === '0') ? key : val + key;
+    if (parseInt(val, 10) > 99) val = key; // オーバーフロー時は入力値に置換
+    buf[sec][fk] = false; // 1文字入力したので追記モードへ
+  }
   // 予約数は施術回数を上限とする
   if (field === 'r') { const cap = parseInt(buf[sec].v, 10) || 0; if (parseInt(val, 10) > cap) val = String(cap); }
   buf[sec][field] = val;
