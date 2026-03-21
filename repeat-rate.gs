@@ -52,6 +52,10 @@ function doGet(e) {
   if (e.parameter.action === 'migrateRS' && e.parameter.key === 'shinqrs2026') {
     return ContentService.createTextOutput(JSON.stringify(migrateRSColumns()));
   }
+  // 既存シートのL列（物販）の0を空欄にクリア
+  if (e.parameter.action === 'clearBuhanCol' && e.parameter.key === 'shinqbuhan2026') {
+    return ContentService.createTextOutput(JSON.stringify(clearBuhanColumn()));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
