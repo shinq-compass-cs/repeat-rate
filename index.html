@@ -878,14 +878,26 @@ async function saveData(sec, date) {
       date, visitors: v, reservations: r, customers: v > 0 ? collectCustomers(sec) : []
     });
     if (!res.success) throw new Error(res.error);
+    // 来店0回 → 未記入に戻す（allDaysから削除、カレンダーを空白に）
+    if (v === 0) {
+      showToast('施術0回のため記録を削除しました');
+      allDays = allDays.filter(d => d.date !== date);
+      allCustomers = allCustomers.filter(c => c.date !== date);
+      renderMonthlyStats(); renderCalendar(); renderChart();
+      if (sec === 't') {
+        document.getElementById('today-empty').style.display = 'block';
+        document.getElementById('today-saved').style.display = 'none';
+        document.getElementById('today-input').style.display = 'none';
+      }
+      return true;
+    }
     showToast('保存しました');
-    const rate = v > 0 ? Math.round(r / v * 100) : null;
+    const rate = Math.round(r / v * 100);
     allDays = allDays.filter(d => d.date !== date);
     allDays.unshift({ date, visitors: v, reservations: r, rate });
     allDays.sort((a, b) => a.date > b.date ? -1 : 1);
     allCustomers = allCustomers.filter(c => c.date !== date);
-    const saved = v > 0 ? collectCustomers(sec) : [];
-    saved.forEach((c, i) => allCustomers.push({ date, index: i + 1, ...c }));
+    collectCustomers(sec).forEach((c, i) => allCustomers.push({ date, index: i + 1, ...c }));
     renderMonthlyStats(); renderCalendar(); renderChart();
     if (sec === 't') showTodaySaved({ visitors: v, reservations: r, rate });
     return true;
