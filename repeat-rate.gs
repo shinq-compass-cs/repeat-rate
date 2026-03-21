@@ -56,6 +56,10 @@ function doGet(e) {
   if (e.parameter.action === 'clearBuhanCol' && e.parameter.key === 'shinqbuhan2026') {
     return ContentService.createTextOutput(JSON.stringify(clearBuhanColumn()));
   }
+  // 既存シートの日次D列にパーセント表記フォーマット適用
+  if (e.parameter.action === 'formatRateCol' && e.parameter.key === 'shinqrate2026') {
+    return ContentService.createTextOutput(JSON.stringify(formatRateColumn()));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
