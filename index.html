@@ -990,8 +990,8 @@ function renderChart() {
   chartInstance = new Chart(ctx, {
     type: 'line',
     plugins: [datalabelPlugin],
-    data: { labels, datasets: [{ label: 'リピート率(%)', data: dataPoints, borderColor: 'rgba(46,138,110,0.8)', backgroundColor: 'rgba(46,138,110,0.1)', pointBackgroundColor: lineColors, pointBorderColor: lineColors, pointRadius: 5, pointHoverRadius: 7, tension: 0.3, spanGaps: true, fill: true }] },
-    options: { responsive: true, layout: { padding: { top: 18 } }, plugins: { legend: { display: false } },
+    data: { labels, datasets: [{ label: 'リピート率(%)', data: dataPoints, borderColor: 'rgba(46,138,110,0.8)', backgroundColor: 'rgba(46,138,110,0.1)', pointBackgroundColor: lineColors, pointBorderColor: lineColors, pointRadius: 5, pointHoverRadius: 7, tension: 0, spanGaps: true, fill: true }] },
+    options: { responsive: true, layout: { padding: { top: 28 } }, plugins: { legend: { display: false } },
       scales: { y: { min:0, max:100, ticks: { callback: v => v+'%' }, grid: { color:'#e2e8f0' } },
                 x: { grid: { display:false }, ticks: { autoSkip: false, maxRotation: 0, font: { size: 10 } } } } }
   });
