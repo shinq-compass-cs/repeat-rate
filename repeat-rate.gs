@@ -222,6 +222,61 @@ function addMenuColumnToExistingSheets() {
 
 // ─── 顧客タブ復元（リビジョン履歴から） ─────────────────────────────
 
+// 指定リビジョンの顧客タブ CSV 行数を確認（GASエディタ / ウェブアプリ両対応）
+function checkRevisionRows2049(revId) {
+  const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
+  try {
+    const rev = Drive.Revisions.get(FILE_ID, revId);
+    const csvBase = (rev.exportLinks || {})['text/csv'];
+    if (!csvBase) return { success: false, error: 'text/csv exportLink なし', revId };
+    const ss      = SpreadsheetApp.openById(FILE_ID);
+    const sheetId = ss.getSheetByName('顧客').getSheetId();
+    const resp    = UrlFetchApp.fetch(csvBase + '&gid=' + sheetId, {
+      headers: { 'Authorization': 'Bearer ' + ScriptApp.getOAuthToken() },
+      muteHttpExceptions: true
+    });
+    if (resp.getResponseCode() !== 200) {
+      return { success: false, error: 'fetch失敗 code=' + resp.getResponseCode(), revId };
+    }
+    const rows = Utilities.parseCsv(resp.getContentText());
+    return { success: true, revId, date: rev.modifiedDate, dataRows: rows.length - 1 };
+  } catch (e) { return { success: false, error: e.message, revId }; }
+}
+
+// 指定リビジョンから顧客タブを復元（GASエディタから実行）
+function restoreFromRevision2049(revId) {
+  const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
+  try {
+    const rev     = Drive.Revisions.get(FILE_ID, revId);
+    const csvBase = (rev.exportLinks || {})['text/csv'];
+    if (!csvBase) return { success: false, error: 'text/csv exportLink なし' };
+    const ss      = SpreadsheetApp.openById(FILE_ID);
+    const sheetId = ss.getSheetByName('顧客').getSheetId();
+    const resp    = UrlFetchApp.fetch(csvBase + '&gid=' + sheetId, {
+      headers: { 'Authorization': 'Bearer ' + ScriptApp.getOAuthToken() },
+      muteHttpExceptions: true
+    });
+    console.log('responseCode = ' + resp.getResponseCode());
+    if (resp.getResponseCode() !== 200) {
+      return { success: false, error: 'fetch失敗 code=' + resp.getResponseCode() };
+    }
+    const rows     = Utilities.parseCsv(resp.getContentText());
+    console.log('CSVパース完了 rows=' + rows.length);
+    const origCust = ss.getSheetByName('顧客');
+    const origLast = origCust.getLastRow();
+    if (origLast > 1) origCust.deleteRows(2, origLast - 1);
+    if (rows.length > 1) {
+      origCust.getRange(2, 1, rows.length - 1, rows[0].length).setValues(rows.slice(1));
+    }
+    const fixResult = fixColumns2049();
+    console.log('fix完了 rows=' + fixResult.rows);
+    return { success: true, revId, date: rev.modifiedDate, restoredRows: rows.length - 1, fix: fixResult };
+  } catch (e) {
+    console.log('ERROR: ' + e.message);
+    return { success: false, error: e.message };
+  }
+}
+
 function getRevisionUrl2049() {
   const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
   try {
