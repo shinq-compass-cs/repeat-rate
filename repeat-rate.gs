@@ -559,3 +559,90 @@ function testAll() {
   Logger.log(summary);
   return summary;
 }
+
+// ─── 顧客タブ 旧→新フォーマット マイグレーション ─────────────────────
+// GASエディタから runMigrationAll() を直接実行する
+
+function runMigrationAll() {
+  const results = [];
+  for (const sid of ['1795', '2049']) {
+    try {
+      const msg = migrateCustTab(sid);
+      results.push(sid + ': ' + msg);
+    } catch(e) {
+      results.push(sid + ': ERROR - ' + e.message);
+    }
+  }
+  const summary = results.join('\n');
+  Logger.log(summary);
+  return summary;
+}
+
+function migrateCustTab(sid) {
+  // インデックスからスプレッドシートIDを取得
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const idx    = master.getSheetByName(INDEX_TAB);
+  if (!idx) return 'インデックスタブなし';
+  const rows = idx.getDataRange().getValues();
+  let ssId = null;
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); break; }
+  }
+  if (!ssId) return 'スプレッドシートIDが見つかりません';
+
+  const ss      = SpreadsheetApp.openById(ssId);
+  const custTab = ss.getSheetByName('顧客');
+  if (!custTab) return '顧客タブなし';
+
+  // すでに新フォーマットなら何もしない
+  const fmt = getSheetFormat(custTab);
+  if (fmt.type === 'new') return 'すでに新フォーマット（スキップ）';
+
+  // 既存データを読み取る（ヘッダー除く）
+  const allRows = custTab.getDataRange().getValues();
+  const dataRows = allRows.slice(1).filter(r => r[0] !== '' && r[0] !== null);
+
+  // シートをクリアして新ヘッダーを書き込む
+  custTab.clearContents();
+  custTab.appendRow(['氏名','氏名（かな）','性別','誕生日','年齢','電話番号','郵便番号','住所',
+                     'メールアドレス','総売上','施術','物販','顧客単価','来店回数','初回来店','最終来店',
+                     '来店日','番号','次回予約の有無']);
+  custTab.getRange('A1:S1').setFontWeight('bold');
+  custTab.setFrozenRows(1);
+
+  // 旧データを新フォーマットに変換して書き込む
+  // 旧: 日付(0), 番号(1), 苗字(2), 名前(3), 次回予約(4), メニュー(5), 単価(6), 性別(7), 電話(8), メール(9)
+  const newRows = dataRows.map(r => {
+    const date      = fmtDate(r[0]);
+    const fullName  = ((String(r[2]||'')).trim() + ' ' + (String(r[3]||'')).trim()).trim();
+    const price     = String(r[6] || '');
+    return [
+      fullName,           // A: 氏名
+      '',                 // B: 氏名（かな）
+      String(r[7] || ''),// C: 性別
+      '',                 // D: 誕生日
+      '',                 // E: 年齢
+      String(r[8] || ''),// F: 電話番号
+      '',                 // G: 郵便番号
+      '',                 // H: 住所
+      String(r[9] || ''),// I: メールアドレス
+      price,              // J: 総売上
+      price,              // K: 施術
+      '0',                // L: 物販
+      price,              // M: 顧客単価
+      '',                 // N: 来店回数
+      date,               // O: 初回来店
+      date,               // P: 最終来店
+      date,               // Q: 来店日
+      r[1],               // R: 番号
+      r[4]                // S: 次回予約の有無
+    ];
+  });
+
+  if (newRows.length > 0) {
+    custTab.getRange(2, 1, newRows.length, 19).setValues(newRows);
+    sortSheetByDate(custTab, 17); // Q列（17列目）で日付ソート
+  }
+
+  return '完了（' + newRows.length + '行変換）';
+}
