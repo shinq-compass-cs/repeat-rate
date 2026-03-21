@@ -416,7 +416,7 @@ function handleSaveDay(d) {
         '',                 // G: 郵便番号
         '',                 // H: 住所
         c.email_addr || '', // I: メールアドレス
-        price,              // J: 総売上
+        '',                 // J: 総売上（空欄）
         price,              // K: 施術
         '',                 // L: 物販（空欄）
         price,              // M: 顧客単価
