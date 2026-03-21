@@ -240,12 +240,17 @@ function handleSaveDay(d) {
   const date         = String(d.date         || '').trim();
   const visitors     = parseInt(d.visitors,     10) || 0;
   const reservations = parseInt(d.reservations, 10) || 0;
-  const rate         = visitors > 0 ? Math.round(reservations / visitors * 100) : 0;
 
-  // 同日付を削除（上書き保存）
+  // 同日付を削除（上書き保存 or 未記入に戻す）
   deleteRowsByDate(dayTab,  date, 0);
   deleteRowsByDate(custTab, date, fmt.dateCol);
 
+  // 来店0回は「未記入」扱い → 行を追加せず終了
+  if (visitors === 0) {
+    return { success: true, deleted: true, spreadsheet_id: ss.getId() };
+  }
+
+  const rate = Math.round(reservations / visitors * 100);
   dayTab.appendRow([date, visitors, reservations, rate]);
   sortSheetByDate(dayTab, 1);
 
