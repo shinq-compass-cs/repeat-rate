@@ -196,42 +196,43 @@ function addMenuColumnToExistingSheets() {
 
 function restoreAndFix2049() {
   const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
-  const token   = ScriptApp.getOAuthToken();
-  const headers = { 'Authorization': 'Bearer ' + token };
-  let tmpFileId = null, tmpSsId = null;
+  let tmpSsId = null;
 
   try {
-    // 1. Drive API v2 でリビジョン一覧を取得
-    const revRes   = UrlFetchApp.fetch(
-      'https://www.googleapis.com/drive/v2/files/' + FILE_ID + '/revisions',
-      { headers }
-    );
-    const revisions = JSON.parse(revRes.getContentText()).items;
-    if (!revisions || revisions.length === 0) return { success: false, error: 'リビジョンが見つかりません' };
+    // 1. Advanced Drive Service でリビジョン一覧を取得（UrlFetchApp 不要）
+    const revList  = Drive.Revisions.list(FILE_ID);
+    const revisions = revList.items || [];
+    if (revisions.length === 0) return { success: false, error: 'リビジョンが見つかりません' };
 
     // 2. 14:49 JST (05:49 UTC) より前の最新リビジョンを選択
     const cutoff = new Date('2026-03-21T05:49:00.000Z');
     const target  = revisions.filter(r => new Date(r.modifiedDate) < cutoff).pop();
-    if (!target) return { success: false, error: '対象リビジョンが見つかりません', revisions: revisions.map(r => r.modifiedDate) };
+    if (!target) {
+      return { success: false, error: '対象リビジョンが見つかりません',
+               revisions: revisions.map(r => r.modifiedDate) };
+    }
 
-    // 3. 対象リビジョンを XLSX としてダウンロード
-    const xlsxUrl  = target.exportLinks['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-    const xlsxBlob = UrlFetchApp.fetch(xlsxUrl, { headers }).getBlob().setName('_restore_tmp.xlsx');
+    // 3. 対象リビジョンを XLSX としてエクスポートURLを取得
+    const exportLinks = target.exportLinks || {};
+    const xlsxUrl = exportLinks['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    if (!xlsxUrl) {
+      return { success: false, error: 'exportLinks なし（revision: ' + target.id + ', date: ' + target.modifiedDate + '）',
+               links: Object.keys(exportLinks) };
+    }
 
-    // 4. Drive に一時 XLSX ファイルを作成
-    const tmpFile = DriveApp.createFile(xlsxBlob);
-    tmpFileId = tmpFile.getId();
+    // 4. XLSX をダウンロードして Drive に一時ファイル作成
+    const token    = ScriptApp.getOAuthToken();
+    const xlsxBlob = UrlFetchApp.fetch(xlsxUrl,
+      { headers: { 'Authorization': 'Bearer ' + token } }).getBlob().setName('_restore_tmp.xlsx');
+    const tmpFile  = DriveApp.createFile(xlsxBlob);
 
-    // 5. XLSX → Google Sheets に変換（Drive API v3 files.copy）
-    const copyRes = UrlFetchApp.fetch(
-      'https://www.googleapis.com/drive/v3/files/' + tmpFileId + '/copy',
-      {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-        payload: JSON.stringify({ mimeType: 'application/vnd.google-apps.spreadsheet', name: '_restore_tmp_sheet' })
-      }
+    // 5. XLSX → Google Sheets に変換（Advanced Drive Service）
+    const copied = Drive.Files.copy(
+      { title: '_restore_tmp_sheet', mimeType: 'application/vnd.google-apps.spreadsheet' },
+      tmpFile.getId()
     );
-    tmpSsId = JSON.parse(copyRes.getContentText()).id;
+    tmpSsId = copied.id;
+    tmpFile.setTrashed(true);
 
     // 6. 変換後 Spreadsheet から顧客タブを取得
     const tmpSs   = SpreadsheetApp.openById(tmpSsId);
@@ -262,9 +263,7 @@ function restoreAndFix2049() {
   } catch (err) {
     return { success: false, error: err.message };
   } finally {
-    // 一時ファイルを必ずゴミ箱へ
-    try { if (tmpFileId) DriveApp.getFileById(tmpFileId).setTrashed(true); } catch(_) {}
-    try { if (tmpSsId)   DriveApp.getFileById(tmpSsId).setTrashed(true);   } catch(_) {}
+    try { if (tmpSsId) DriveApp.getFileById(tmpSsId).setTrashed(true); } catch(_) {}
   }
 }
 
