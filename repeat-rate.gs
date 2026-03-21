@@ -328,12 +328,15 @@ function restoreAndFix2049() {
     tmpFile.setTrashed(true);
 
     // 6. 変換後 Spreadsheet から顧客タブを取得
+    console.log('Step6: 一時Sheets openById: ' + tmpSsId);
     const tmpSs   = SpreadsheetApp.openById(tmpSsId);
     const tmpCust = tmpSs.getSheetByName('顧客');
     if (!tmpCust) return { success: false, error: '一時ファイルに顧客タブなし' };
     const savedData = tmpCust.getDataRange().getValues();
+    console.log('Step6: 復元データ行数 = ' + (savedData.length - 1));
 
     // 7. 元シートの顧客タブを一旦クリアして上書き
+    console.log('Step7: 元シート上書き開始');
     const origSs   = SpreadsheetApp.openById(FILE_ID);
     const origCust = origSs.getSheetByName('顧客');
     const origLast = origCust.getLastRow();
@@ -342,9 +345,11 @@ function restoreAndFix2049() {
       origCust.getRange(2, 1, savedData.length - 1, savedData[0].length)
               .setValues(savedData.slice(1));
     }
+    console.log('Step7: 書き込み完了');
 
     // 8. 復元後に列クリーンアップ（J/K/L/O/P空欄化 + R/S正規化）
     const fixResult = fixColumns2049();
+    console.log('Step8: fix完了 rows=' + fixResult.rows);
 
     return {
       success: true,
