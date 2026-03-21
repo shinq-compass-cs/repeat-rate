@@ -352,7 +352,7 @@ function handleSaveDay(d) {
         c.email_addr || '', // I: メールアドレス
         price,              // J: 総売上
         price,              // K: 施術
-        '0',                // L: 物販
+        '',                 // L: 物販（空欄）
         price,              // M: 顧客単価
         '',                 // N: 来店回数
         '',                 // O: 初回来店（空欄）
