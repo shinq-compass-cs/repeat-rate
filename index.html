@@ -737,7 +737,13 @@ function np(key, sec, field) {
   if (field === 'r') {
     const cap = parseInt(buf[sec].v, 10) || 0;
     if (cap === 0 && key !== 'clear' && key !== 'del') { showToast('先に①の施術回数を入力してください'); return; }
-    if (parseInt(val, 10) > cap) { val = String(cap); buf[sec][fk] = true; } // キャップされたら次の入力を置換モードに戻す
+    if (parseInt(val, 10) > cap) {
+      const keyInt = parseInt(key, 10);
+      // キー単体がcap以下 → そのキー値を採用（1回押しで変更できるUX）
+      // キー単体がcap超え → capに丸めて次の入力は置換モードに戻す
+      val = keyInt <= cap ? key : String(cap);
+      buf[sec][fk] = keyInt > cap;
+    }
   }
   buf[sec][field] = val;
   // vを下げた場合、rも連動して上限を下げる（チェックボックスも再同期）
