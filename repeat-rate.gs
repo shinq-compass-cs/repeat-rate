@@ -282,92 +282,69 @@ function getRestoreResult2049() {
 
 function restoreAndFix2049() {
   const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
-  let tmpSsId = null;
 
   try {
-    // 1. Advanced Drive Service でリビジョン一覧を取得（UrlFetchApp 不要）
+    // 1. リビジョン一覧取得
     console.log('Step1: Drive.Revisions.list 開始');
-    const revList  = Drive.Revisions.list(FILE_ID);
-    const revisions = revList.items || [];
+    const revisions = (Drive.Revisions.list(FILE_ID).items || []);
     console.log('Step1: リビジョン数 = ' + revisions.length);
     if (revisions.length === 0) return { success: false, error: 'リビジョンが見つかりません' };
 
-    // 2. 14:49 JST (05:49 UTC) より前の最新リビジョンを選択
+    // 2. データ損失前（14:49 JST = 05:49 UTC）より前の最新リビジョンを選択
     const cutoff = new Date('2026-03-21T05:49:00.000Z');
     const target  = revisions.filter(r => new Date(r.modifiedDate) < cutoff).pop();
     console.log('Step2: target = ' + (target ? target.modifiedDate : 'null'));
-    if (!target) {
-      return { success: false, error: '対象リビジョンが見つかりません',
-               revisions: revisions.map(r => r.modifiedDate) };
-    }
+    if (!target) return { success: false, error: '対象リビジョンが見つかりません' };
 
-    // 3. 対象リビジョンを XLSX としてエクスポートURLを取得
-    const exportLinks = target.exportLinks || {};
-    const xlsxUrl = exportLinks['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-    console.log('Step3: xlsxUrl = ' + (xlsxUrl ? xlsxUrl.substring(0, 80) : 'null'));
-    console.log('Step3: exportLinks keys = ' + Object.keys(exportLinks).join(', '));
-    if (!xlsxUrl) {
-      return { success: false, error: 'exportLinks なし（revision: ' + target.id + ', date: ' + target.modifiedDate + '）',
-               links: Object.keys(exportLinks) };
-    }
+    // 3. 顧客タブの gid を取得して CSV URL を構築
+    const ss        = SpreadsheetApp.openById(FILE_ID);
+    const custSheet = ss.getSheetByName('顧客');
+    const sheetId   = custSheet.getSheetId();
+    const csvBase   = (target.exportLinks || {})['text/csv'];
+    console.log('Step3: 顧客 gid=' + sheetId + ' csvBase=' + (csvBase ? csvBase.substring(0, 60) : 'null'));
+    if (!csvBase) return { success: false, error: 'text/csv exportLink なし' };
+    const csvUrl = csvBase + '&gid=' + sheetId;
 
-    // 4. XLSX をダウンロードして Drive に一時ファイル作成
-    console.log('Step4: UrlFetchApp.fetch 開始');
-    const token    = ScriptApp.getOAuthToken();
-    const resp = UrlFetchApp.fetch(xlsxUrl,
-      { headers: { 'Authorization': 'Bearer ' + token }, muteHttpExceptions: true });
+    // 4. CSV をダウンロード
+    console.log('Step4: CSV fetch 開始');
+    const token = ScriptApp.getOAuthToken();
+    const resp  = UrlFetchApp.fetch(csvUrl, {
+      headers: { 'Authorization': 'Bearer ' + token },
+      muteHttpExceptions: true
+    });
     console.log('Step4: responseCode = ' + resp.getResponseCode());
     if (resp.getResponseCode() !== 200) {
-      return { success: false, error: 'fetch失敗 code=' + resp.getResponseCode(), body: resp.getContentText().substring(0, 300) };
+      return { success: false, error: 'CSV fetch失敗 code=' + resp.getResponseCode(),
+               body: resp.getContentText().substring(0, 300) };
     }
-    const xlsxBlob = resp.getBlob().setName('_restore_tmp.xlsx');
-    console.log('Step4: fetch完了, size = ' + xlsxBlob.getBytes().length);
-    const tmpFile  = DriveApp.createFile(xlsxBlob);
 
-    // 5. XLSX → Google Sheets に変換（Advanced Drive Service）
-    const copied = Drive.Files.copy(
-      { title: '_restore_tmp_sheet', mimeType: 'application/vnd.google-apps.spreadsheet' },
-      tmpFile.getId()
-    );
-    tmpSsId = copied.id;
-    tmpFile.setTrashed(true);
+    // 5. CSV パース
+    const rows = Utilities.parseCsv(resp.getContentText());
+    console.log('Step5: CSVパース完了 rows=' + rows.length);
+    if (rows.length <= 1) return { success: false, error: 'CSVデータが空またはヘッダーのみ' };
 
-    // 6. 変換後 Spreadsheet から顧客タブを取得
-    console.log('Step6: 一時Sheets openById: ' + tmpSsId);
-    const tmpSs   = SpreadsheetApp.openById(tmpSsId);
-    const tmpCust = tmpSs.getSheetByName('顧客');
-    if (!tmpCust) return { success: false, error: '一時ファイルに顧客タブなし' };
-    const savedData = tmpCust.getDataRange().getValues();
-    console.log('Step6: 復元データ行数 = ' + (savedData.length - 1));
-
-    // 7. 元シートの顧客タブを一旦クリアして上書き
-    console.log('Step7: 元シート上書き開始');
-    const origSs   = SpreadsheetApp.openById(FILE_ID);
-    const origCust = origSs.getSheetByName('顧客');
+    // 6. 元シート顧客タブをクリアして上書き
+    console.log('Step6: 元シート上書き開始');
+    const origCust = ss.getSheetByName('顧客');
     const origLast = origCust.getLastRow();
     if (origLast > 1) origCust.deleteRows(2, origLast - 1);
-    if (savedData.length > 1) {
-      origCust.getRange(2, 1, savedData.length - 1, savedData[0].length)
-              .setValues(savedData.slice(1));
-    }
-    console.log('Step7: 書き込み完了');
+    origCust.getRange(2, 1, rows.length - 1, rows[0].length).setValues(rows.slice(1));
+    console.log('Step6: 書き込み完了 ' + (rows.length - 1) + '行');
 
-    // 8. 復元後に列クリーンアップ（J/K/L/O/P空欄化 + R/S正規化）
+    // 7. 列クリーンアップ（J/K/L/O/P空欄化・R/S正規化）
     const fixResult = fixColumns2049();
-    console.log('Step8: fix完了 rows=' + fixResult.rows);
+    console.log('Step7: fix完了 rows=' + fixResult.rows);
 
     return {
       success: true,
       revisionDate: target.modifiedDate,
-      restoredRows: savedData.length - 1,
+      restoredRows: rows.length - 1,
       fix: fixResult
     };
 
   } catch (err) {
     console.log('ERROR: ' + err.message);
     return { success: false, error: err.message };
-  } finally {
-    try { if (tmpSsId) DriveApp.getFileById(tmpSsId).setTrashed(true); } catch(_) {}
   }
 }
 
