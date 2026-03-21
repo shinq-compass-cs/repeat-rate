@@ -340,8 +340,10 @@ function handleGetData(d) {
 
   const dayMap = {};
   dayRows.slice(1).forEach(r => {
+    const visitors = Number(r[1]);
+    if (!visitors) return; // visitors=0は未記入扱いで除外
     const d = fmtDate(r[0]);
-    dayMap[d] = { date: d, visitors: Number(r[1]), reservations: Number(r[2]), rate: Number(r[3]) };
+    dayMap[d] = { date: d, visitors, reservations: Number(r[2]), rate: Number(r[3]) };
   });
   const cusMap = {};
   if (fmt.type === 'new') {
