@@ -44,6 +44,10 @@ function doGet(e) {
   if (e.parameter.action === 'fix2049mar21' && e.parameter.key === 'shinqfix2026') {
     return ContentService.createTextOutput(JSON.stringify(fix2049Mar21()));
   }
+  // 既存シートにT列（メニュー）ヘッダー追加
+  if (e.parameter.action === 'addMenuCol' && e.parameter.key === 'shinqmenu2026') {
+    return ContentService.createTextOutput(JSON.stringify(addMenuColumnToExistingSheets()));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
