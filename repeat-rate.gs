@@ -317,6 +317,8 @@ function getOrCreateSalonSS(sid, sname) {
   dayTab.appendRow(['日付', '来店人数', '次回予約数', 'リピート率(%)']);
   dayTab.setFrozenRows(1);
   dayTab.getRange('A1:D1').setFontWeight('bold');
+  // D列全体にパーセント表記フォーマット適用
+  dayTab.getRange('D2:D1000').setNumberFormat('0"%"');
 
   const custTab = ss.insertSheet('顧客');
   custTab.appendRow(['氏名','氏名（かな）','性別','誕生日','年齢','電話番号','郵便番号','住所',
