@@ -869,7 +869,7 @@ function prefillCustomers(sec, custs, n) {
     const c = custs[i]; if (!c) return;
     const s = (f, v) => { const el = row.querySelector(`[data-field="${f}"]`); if (el) el.value = v || ''; };
     s('last_name', c.last_name); s('first_name', c.first_name);
-    s('menu', c.menu); s('price', c.price); s('gender', c.gender);
+    s('menu', c.menu); s('gender', c.gender);
     s('phone', c.phone); s('email_addr', c.email_addr);
     const cb = row.querySelector('[data-field="reserved"]'); if (cb) cb.checked = c.reserved;
   });
