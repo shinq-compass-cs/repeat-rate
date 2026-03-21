@@ -312,10 +312,10 @@ function handleSaveDay(d) {
         '',                 // N: 来店回数
         '',                 // O: 初回来店（空欄）
         '',                 // P: 最終来店（空欄）
-        date,               // Q: 来店日
-        i + 1,              // R: 番号
-        c.reserved ? '○' : '', // S: 次回予約の有無
-        c.menu || ''        // T: メニュー
+        date,                               // Q: 来店日
+        date.replace(/-/g,'') + '_' + String(i + 1).padStart(3,'0'), // R: 番号（YYYYMMDD_NNN）
+        c.reserved ? 1 : 0,                // S: 次回予約の有無（1/0）
+        c.menu || ''                        // T: メニュー
       ]);
     });
   } else {
