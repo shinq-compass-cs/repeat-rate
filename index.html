@@ -719,8 +719,14 @@ function np(key, sec, field) {
   // 予約数は施術回数を上限とする
   if (field === 'r') { const cap = parseInt(buf[sec].v, 10) || 0; if (parseInt(val, 10) > cap) val = String(cap); }
   buf[sec][field] = val;
-  // vを下げた場合、rも連動して上限を下げる
-  if (field === 'v') { const newV = parseInt(val, 10) || 0; if ((parseInt(buf[sec].r, 10) || 0) > newV) { buf[sec].r = String(newV); } }
+  // vを下げた場合、rも連動して上限を下げる（チェックボックスも再同期）
+  if (field === 'v') {
+    const newV = parseInt(val, 10) || 0;
+    if ((parseInt(buf[sec].r, 10) || 0) > newV) {
+      buf[sec].r = String(newV);
+      syncReserveCheckboxes(sec, newV);
+    }
+  }
   setDisplay(sec);
   if (field === 'v') updateCustomerRows(sec, parseInt(val, 10));
   if (field === 'r') syncReserveCheckboxes(sec, parseInt(val, 10));
