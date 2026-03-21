@@ -348,20 +348,20 @@ function handleGetData(d) {
   });
   const cusMap = {};
   if (fmt.type === 'new') {
-    // 新フォーマット: Q(16)=来店日, R(17)=番号, S(18)=次回予約の有無
+    // 新フォーマット: Q(16)=来店日, R(17)=番号, S(18)=次回予約の有無, T(19)=メニュー
     cusRows.slice(1).forEach(r => {
       const d = fmtDate(r[16]);
       if (!d) return;
       if (!cusMap[d]) cusMap[d] = [];
       cusMap[d].push({
         date: d, index: Number(r[17]),
-        last_name:  String(r[0] || '').trim(), first_name: String(r[1] || '').trim(),
+        last_name:  String(r[0]  || '').trim(), first_name: String(r[1]  || '').trim(),
         reserved:   r[18] === '○',
-        menu:       '',
-        price:      String(r[10] || ''), // K: 施術
-        gender:     String(r[2]  || ''), // C: 性別
-        phone:      String(r[5]  || ''), // F: 電話番号
-        email_addr: String(r[8]  || '')  // I: メールアドレス
+        menu:       String(r[19] || ''),         // T: メニュー
+        price:      String(r[12] || ''),         // M: 顧客単価
+        gender:     String(r[2]  || ''),         // C: 性別
+        phone:      String(r[5]  || ''),         // F: 電話番号
+        email_addr: String(r[8]  || '')          // I: メールアドレス
       });
     });
   } else {
