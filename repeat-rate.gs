@@ -286,13 +286,16 @@ function restoreAndFix2049() {
 
   try {
     // 1. Advanced Drive Service でリビジョン一覧を取得（UrlFetchApp 不要）
+    console.log('Step1: Drive.Revisions.list 開始');
     const revList  = Drive.Revisions.list(FILE_ID);
     const revisions = revList.items || [];
+    console.log('Step1: リビジョン数 = ' + revisions.length);
     if (revisions.length === 0) return { success: false, error: 'リビジョンが見つかりません' };
 
     // 2. 14:49 JST (05:49 UTC) より前の最新リビジョンを選択
     const cutoff = new Date('2026-03-21T05:49:00.000Z');
     const target  = revisions.filter(r => new Date(r.modifiedDate) < cutoff).pop();
+    console.log('Step2: target = ' + (target ? target.modifiedDate : 'null'));
     if (!target) {
       return { success: false, error: '対象リビジョンが見つかりません',
                revisions: revisions.map(r => r.modifiedDate) };
@@ -301,15 +304,19 @@ function restoreAndFix2049() {
     // 3. 対象リビジョンを XLSX としてエクスポートURLを取得
     const exportLinks = target.exportLinks || {};
     const xlsxUrl = exportLinks['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    console.log('Step3: xlsxUrl = ' + (xlsxUrl ? xlsxUrl.substring(0, 80) : 'null'));
+    console.log('Step3: exportLinks keys = ' + Object.keys(exportLinks).join(', '));
     if (!xlsxUrl) {
       return { success: false, error: 'exportLinks なし（revision: ' + target.id + ', date: ' + target.modifiedDate + '）',
                links: Object.keys(exportLinks) };
     }
 
     // 4. XLSX をダウンロードして Drive に一時ファイル作成
+    console.log('Step4: UrlFetchApp.fetch 開始');
     const token    = ScriptApp.getOAuthToken();
     const xlsxBlob = UrlFetchApp.fetch(xlsxUrl,
       { headers: { 'Authorization': 'Bearer ' + token } }).getBlob().setName('_restore_tmp.xlsx');
+    console.log('Step4: fetch完了, size = ' + xlsxBlob.getBytes().length);
     const tmpFile  = DriveApp.createFile(xlsxBlob);
 
     // 5. XLSX → Google Sheets に変換（Advanced Drive Service）
