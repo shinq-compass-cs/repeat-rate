@@ -427,10 +427,6 @@ function handleSaveDay(d) {
 
   const fmt = getSheetFormat(custTab);
 
-  // 既存の重複行を事前クリーンアップ
-  deduplicateSheet(dayTab, 0);
-  deduplicateSheet(custTab, fmt.dateCol, fmt.indexCol);
-
   const date         = String(d.date         || '').trim();
   const visitors     = parseInt(d.visitors,     10) || 0;
   const reservations = parseInt(d.reservations, 10) || 0;
