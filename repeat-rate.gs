@@ -258,6 +258,34 @@ function fix2049Mar21() {
   }
 }
 
+function fix2049Mar5() {
+  // 2049サロン 3/5 顧客行の問題修正
+  // migration変換バグ（L='0', R=旧番号, S='○'/'') による残存行を削除し
+  // fixColumns2049 で全行の L/R/S を正しい形式に補正する
+  try {
+    const ss   = SpreadsheetApp.openById('1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc');
+    const cust = ss.getSheetByName('顧客');
+    const fmt  = getSheetFormat(cust);
+
+    // 3/5の全顧客行を削除（重複行・migration残存行を一括除去）
+    const beforeRows = cust.getLastRow() - 1;
+    deleteRowsByDate(cust, '2026-03-05', fmt.dateCol);
+    const afterRows = cust.getLastRow() - 1;
+
+    // 全行のL/R/S列を正しい形式に補正（他日付の残存バグも合わせてクリア）
+    const fixResult = fixColumns2049();
+
+    return {
+      success: true,
+      message: '2049サロン 2026-03-05 顧客行削除 + 全行L/R/S補正完了',
+      deletedRows: beforeRows - afterRows,
+      fixResult
+    };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
 function runCleanup2049() {
   try {
     const SALON_ID = '2049';
