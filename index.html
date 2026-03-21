@@ -498,7 +498,8 @@ let pastDate = '';
 let calMonthOffset = 0; // 0=今月, -1=先月, etc.
 
 // 入力バッファ（t=today, p=past / v=visitors, r=reservations）
-const buf = { t: { v: '0', r: '0' }, p: { v: '0', r: '0' } };
+// vf/rf = フレッシュフラグ（true=次の数字キーで値を置換、false=追記モード）
+const buf = { t: { v: '0', r: '0', vf: true, rf: true }, p: { v: '0', r: '0', vf: true, rf: true } };
 
 // ===================================================================
 // ログイン
