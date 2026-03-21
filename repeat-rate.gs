@@ -202,6 +202,41 @@ function addMenuColumnToExistingSheets() {
 
 // ─── 顧客タブ復元（リビジョン履歴から） ─────────────────────────────
 
+function getRevisionUrl2049() {
+  const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
+  try {
+    const revList   = Drive.Revisions.list(FILE_ID);
+    const revisions = revList.items || [];
+    const cutoff    = new Date('2026-03-21T05:49:00.000Z');
+    const target    = revisions.filter(r => new Date(r.modifiedDate) < cutoff).pop();
+    if (!target) return { success: false, error: '対象リビジョンなし', revisions: revisions.map(r => r.modifiedDate) };
+    const links = target.exportLinks || {};
+    const xlsxUrl = links['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    return { success: true, revisionDate: target.modifiedDate, xlsxUrl };
+  } catch (e) { return { success: false, error: e.message }; }
+}
+
+function restoreFromFile2049(tmpSsId) {
+  const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
+  try {
+    if (!tmpSsId) return { success: false, error: 'fileId が未指定' };
+    const tmpSs   = SpreadsheetApp.openById(tmpSsId);
+    const tmpCust = tmpSs.getSheetByName('顧客');
+    if (!tmpCust) return { success: false, error: '顧客タブなし' };
+    const savedData = tmpCust.getDataRange().getValues();
+    const origSs   = SpreadsheetApp.openById(FILE_ID);
+    const origCust = origSs.getSheetByName('顧客');
+    const origLast = origCust.getLastRow();
+    if (origLast > 1) origCust.deleteRows(2, origLast - 1);
+    if (savedData.length > 1) {
+      origCust.getRange(2, 1, savedData.length - 1, savedData[0].length)
+              .setValues(savedData.slice(1));
+    }
+    const fixResult = fixColumns2049();
+    return { success: true, restoredRows: savedData.length - 1, fix: fixResult };
+  } catch (e) { return { success: false, error: e.message }; }
+}
+
 function restoreAndFix2049() {
   const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
   let tmpSsId = null;
