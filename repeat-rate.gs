@@ -322,10 +322,9 @@ function handleGetData(d) {
       const d = fmtDate(r[16]);
       if (!d) return;
       if (!cusMap[d]) cusMap[d] = [];
-      const parts = String(r[0] || '').trim().split(/\s+/);
       cusMap[d].push({
         date: d, index: Number(r[17]),
-        last_name:  parts[0] || '', first_name: parts.slice(1).join(' ') || '',
+        last_name:  String(r[0] || '').trim(), first_name: String(r[1] || '').trim(),
         reserved:   r[18] === '○',
         menu:       '',
         price:      String(r[10] || ''), // K: 施術
