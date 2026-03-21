@@ -64,6 +64,10 @@ function doGet(e) {
   if (e.parameter.action === 'fixCols2049' && e.parameter.key === 'shinqfix2049jop') {
     return ContentService.createTextOutput(JSON.stringify(fixColumns2049()));
   }
+  // 2049スプレッドシート 顧客タブをリビジョン履歴から復元 + 列クリーンアップ
+  if (e.parameter.action === 'restoreAndFix2049' && e.parameter.key === 'shinqrestore2026') {
+    return ContentService.createTextOutput(JSON.stringify(restoreAndFix2049()));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
