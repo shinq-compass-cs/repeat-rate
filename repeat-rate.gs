@@ -223,6 +223,15 @@ function addMenuColumnToExistingSheets() {
 // ─── 顧客タブ復元（リビジョン履歴から） ─────────────────────────────
 
 // 指定リビジョンの顧客タブ CSV 行数を確認（GASエディタ / ウェブアプリ両対応）
+// リビジョン 156 と 160 の行数を両方確認（エディタから引数なしで実行）
+function checkRevisions156and160() {
+  const r156 = checkRevisionRows2049('156');
+  const r160 = checkRevisionRows2049('160');
+  console.log('rev156: ' + JSON.stringify(r156));
+  console.log('rev160: ' + JSON.stringify(r160));
+  return { r156, r160 };
+}
+
 function checkRevisionRows2049(revId) {
   const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
   try {
