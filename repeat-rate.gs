@@ -60,6 +60,10 @@ function doGet(e) {
   if (e.parameter.action === 'formatRateCol' && e.parameter.key === 'shinqrate2026') {
     return ContentService.createTextOutput(JSON.stringify(formatRateColumn()));
   }
+  // 2049スプレッドシート J/L/O/P列クリア + R/S再マイグレーション
+  if (e.parameter.action === 'fixCols2049' && e.parameter.key === 'shinqfix2049jop') {
+    return ContentService.createTextOutput(JSON.stringify(fixColumns2049()));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
