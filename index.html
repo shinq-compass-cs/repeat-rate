@@ -786,6 +786,7 @@ function npPm(sec, field, delta) {
   // 予約数は来店数を上限とする
   if (field === 'r') next = Math.min(next, parseInt(buf[sec].v, 10) || 0);
   buf[sec][field] = String(next);
+  buf[sec][field + 'f'] = true; // ±後は次の数字キーで置換モードに戻す
   // vを下げた場合、rも連動して上限を下げる（チェックボックスも再同期）
   if (field === 'v') {
     const r = parseInt(buf[sec].r, 10) || 0;
