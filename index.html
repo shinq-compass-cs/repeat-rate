@@ -791,7 +791,7 @@ function updateSaveBtn(sec) {
 function updateCustomerRows(sec, n) {
   const section   = document.getElementById(sec + '-customers-section');
   const container = document.getElementById(sec + '-customer-rows');
-  if (n <= 0) { section.style.display = 'none'; return; }
+  if (n <= 0) { section.style.display = 'none'; container.innerHTML = ''; return; }
   section.style.display = 'block';
   while (container.querySelectorAll('.customer-row').length < n)
     container.appendChild(createCustomerRow(sec, container.querySelectorAll('.customer-row').length + 1));
