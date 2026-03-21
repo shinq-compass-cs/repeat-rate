@@ -51,6 +51,33 @@ function doGet(e) {
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
+function addMenuColumnToExistingSheets() {
+  // 管理済みのすべてのサロンSSにT列「メニュー」ヘッダーを追加（未設定の場合のみ）
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const idx = master.getSheetByName(INDEX_TAB);
+  if (!idx) return { success: false, error: 'INDEX_TAB not found' };
+  const rows = idx.getDataRange().getValues();
+  const results = [];
+  for (let i = 1; i < rows.length; i++) {
+    const ssId = String(rows[i][1] || '').trim();
+    if (!ssId) continue;
+    try {
+      const ss   = SpreadsheetApp.openById(ssId);
+      const cust = ss.getSheetByName('顧客');
+      if (!cust) continue;
+      const header = cust.getRange(1, 1, 1, cust.getLastColumn()).getValues()[0];
+      if (header[19] === 'メニュー') { results.push(ssId + ': skip (already has T)'); continue; }
+      // T列（20列目）にヘッダーを書き込む
+      cust.getRange(1, 20).setValue('メニュー');
+      cust.getRange(1, 20).setFontWeight('bold');
+      results.push(ssId + ': added T=メニュー');
+    } catch (e) {
+      results.push(ssId + ': error - ' + e.message);
+    }
+  }
+  return { success: true, results };
+}
+
 function fix2049Mar21() {
   try {
     const ss   = SpreadsheetApp.openById('1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc');
