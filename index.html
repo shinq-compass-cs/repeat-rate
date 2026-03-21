@@ -734,7 +734,11 @@ function np(key, sec, field) {
     buf[sec][fk] = false; // 1文字入力したので追記モードへ
   }
   // 予約数は施術回数を上限とする
-  if (field === 'r') { const cap = parseInt(buf[sec].v, 10) || 0; if (parseInt(val, 10) > cap) val = String(cap); }
+  if (field === 'r') {
+    const cap = parseInt(buf[sec].v, 10) || 0;
+    if (cap === 0 && key !== 'clear' && key !== 'del') { showToast('先に①の施術回数を入力してください'); return; }
+    if (parseInt(val, 10) > cap) val = String(cap);
+  }
   buf[sec][field] = val;
   // vを下げた場合、rも連動して上限を下げる（チェックボックスも再同期）
   if (field === 'v') {
