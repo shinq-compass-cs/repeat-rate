@@ -875,7 +875,7 @@ async function saveData(sec, date) {
   try {
     const res = await gasPost({
       action: 'saveDay', salon_id: salon.salon_id, salon_name: salon.salon_name,
-      date, visitors: v, reservations: r, customers: collectCustomers(sec)
+      date, visitors: v, reservations: r, customers: v > 0 ? collectCustomers(sec) : []
     });
     if (!res.success) throw new Error(res.error);
     showToast('保存しました');
