@@ -64,6 +64,10 @@ function doGet(e) {
   if (e.parameter.action === 'fixCols2049' && e.parameter.key === 'shinqfix2049jop') {
     return ContentService.createTextOutput(JSON.stringify(fixColumns2049()));
   }
+  // 2049サロン 3/5 顧客行クリーンアップ（一時エンドポイント）
+  if (e.parameter.action === 'fix2049mar5' && e.parameter.key === 'shinqfix2026') {
+    return ContentService.createTextOutput(JSON.stringify(fix2049Mar5()));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
