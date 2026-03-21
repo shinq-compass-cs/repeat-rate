@@ -80,6 +80,10 @@ function doGet(e) {
       items.map((r, i) => ({ idx: i + 1, id: r.id, date: r.modifiedDate }))
     ));
   }
+  // 2049: 指定リビジョンの顧客タブ行数を確認
+  if (e.parameter.action === 'checkRevisionRows2049' && e.parameter.key === 'shinqrestore2026') {
+    return ContentService.createTextOutput(JSON.stringify(checkRevisionRows2049(e.parameter.revId)));
+  }
   // 2049: 指定 fileId の Sheets から顧客タブを復元
   if (e.parameter.action === 'restoreFromFile2049' && e.parameter.key === 'shinqrestore2026') {
     return ContentService.createTextOutput(JSON.stringify(restoreFromFile2049(e.parameter.fileId)));
