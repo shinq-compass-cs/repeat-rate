@@ -523,10 +523,6 @@ function handleGetData(d) {
 
   const fmt = getSheetFormat(cusTab);
 
-  // ログイン時に既存の重複行をシートから削除（今後も重複しない状態を維持）
-  deduplicateSheet(dayTab, 0);
-  deduplicateSheet(cusTab, fmt.dateCol, fmt.indexCol);
-
   const dayRows = dayTab.getDataRange().getValues();
   const cusRows = cusTab.getDataRange().getValues();
 
