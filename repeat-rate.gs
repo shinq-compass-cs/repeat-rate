@@ -68,6 +68,14 @@ function doGet(e) {
   if (e.parameter.action === 'restoreAndFix2049' && e.parameter.key === 'shinqrestore2026') {
     return ContentService.createTextOutput(JSON.stringify(restoreAndFix2049()));
   }
+  // 2049: リビジョンexportLink URLを返す（ローカルからダウンロード用）
+  if (e.parameter.action === 'getRevisionUrl2049' && e.parameter.key === 'shinqrestore2026') {
+    return ContentService.createTextOutput(JSON.stringify(getRevisionUrl2049()));
+  }
+  // 2049: 指定 fileId の Sheets から顧客タブを復元
+  if (e.parameter.action === 'restoreFromFile2049' && e.parameter.key === 'shinqrestore2026') {
+    return ContentService.createTextOutput(JSON.stringify(restoreFromFile2049(e.parameter.fileId)));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
