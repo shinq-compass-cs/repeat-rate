@@ -737,7 +737,7 @@ function np(key, sec, field) {
   if (field === 'r') {
     const cap = parseInt(buf[sec].v, 10) || 0;
     if (cap === 0 && key !== 'clear' && key !== 'del') { showToast('先に①の施術回数を入力してください'); return; }
-    if (parseInt(val, 10) > cap) val = String(cap);
+    if (parseInt(val, 10) > cap) { val = String(cap); buf[sec][fk] = true; } // キャップされたら次の入力を置換モードに戻す
   }
   buf[sec][field] = val;
   // vを下げた場合、rも連動して上限を下げる（チェックボックスも再同期）
