@@ -60,6 +60,37 @@ function doGet(e) {
 }
 
 // R列（番号）を YYYYMMDD_NNN 形式に、S列（次回予約の有無）を 1/0 に一括変換
+function clearBuhanColumn() {
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const idx    = master.getSheetByName(INDEX_TAB);
+  if (!idx) return { success: false, error: 'INDEX_TAB not found' };
+  const rows = idx.getDataRange().getValues();
+  const results = [];
+  for (let i = 1; i < rows.length; i++) {
+    const ssId = String(rows[i][1] || '').trim();
+    if (!ssId) continue;
+    try {
+      const ss   = SpreadsheetApp.openById(ssId);
+      const cust = ss.getSheetByName('顧客');
+      if (!cust) continue;
+      const lastRow = cust.getLastRow();
+      if (lastRow < 2) { results.push(ssId + ': no data'); continue; }
+      const lCol = cust.getRange(2, 12, lastRow - 1, 1).getValues(); // L列
+      let cleared = 0;
+      lCol.forEach((r, ri) => {
+        if (r[0] !== '' && r[0] !== null) {
+          cust.getRange(ri + 2, 12).setValue('');
+          cleared++;
+        }
+      });
+      results.push(ssId + ': ' + cleared + '件クリア');
+    } catch (e) {
+      results.push(ssId + ': error - ' + e.message);
+    }
+  }
+  return { success: true, results };
+}
+
 function migrateRSColumns() {
   const master = SpreadsheetApp.openById(MASTER_SS_ID);
   const idx    = master.getSheetByName(INDEX_TAB);
