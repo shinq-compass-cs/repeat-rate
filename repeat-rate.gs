@@ -314,8 +314,13 @@ function restoreAndFix2049() {
     // 4. XLSX をダウンロードして Drive に一時ファイル作成
     console.log('Step4: UrlFetchApp.fetch 開始');
     const token    = ScriptApp.getOAuthToken();
-    const xlsxBlob = UrlFetchApp.fetch(xlsxUrl,
-      { headers: { 'Authorization': 'Bearer ' + token } }).getBlob().setName('_restore_tmp.xlsx');
+    const resp = UrlFetchApp.fetch(xlsxUrl,
+      { headers: { 'Authorization': 'Bearer ' + token }, muteHttpExceptions: true });
+    console.log('Step4: responseCode = ' + resp.getResponseCode());
+    if (resp.getResponseCode() !== 200) {
+      return { success: false, error: 'fetch失敗 code=' + resp.getResponseCode(), body: resp.getContentText().substring(0, 300) };
+    }
+    const xlsxBlob = resp.getBlob().setName('_restore_tmp.xlsx');
     console.log('Step4: fetch完了, size = ' + xlsxBlob.getBytes().length);
     const tmpFile  = DriveApp.createFile(xlsxBlob);
 
