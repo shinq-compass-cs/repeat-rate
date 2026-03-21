@@ -367,6 +367,9 @@ function handleSaveDay(d) {
 
   const rate = Math.round(reservations / visitors * 100);
   dayTab.appendRow([date, visitors, reservations, rate]);
+  // D列のリピート率セルにパーセント表記フォーマットを適用
+  const newRow = dayTab.getLastRow();
+  dayTab.getRange(newRow, 4).setNumberFormat('0"%"');
   sortSheetByDate(dayTab, 1);
 
   // 空エントリ（名前・メニュー・電話番号がすべて空）はフィルタして除外
