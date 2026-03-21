@@ -730,13 +730,18 @@ function np(key, sec, field) {
 // 直接入力（input oninput）
 function onCountInput(sec, field, raw) {
   const digits = raw.replace(/[^0-9]/g, '').slice(0, 2);
-  const n = parseInt(digits, 10) || 0;
+  let n = parseInt(digits, 10) || 0;
+  // 予約数は施術回数を上限とする
+  if (field === 'r') n = Math.min(n, parseInt(buf[sec].v, 10) || 0);
   buf[sec][field] = String(n);
   // inputの値を正規化
   const elId = sec + '-' + (field === 'v' ? 'visitor' : 'reservation') + '-display';
   document.getElementById(elId).value = n;
   if (field === 'v') {
     document.getElementById(sec + '-visitor-label').textContent = n;
+    // vを下げた場合、rも連動して上限を下げる
+    const r = parseInt(buf[sec].r, 10) || 0;
+    if (r > n) { buf[sec].r = String(n); document.getElementById(sec + '-reservation-display').value = n; }
     updateCustomerRows(sec, n);
   }
   if (field === 'r') syncReserveCheckboxes(sec, n);
