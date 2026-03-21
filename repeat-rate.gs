@@ -390,7 +390,7 @@ function getOrCreateSalonSS(sid, sname) {
   }
 
   // 新規スプレッドシート作成 → 指定フォルダへ移動
-  const ss = SpreadsheetApp.create('次回予約率_' + sid + (sname ? '_' + sname : ''));
+  const ss = SpreadsheetApp.create(sid + (sname ? '_' + sname : '') + '_次回予約率');
   DriveApp.getFileById(ss.getId()).moveTo(DriveApp.getFolderById(SALON_FOLDER_ID));
 
   const dayTab = ss.getSheets()[0];
