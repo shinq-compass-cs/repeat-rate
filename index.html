@@ -688,7 +688,7 @@ function openPastForm(dateStr) {
   updateCustomerRows('p', parseInt(buf.p.v, 10));
   const cust = allCustomers.filter(c => c.date === dateStr);
   if (cust.length) prefillCustomers('p', cust, parseInt(buf.p.v, 10));
-  else syncReserveCheckboxes('p', parseInt(buf.p.r, 10));
+  syncReserveCheckboxes('p', parseInt(buf.p.r, 10));
   updateLiveRate('p'); updateSaveBtn('p');
 }
 
