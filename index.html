@@ -745,9 +745,13 @@ function onCountInput(sec, field, raw) {
   document.getElementById(elId).value = n;
   if (field === 'v') {
     document.getElementById(sec + '-visitor-label').textContent = n;
-    // vを下げた場合、rも連動して上限を下げる
+    // vを下げた場合、rも連動して上限を下げる（チェックボックスも再同期）
     const r = parseInt(buf[sec].r, 10) || 0;
-    if (r > n) { buf[sec].r = String(n); document.getElementById(sec + '-reservation-display').value = n; }
+    if (r > n) {
+      buf[sec].r = String(n);
+      document.getElementById(sec + '-reservation-display').value = n;
+      syncReserveCheckboxes(sec, n);
+    }
     updateCustomerRows(sec, n);
   }
   if (field === 'r') syncReserveCheckboxes(sec, n);
