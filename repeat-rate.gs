@@ -48,6 +48,10 @@ function doGet(e) {
   if (e.parameter.action === 'addMenuCol' && e.parameter.key === 'shinqmenu2026') {
     return ContentService.createTextOutput(JSON.stringify(addMenuColumnToExistingSheets()));
   }
+  // 既存シートのR列・S列フォーマット移行
+  if (e.parameter.action === 'migrateRS' && e.parameter.key === 'shinqrs2026') {
+    return ContentService.createTextOutput(JSON.stringify(migrateRSColumns()));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
