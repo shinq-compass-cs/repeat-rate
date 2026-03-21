@@ -188,6 +188,55 @@ function addMenuColumnToExistingSheets() {
   return { success: true, results };
 }
 
+function fixColumns2049() {
+  // 2049スプレッドシートの顧客タブ:
+  // J列(10)総売上, L列(12)物販, O列(15)初回来店, P列(16)最終来店 を空欄にクリア
+  // R列(18)を YYYYMMDD_NNN 形式に、S列(19)を 1/0 に再マイグレーション
+  try {
+    const ss   = SpreadsheetApp.openById('1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc');
+    const cust = ss.getSheetByName('顧客');
+    const lastRow = cust.getLastRow();
+    if (lastRow < 2) return { success: true, message: 'no data rows' };
+
+    const data = cust.getRange(2, 1, lastRow - 1, 20).getValues(); // A〜T列
+    let cleared = 0, migrated = 0;
+
+    data.forEach((r, ri) => {
+      const row = ri + 2; // 1-indexed row number
+
+      // J(10), L(12), O(15), P(16) を空欄にクリア（値がある場合のみ）
+      [[10, r[9]], [12, r[11]], [15, r[14]], [16, r[15]]].forEach(([col, val]) => {
+        if (val !== '' && val !== null && val !== undefined) {
+          cust.getRange(row, col).setValue('');
+          cleared++;
+        }
+      });
+
+      // R列(18): YYYYMMDD_NNN 形式に変換
+      const dateStr = fmtDate(r[16]); // Q列（0-indexed=16）
+      if (dateStr) {
+        const dateKey = dateStr.replace(/-/g, '');
+        const rawIdx  = r[17]; // R列（0-indexed=17）
+        const numPart = parseInt(String(rawIdx).replace(/[^0-9]/g, '')) || (ri + 1);
+        const newR    = dateKey + '_' + String(numPart).padStart(3, '0');
+        if (String(rawIdx) !== newR) {
+          cust.getRange(row, 18).setValue(newR);
+          migrated++;
+        }
+
+        // S列(19): '○'→1, ''→0, 既に 0/1 なら変換しない
+        const rawS = r[18]; // S列（0-indexed=18）
+        const newS = (rawS === '○' || rawS === 1) ? 1 : 0;
+        if (rawS !== newS) cust.getRange(row, 19).setValue(newS);
+      }
+    });
+
+    return { success: true, cleared, migrated, rows: lastRow - 1 };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
 function fix2049Mar21() {
   try {
     const ss   = SpreadsheetApp.openById('1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc');
