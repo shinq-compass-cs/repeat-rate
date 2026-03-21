@@ -33,9 +33,12 @@ function doPost(e) {
 
 function doGet(e) {
   if ((e.parameter.action || '') === 'csv') return handleCsv(e.parameter);
-  // 一時クリーンアップ（使用後削除）
   if (e.parameter.action === 'cleanup' && e.parameter.key === 'shinq2049cleanup') {
     return ContentService.createTextOutput(JSON.stringify(runCleanup2049()));
+  }
+  // 顧客タブマイグレーション（一時エンドポイント）
+  if (e.parameter.action === 'migrate' && e.parameter.key === 'shinqmigrate2026') {
+    return ContentService.createTextOutput(JSON.stringify({ result: runMigrationAll() }));
   }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
