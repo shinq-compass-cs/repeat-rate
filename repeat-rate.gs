@@ -64,38 +64,6 @@ function doGet(e) {
   if (e.parameter.action === 'fixCols2049' && e.parameter.key === 'shinqfix2049jop') {
     return ContentService.createTextOutput(JSON.stringify(fixColumns2049()));
   }
-  // 2049スプレッドシート 顧客タブをリビジョン履歴から復元 + 列クリーンアップ
-  if (e.parameter.action === 'restoreAndFix2049' && e.parameter.key === 'shinqrestore2026') {
-    return ContentService.createTextOutput(JSON.stringify(restoreAndFix2049()));
-  }
-  // 2049: リビジョンexportLink URLを返す（ローカルからダウンロード用）
-  if (e.parameter.action === 'getRevisionUrl2049' && e.parameter.key === 'shinqrestore2026') {
-    return ContentService.createTextOutput(JSON.stringify(getRevisionUrl2049()));
-  }
-  // 2049: 全リビジョン日時一覧
-  if (e.parameter.action === 'listRevisions2049' && e.parameter.key === 'shinqrestore2026') {
-    const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
-    const items = (Drive.Revisions.list(FILE_ID).items || []);
-    return ContentService.createTextOutput(JSON.stringify(
-      items.map((r, i) => ({ idx: i + 1, id: r.id, date: r.modifiedDate }))
-    ));
-  }
-  // 2049: 指定リビジョンの顧客タブ行数を確認
-  if (e.parameter.action === 'checkRevisionRows2049' && e.parameter.key === 'shinqrestore2026') {
-    return ContentService.createTextOutput(JSON.stringify(checkRevisionRows2049(e.parameter.revId)));
-  }
-  // 2049: 指定 fileId の Sheets から顧客タブを復元
-  if (e.parameter.action === 'restoreFromFile2049' && e.parameter.key === 'shinqrestore2026') {
-    return ContentService.createTextOutput(JSON.stringify(restoreFromFile2049(e.parameter.fileId)));
-  }
-  // 2049: タイムトリガーで復元をスケジュール（UrlFetchApp 制限回避）
-  if (e.parameter.action === 'scheduleRestore2049' && e.parameter.key === 'shinqrestore2026') {
-    return ContentService.createTextOutput(JSON.stringify(scheduleRestore2049()));
-  }
-  // 2049: スケジュール復元の結果を確認
-  if (e.parameter.action === 'getRestoreResult2049' && e.parameter.key === 'shinqrestore2026') {
-    return ContentService.createTextOutput(JSON.stringify(getRestoreResult2049()));
-  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
