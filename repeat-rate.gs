@@ -72,6 +72,14 @@ function doGet(e) {
   if (e.parameter.action === 'getRevisionUrl2049' && e.parameter.key === 'shinqrestore2026') {
     return ContentService.createTextOutput(JSON.stringify(getRevisionUrl2049()));
   }
+  // 2049: 全リビジョン日時一覧
+  if (e.parameter.action === 'listRevisions2049' && e.parameter.key === 'shinqrestore2026') {
+    const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
+    const items = (Drive.Revisions.list(FILE_ID).items || []);
+    return ContentService.createTextOutput(JSON.stringify(
+      items.map((r, i) => ({ idx: i + 1, id: r.id, date: r.modifiedDate }))
+    ));
+  }
   // 2049: 指定 fileId の Sheets から顧客タブを復元
   if (e.parameter.action === 'restoreFromFile2049' && e.parameter.key === 'shinqrestore2026') {
     return ContentService.createTextOutput(JSON.stringify(restoreFromFile2049(e.parameter.fileId)));
