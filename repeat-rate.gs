@@ -899,7 +899,7 @@ function migrateCustTab(sid) {
 
   // 旧データを新フォーマットに変換して書き込む
   // 旧: 日付(0), 番号(1), 苗字(2), 名前(3), 次回予約(4), メニュー(5), 単価(6), 性別(7), 電話(8), メール(9)
-  const newRows = dataRows.map(r => {
+  const newRows = dataRows.map((r, idx) => {
     const date      = fmtDate(r[0]);
     const fullName  = ((String(r[2]||'')).trim() + ' ' + (String(r[3]||'')).trim()).trim();
     const price     = String(r[6] || '');
@@ -913,16 +913,16 @@ function migrateCustTab(sid) {
       '',                 // G: 郵便番号
       '',                 // H: 住所
       String(r[9] || ''),// I: メールアドレス
-      price,              // J: 総売上
-      price,              // K: 施術
-      '0',                // L: 物販
+      '',                 // J: 総売上（空欄）
+      '',                 // K: 施術（空欄）
+      '',                 // L: 物販（空欄）
       price,              // M: 顧客単価
       '',                 // N: 来店回数
       '',                 // O: 初回来店（空欄）
       '',                 // P: 最終来店（空欄）
       date,               // Q: 来店日
-      r[1],               // R: 番号
-      r[4]                // S: 次回予約の有無
+      date.replace(/-/g, '') + '_' + String(idx + 1).padStart(3, '0'), // R: 番号（YYYYMMDD_NNN）
+      String(r[4]).trim() === '○' ? 1 : 0  // S: 次回予約の有無（1/0）
     ];
   });
 
