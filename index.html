@@ -527,6 +527,8 @@ async function handleLogin() {
 
 function handleLogout() {
   clearSession(); salon = null; allDays = []; allCustomers = [];
+  // buf をリセット（再ログイン時に前回の入力値が残らないよう）
+  buf.t.v = '0'; buf.t.r = '0'; buf.p.v = '0'; buf.p.r = '0';
   document.getElementById('main-screen').style.display  = 'none';
   document.getElementById('login-screen').style.display = 'flex';
 }
