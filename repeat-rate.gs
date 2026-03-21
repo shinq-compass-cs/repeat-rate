@@ -192,6 +192,82 @@ function addMenuColumnToExistingSheets() {
   return { success: true, results };
 }
 
+// ─── 顧客タブ復元（リビジョン履歴から） ─────────────────────────────
+
+function restoreAndFix2049() {
+  const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
+  const token   = ScriptApp.getOAuthToken();
+  const headers = { 'Authorization': 'Bearer ' + token };
+  let tmpFileId = null, tmpSsId = null;
+
+  try {
+    // 1. Drive API v2 でリビジョン一覧を取得
+    const revRes   = UrlFetchApp.fetch(
+      'https://www.googleapis.com/drive/v2/files/' + FILE_ID + '/revisions',
+      { headers }
+    );
+    const revisions = JSON.parse(revRes.getContentText()).items;
+    if (!revisions || revisions.length === 0) return { success: false, error: 'リビジョンが見つかりません' };
+
+    // 2. 14:49 JST (05:49 UTC) より前の最新リビジョンを選択
+    const cutoff = new Date('2026-03-21T05:49:00.000Z');
+    const target  = revisions.filter(r => new Date(r.modifiedDate) < cutoff).pop();
+    if (!target) return { success: false, error: '対象リビジョンが見つかりません', revisions: revisions.map(r => r.modifiedDate) };
+
+    // 3. 対象リビジョンを XLSX としてダウンロード
+    const xlsxUrl  = target.exportLinks['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    const xlsxBlob = UrlFetchApp.fetch(xlsxUrl, { headers }).getBlob().setName('_restore_tmp.xlsx');
+
+    // 4. Drive に一時 XLSX ファイルを作成
+    const tmpFile = DriveApp.createFile(xlsxBlob);
+    tmpFileId = tmpFile.getId();
+
+    // 5. XLSX → Google Sheets に変換（Drive API v3 files.copy）
+    const copyRes = UrlFetchApp.fetch(
+      'https://www.googleapis.com/drive/v3/files/' + tmpFileId + '/copy',
+      {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        payload: JSON.stringify({ mimeType: 'application/vnd.google-apps.spreadsheet', name: '_restore_tmp_sheet' })
+      }
+    );
+    tmpSsId = JSON.parse(copyRes.getContentText()).id;
+
+    // 6. 変換後 Spreadsheet から顧客タブを取得
+    const tmpSs   = SpreadsheetApp.openById(tmpSsId);
+    const tmpCust = tmpSs.getSheetByName('顧客');
+    if (!tmpCust) return { success: false, error: '一時ファイルに顧客タブなし' };
+    const savedData = tmpCust.getDataRange().getValues();
+
+    // 7. 元シートの顧客タブを一旦クリアして上書き
+    const origSs   = SpreadsheetApp.openById(FILE_ID);
+    const origCust = origSs.getSheetByName('顧客');
+    const origLast = origCust.getLastRow();
+    if (origLast > 1) origCust.deleteRows(2, origLast - 1);
+    if (savedData.length > 1) {
+      origCust.getRange(2, 1, savedData.length - 1, savedData[0].length)
+              .setValues(savedData.slice(1));
+    }
+
+    // 8. 復元後に列クリーンアップ（J/K/L/O/P空欄化 + R/S正規化）
+    const fixResult = fixColumns2049();
+
+    return {
+      success: true,
+      revisionDate: target.modifiedDate,
+      restoredRows: savedData.length - 1,
+      fix: fixResult
+    };
+
+  } catch (err) {
+    return { success: false, error: err.message };
+  } finally {
+    // 一時ファイルを必ずゴミ箱へ
+    try { if (tmpFileId) DriveApp.getFileById(tmpFileId).setTrashed(true); } catch(_) {}
+    try { if (tmpSsId)   DriveApp.getFileById(tmpSsId).setTrashed(true);   } catch(_) {}
+  }
+}
+
 function fixColumns2049() {
   // 2049スプレッドシートの顧客タブ:
   // J列(10)総売上, L列(12)物販, O列(15)初回来店, P列(16)最終来店 を空欄にクリア
