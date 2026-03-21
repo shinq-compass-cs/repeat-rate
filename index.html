@@ -628,6 +628,7 @@ function shiftCalMonth(delta) {
   // 未来月には進めない
   if (calMonthOffset > 0) calMonthOffset = 0;
   renderCalendar();
+  renderChart();
 }
 
 function renderCalendar() {
