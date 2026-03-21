@@ -917,6 +917,8 @@ async function saveData(sec, date) {
   const v = parseInt(buf[sec].v, 10) || 0;
   const r = parseInt(buf[sec].r, 10) || 0;
   if (r > v) { showToast('次回予約数が施術回数を超えています'); return false; }
+  // 施術0回 かつ 既存データなし → 入力を促すだけ（「削除しました」メッセージを出さない）
+  if (v === 0 && !allDays.some(d => d.date === date)) { showToast('施術回数を入力してください'); return false; }
   showLoading(true);
   try {
     const res = await gasPost({
