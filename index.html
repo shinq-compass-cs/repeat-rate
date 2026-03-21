@@ -611,6 +611,8 @@ function showTodayInput() {
     // 保存済みデータがあれば上書き
     buf.t.v = String(today.visitors); buf.t.r = String(today.reservations);
   }
+  // フォームを開いたらフレッシュ状態にリセット（次の数字キーで置換モード）
+  buf.t.vf = true; buf.t.rf = true;
   // 保存済みデータなし → buf.t を保持（入力途中の値を維持）
   setDisplay('t');
   updateCustomerRows('t', parseInt(buf.t.v, 10));
