@@ -76,6 +76,14 @@ function doGet(e) {
   if (e.parameter.action === 'restoreFromFile2049' && e.parameter.key === 'shinqrestore2026') {
     return ContentService.createTextOutput(JSON.stringify(restoreFromFile2049(e.parameter.fileId)));
   }
+  // 2049: タイムトリガーで復元をスケジュール（UrlFetchApp 制限回避）
+  if (e.parameter.action === 'scheduleRestore2049' && e.parameter.key === 'shinqrestore2026') {
+    return ContentService.createTextOutput(JSON.stringify(scheduleRestore2049()));
+  }
+  // 2049: スケジュール復元の結果を確認
+  if (e.parameter.action === 'getRestoreResult2049' && e.parameter.key === 'shinqrestore2026') {
+    return ContentService.createTextOutput(JSON.stringify(getRestoreResult2049()));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
