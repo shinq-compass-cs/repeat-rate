@@ -364,6 +364,7 @@ function restoreAndFix2049() {
     };
 
   } catch (err) {
+    console.log('ERROR: ' + err.message);
     return { success: false, error: err.message };
   } finally {
     try { if (tmpSsId) DriveApp.getFileById(tmpSsId).setTrashed(true); } catch(_) {}
