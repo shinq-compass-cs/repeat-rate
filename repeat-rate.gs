@@ -631,8 +631,8 @@ function migrateCustTab(sid) {
       '0',                // L: 物販
       price,              // M: 顧客単価
       '',                 // N: 来店回数
-      date,               // O: 初回来店
-      date,               // P: 最終来店
+      '',                 // O: 初回来店（空欄）
+      '',                 // P: 最終来店（空欄）
       date,               // Q: 来店日
       r[1],               // R: 番号
       r[4]                // S: 次回予約の有無
