@@ -47,6 +47,19 @@ function doGet(e) {
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
+function fix2049Mar21() {
+  try {
+    const ss = SpreadsheetApp.openById('1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc');
+    const cust = ss.getSheetByName('顧客');
+    const fmt  = getSheetFormat(cust);
+    // 3/21の顧客行をすべて削除
+    deleteRowsByDate(cust, '2026-03-21', fmt.dateCol);
+    return { success: true, message: '2049サロン 2026-03-21 顧客行を削除しました' };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
 function runCleanup2049() {
   try {
     const SALON_ID = '2049';
