@@ -204,8 +204,8 @@ function fixColumns2049() {
     data.forEach((r, ri) => {
       const row = ri + 2; // 1-indexed row number
 
-      // J(10), L(12), O(15), P(16) を空欄にクリア（値がある場合のみ）
-      [[10, r[9]], [12, r[11]], [15, r[14]], [16, r[15]]].forEach(([col, val]) => {
+      // J(10), K(11), L(12), O(15), P(16) を空欄にクリア（値がある場合のみ）
+      [[10, r[9]], [11, r[10]], [12, r[11]], [15, r[14]], [16, r[15]]].forEach(([col, val]) => {
         if (val !== '' && val !== null && val !== undefined) {
           cust.getRange(row, col).setValue('');
           cleared++;
