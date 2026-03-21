@@ -470,7 +470,7 @@ function handleSaveDay(d) {
         '',                 // H: 住所
         c.email_addr || '', // I: メールアドレス
         '',                 // J: 総売上（空欄）
-        price,              // K: 施術
+        '',                 // K: 施術（空欄）
         '',                 // L: 物販（空欄）
         price,              // M: 顧客単価
         '',                 // N: 来店回数
