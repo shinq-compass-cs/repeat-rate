@@ -245,6 +245,41 @@ function restoreFromFile2049(tmpSsId) {
   } catch (e) { return { success: false, error: e.message }; }
 }
 
+// タイムトリガーで restoreAndFix2049 をスケジュール（ウェブアプリのUrlFetchApp制限を回避）
+function scheduleRestore2049() {
+  try {
+    // 既存の復元トリガーを削除
+    ScriptApp.getProjectTriggers()
+      .filter(t => t.getHandlerFunction() === 'triggeredRestore2049')
+      .forEach(t => ScriptApp.deleteTrigger(t));
+    // 結果キーをリセット
+    PropertiesService.getScriptProperties().deleteProperty('restore2049Result');
+    // 1分後にトリガー実行
+    ScriptApp.newTrigger('triggeredRestore2049')
+      .timeBased()
+      .after(60 * 1000)
+      .create();
+    return { success: true, message: '1分後に復元を開始します。getRestoreResult2049 で結果を確認してください。' };
+  } catch (e) { return { success: false, error: e.message }; }
+}
+
+// タイムトリガーから呼ばれる復元関数（非ウェブアプリコンテキスト）
+function triggeredRestore2049() {
+  const result = restoreAndFix2049();
+  PropertiesService.getScriptProperties().setProperty('restore2049Result', JSON.stringify(result));
+  // 完了後にトリガー自身を削除
+  ScriptApp.getProjectTriggers()
+    .filter(t => t.getHandlerFunction() === 'triggeredRestore2049')
+    .forEach(t => ScriptApp.deleteTrigger(t));
+}
+
+// 復元結果を返す
+function getRestoreResult2049() {
+  const raw = PropertiesService.getScriptProperties().getProperty('restore2049Result');
+  if (!raw) return { done: false, message: 'まだ完了していません（1分後に再確認）' };
+  return { done: true, result: JSON.parse(raw) };
+}
+
 function restoreAndFix2049() {
   const FILE_ID = '1jJJIUs31vQ4S6HDcFDTul35oy0GDaSZYlvUAveBqGUc';
   let tmpSsId = null;
