@@ -253,9 +253,9 @@ input.count-display-today:focus { border-color: var(--primary-light); background
     <h1 class="login-title">次回予約率ツール</h1>
     <p class="login-subtitle">来店・予約データを記録してリピート率を管理</p>
     <label class="login-label">サロンID</label>
-    <input type="text"  id="sid-input"   class="login-input" placeholder="例：38290" inputmode="numeric">
+    <input type="text"  id="sid-input"   class="login-input" placeholder="例：38290" inputmode="numeric" onkeydown="if(event.key==='Enter')handleLogin()">
     <label class="login-label">メールアドレス</label>
-    <input type="email" id="email-input" class="login-input" placeholder="例：info@example.com" autocomplete="email">
+    <input type="email" id="email-input" class="login-input" placeholder="例：info@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')handleLogin()">
     <button class="login-btn" onclick="handleLogin()">ログイン</button>
     <div id="login-error" class="login-error"></div>
   </div>
