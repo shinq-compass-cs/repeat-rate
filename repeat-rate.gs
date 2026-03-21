@@ -232,7 +232,11 @@ function handleSaveDay(d) {
   dayTab.appendRow([date, visitors, reservations, rate]);
   sortSheetByDate(dayTab, 1);
 
-  const customers = d.customers || [];
+  // 空エントリ（名前・メニュー・電話番号がすべて空）はフィルタして除外
+  const customers = (d.customers || []).filter(c =>
+    (c.last_name || '').trim() || (c.first_name || '').trim() ||
+    (c.menu || '').trim() || (c.phone || '').trim()
+  );
   if (fmt.type === 'new') {
     customers.forEach((c, i) => {
       const price = c.price || '';
