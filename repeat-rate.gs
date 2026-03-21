@@ -212,14 +212,16 @@ function fixColumns2049() {
         }
       });
 
-      // R列(18): YYYYMMDD_NNN 形式に変換
+      // R列(18): YYYYMMDD_NNN 形式に変換（既に正しい形式の行はスキップ）
       const dateStr = fmtDate(r[16]); // Q列（0-indexed=16）
       if (dateStr) {
         const dateKey = dateStr.replace(/-/g, '');
-        const rawIdx  = r[17]; // R列（0-indexed=17）
-        const numPart = parseInt(String(rawIdx).replace(/[^0-9]/g, '')) || (ri + 1);
-        const newR    = dateKey + '_' + String(numPart).padStart(3, '0');
-        if (String(rawIdx) !== newR) {
+        const rawIdx  = String(r[17] || ''); // R列（0-indexed=17）
+        // 既に YYYYMMDD_NNN 形式なら変換しない
+        const alreadyMigrated = /^\d{8}_\d{3}$/.test(rawIdx);
+        if (!alreadyMigrated) {
+          const numPart = parseInt(rawIdx.replace(/[^0-9]/g, '')) || (ri + 1);
+          const newR = dateKey + '_' + String(numPart).padStart(3, '0');
           cust.getRange(row, 18).setValue(newR);
           migrated++;
         }
