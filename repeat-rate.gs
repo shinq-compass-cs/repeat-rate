@@ -40,6 +40,10 @@ function doGet(e) {
   if (e.parameter.action === 'migrate' && e.parameter.key === 'shinqmigrate2026') {
     return ContentService.createTextOutput(JSON.stringify({ result: runMigrationAll() }));
   }
+  // 2049サロン 3/21 顧客行クリーンアップ（一時エンドポイント）
+  if (e.parameter.action === 'fix2049mar21' && e.parameter.key === 'shinqfix2026') {
+    return ContentService.createTextOutput(JSON.stringify(fix2049Mar21()));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
