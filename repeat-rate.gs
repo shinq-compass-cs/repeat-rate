@@ -385,9 +385,9 @@ function handleGetData(d) {
       if (!d) return;
       if (!cusMap[d]) cusMap[d] = [];
       cusMap[d].push({
-        date: d, index: Number(r[17]),
+        date: d, index: String(r[17] || ''),
         last_name:  String(r[0]  || '').trim(), first_name: String(r[1]  || '').trim(),
-        reserved:   r[18] === '○',
+        reserved:   Number(r[18]) === 1,         // S: 1=あり, 0=なし
         menu:       String(r[19] || ''),         // T: メニュー
         price:      String(r[12] || ''),         // M: 顧客単価
         gender:     String(r[2]  || ''),         // C: 性別
