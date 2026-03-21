@@ -64,6 +64,28 @@ function doGet(e) {
 }
 
 // R列（番号）を YYYYMMDD_NNN 形式に、S列（次回予約の有無）を 1/0 に一括変換
+function formatRateColumn() {
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const idx    = master.getSheetByName(INDEX_TAB);
+  if (!idx) return { success: false, error: 'INDEX_TAB not found' };
+  const rows = idx.getDataRange().getValues();
+  const results = [];
+  for (let i = 1; i < rows.length; i++) {
+    const ssId = String(rows[i][1] || '').trim();
+    if (!ssId) continue;
+    try {
+      const ss  = SpreadsheetApp.openById(ssId);
+      const day = ss.getSheetByName('日次');
+      if (!day) continue;
+      day.getRange('D2:D1000').setNumberFormat('0"%"');
+      results.push(ssId + ': D列フォーマット適用');
+    } catch (e) {
+      results.push(ssId + ': error - ' + e.message);
+    }
+  }
+  return { success: true, results };
+}
+
 function clearBuhanColumn() {
   const master = SpreadsheetApp.openById(MASTER_SS_ID);
   const idx    = master.getSheetByName(INDEX_TAB);
