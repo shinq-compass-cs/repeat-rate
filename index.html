@@ -854,6 +854,34 @@ function updateSaveBtn(sec) {
 // ===================================================================
 // 顧客入力
 // ===================================================================
+
+// フィールドごとのバリデーション設定
+const FIELD_VALIDATORS = {
+  last_name:  { pattern: /^[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\s\u3000]*$/, msg: '氏名（漢字）は漢字のみ入力してください' },
+  first_name: { pattern: /^[\u3041-\u3096\u30FC\s\u3000]*$/,                       msg: '氏名（かな）はひらがなのみ入力してください' },
+  phone:      { pattern: /^[\d\-\(\)\+\s]*$/,                                      msg: '電話番号は数字・ハイフンのみ入力してください' },
+  email_addr: { fn: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),                    msg: 'メールアドレスの形式が正しくありません' }
+};
+
+function validateField(input) {
+  const field = input.dataset.field;
+  const val = input.value.trim();
+  const v = FIELD_VALIDATORS[field];
+  if (!v || !val) { input.classList.remove('input-error'); input.title = ''; return true; }
+  const ok = v.fn ? v.fn(val) : v.pattern.test(val);
+  if (!ok) { input.classList.add('input-error'); input.title = v.msg; }
+  else      { input.classList.remove('input-error'); input.title = ''; }
+  return ok;
+}
+
+function validateCustomers(sec) {
+  let ok = true;
+  document.querySelectorAll('#' + sec + '-customer-rows input[data-field]').forEach(el => {
+    if (el.dataset.field in FIELD_VALIDATORS && !validateField(el)) ok = false;
+  });
+  return ok;
+}
+
 function updateCustomerRows(sec, n) {
   const section   = document.getElementById(sec + '-customers-section');
   const container = document.getElementById(sec + '-customer-rows');
