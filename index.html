@@ -977,27 +977,41 @@ function switchChart(mode) {
 function renderChart() {
   const ctx = document.getElementById('rate-chart').getContext('2d');
   let labels, dataPoints;
-  if (chartMode === 'daily') {
-    // カレンダーの表示月に連動する（calMonthOffset を使用）
-    const base = new Date();
-    base.setDate(1);
-    base.setMonth(base.getMonth() + calMonthOffset);
-    const year = base.getFullYear(), mon = base.getMonth();
-    const daysInMonth = new Date(year, mon + 1, 0).getDate();
+  if (chartMode === 'weekly') {
+    // 直近8週（月曜起点）のリピート率
     const dataByDate = {};
-    allDays.forEach(d => { dataByDate[d.date] = d.rate; });
+    allDays.forEach(d => { dataByDate[d.date] = d; });
+    const todayD = new Date();
+    // 今週の月曜を起点に8週前まで
+    const dow = todayD.getDay(); // 0=日
+    const diffToMon = (dow === 0 ? -6 : 1 - dow);
+    const thisMonday = new Date(todayD);
+    thisMonday.setDate(todayD.getDate() + diffToMon);
     labels = []; dataPoints = [];
-    for (let day = 1; day <= daysInMonth; day++) {
-      const ds = year + '-' + pad(mon + 1) + '-' + pad(day);
-      labels.push(String(day));
-      dataPoints.push(dataByDate[ds] !== undefined ? dataByDate[ds] : null);
+    for (let w = 7; w >= 0; w--) {
+      const weekStart = new Date(thisMonday);
+      weekStart.setDate(thisMonday.getDate() - w * 7);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      let tv = 0, tr = 0;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(weekStart);
+        d.setDate(weekStart.getDate() + i);
+        const ds = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+        if (dataByDate[ds]) { tv += dataByDate[ds].visitors; tr += dataByDate[ds].reservations; }
+      }
+      const mo = weekStart.getMonth() + 1, da = weekStart.getDate();
+      labels.push(mo + '/' + da + '〜');
+      dataPoints.push(tv > 0 ? Math.round(tr / tv * 100) : null);
     }
   } else {
+    // 直近6ヶ月の月次リピート率
     const byM = {};
     allDays.forEach(d => { const ym = d.date.slice(0, 7); if (!byM[ym]) byM[ym] = {v:0,r:0}; byM[ym].v += d.visitors; byM[ym].r += d.reservations; });
-    const months = Object.keys(byM).sort();
-    labels = months.map(m => m.slice(2).replace('-', '/'));
-    dataPoints = months.map(m => byM[m].v > 0 ? Math.round(byM[m].r / byM[m].v * 100) : 0);
+    const allMonths = Object.keys(byM).sort();
+    const months = allMonths.slice(-6);
+    labels = months.map(m => parseInt(m.slice(5), 10) + '月');
+    dataPoints = months.map(m => byM[m].v > 0 ? Math.round(byM[m].r / byM[m].v * 100) : null);
   }
   const bgColors = dataPoints.map(r => r === null ? 'transparent' : r >= 70 ? 'rgba(46,138,110,.75)' : r >= 50 ? 'rgba(176,122,58,.75)' : 'rgba(168,69,69,.75)');
   // バー上部に「〇%」を表示するカスタムプラグイン
