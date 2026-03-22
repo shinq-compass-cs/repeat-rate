@@ -483,8 +483,10 @@ function handleSaveDay(d) {
 
   // 施術回数分の行をそのまま保存（詳細未入力行も含む — index番号が来訪記録として機能する）
   const customers = (d.customers || []);
+  Logger.log('DEBUG handleSaveDay: customers.length=' + customers.length + ' fmt=' + fmt.type + ' date=' + date);
   if (fmt.type === 'new') {
     customers.forEach((c, i) => {
+      Logger.log('DEBUG row ' + i + ': last_name=' + (c.last_name||'') + ' first_name=' + (c.first_name||''));
       const price = c.price || '';
       custTab.appendRow([
         c.last_name || '',  // A: 氏名
