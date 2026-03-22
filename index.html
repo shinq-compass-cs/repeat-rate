@@ -920,7 +920,7 @@ function validateField(input) {
   const v = FIELD_VALIDATORS[field];
   if (!v || !val) { input.classList.remove('input-error'); input.title = ''; return true; }
   const ok = v.fn ? v.fn(val) : v.pattern.test(val);
-  if (!ok) { input.classList.add('input-error'); input.title = v.msg; }
+  if (!ok) { input.classList.add('input-error'); input.title = v.msg; showFieldHint(input, v.msg); }
   else      { input.classList.remove('input-error'); input.title = ''; }
   return ok;
 }
