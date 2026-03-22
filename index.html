@@ -979,6 +979,11 @@ function switchChart(mode) {
 }
 
 function renderChart() {
+  // ボタン active 状態を常に chartMode と同期（初回呼び出し含む）
+  ['daily','weekly','monthly'].forEach(m => {
+    const btn = document.getElementById('btn-' + m);
+    if (btn) btn.classList.toggle('active', m === chartMode);
+  });
   const ctx = document.getElementById('rate-chart').getContext('2d');
   let labels, dataPoints;
   if (chartMode === 'daily') {
