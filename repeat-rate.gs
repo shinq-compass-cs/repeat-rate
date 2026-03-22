@@ -481,11 +481,8 @@ function handleSaveDay(d) {
   dayTab.getRange(newRow, 4).setNumberFormat('0"%"');
   sortSheetByDate(dayTab, 1);
 
-  // 空エントリ（名前・メニュー・電話番号がすべて空）はフィルタして除外
-  const customers = (d.customers || []).filter(c =>
-    (c.last_name || '').trim() || (c.first_name || '').trim() ||
-    (c.menu || '').trim() || (c.phone || '').trim()
-  );
+  // 施術回数分の行をそのまま保存（詳細未入力行も含む — index番号が来訪記録として機能する）
+  const customers = (d.customers || []);
   if (fmt.type === 'new') {
     customers.forEach((c, i) => {
       const price = c.price || '';
