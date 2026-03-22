@@ -32,7 +32,8 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  if ((e.parameter.action || '') === 'csv') return handleCsv(e.parameter);
+  if ((e.parameter.action || '') === 'csv')    return handleCsv(e.parameter);
+  if ((e.parameter.action || '') === 'export') return handleExport(e.parameter);
   if (e.parameter.action === 'cleanup' && e.parameter.key === 'shinq2049cleanup') {
     return ContentService.createTextOutput(JSON.stringify(runCleanup2049()));
   }
