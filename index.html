@@ -872,7 +872,7 @@ function createCustomerRow(sec, num) {
     <div class="customer-row-top">
       <span class="customer-num">${num}</span>
       <div class="customer-name-inputs">
-        <input class="customer-name-input" type="text" placeholder="（かな）やまだたろう" data-field="first_name">
+        <input class="customer-name-input" type="text" placeholder="（かな）やまだたろう" data-field="first_name" onblur="validateField(this)">
       </div>
     </div>
     <div class="customer-row-bottom">
@@ -884,11 +884,11 @@ function createCustomerRow(sec, num) {
     </div>
     <div class="customer-detail">
       <div class="detail-grid">
-        <div class="detail-field full"><label>氏名（漢字）</label><input type="text" placeholder="山田太郎" data-field="last_name"></div>
+        <div class="detail-field full"><label>氏名（漢字）</label><input type="text" placeholder="山田太郎" data-field="last_name" onblur="validateField(this)"></div>
         <div class="detail-field"><label>メニュー</label><input type="text" placeholder="例：鍼灸60分" data-field="menu"></div>
         <div class="detail-field"><label>性別</label><select data-field="gender"><option value="">—</option><option>男</option><option>女</option></select></div>
-        <div class="detail-field"><label>電話番号</label><input type="tel" placeholder="090-xxxx-xxxx" data-field="phone"></div>
-        <div class="detail-field full"><label>メールアドレス</label><input type="email" placeholder="info@example.com" data-field="email_addr"></div>
+        <div class="detail-field"><label>電話番号</label><input type="tel" placeholder="090-xxxx-xxxx" data-field="phone" onblur="validateField(this)"></div>
+        <div class="detail-field full"><label>メールアドレス</label><input type="email" placeholder="info@example.com" data-field="email_addr" onblur="validateField(this)"></div>
       </div>
     </div>`;
   return div;
