@@ -981,7 +981,22 @@ function switchChart(mode) {
 function renderChart() {
   const ctx = document.getElementById('rate-chart').getContext('2d');
   let labels, dataPoints;
-  if (chartMode === 'weekly') {
+  if (chartMode === 'daily') {
+    // カレンダーの表示月に連動する（calMonthOffset を使用）
+    const base = new Date();
+    base.setDate(1);
+    base.setMonth(base.getMonth() + calMonthOffset);
+    const year = base.getFullYear(), mon = base.getMonth();
+    const daysInMonth = new Date(year, mon + 1, 0).getDate();
+    const dataByDate = {};
+    allDays.forEach(d => { dataByDate[d.date] = d.rate; });
+    labels = []; dataPoints = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const ds = year + '-' + pad(mon + 1) + '-' + pad(day);
+      labels.push(String(day));
+      dataPoints.push(dataByDate[ds] !== undefined ? dataByDate[ds] : null);
+    }
+  } else if (chartMode === 'weekly') {
     // 直近8週（月曜起点）のリピート率
     const dataByDate = {};
     allDays.forEach(d => { dataByDate[d.date] = d; });
