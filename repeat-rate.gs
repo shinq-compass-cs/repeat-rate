@@ -521,7 +521,7 @@ function handleSaveDay(d) {
   }
   if (customers.length > 0) sortSheetByDate(custTab, fmt.dateCol + 1);
 
-  return { success: true, rate, spreadsheet_id: ss.getId(), debug_customers_received: customers.length, debug_fmt: fmt.type };
+  return { success: true, rate, spreadsheet_id: ss.getId() };
 }
 
 function deleteRowsByDate(sheet, date, col) {
