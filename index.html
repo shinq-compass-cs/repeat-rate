@@ -574,9 +574,23 @@ function downloadCsv() {
   document.body.removeChild(a);
 }
 
-function openSpreadsheet() {
-  if (!spreadsheetId) return;
-  window.open('https://docs.google.com/spreadsheets/d/' + spreadsheetId, '_blank');
+async function openSpreadsheet() {
+  if (!salon) return;
+  const btn = document.querySelector('.header-right .csv-btn:last-of-type');
+  if (btn) { btn.textContent = '作成中…'; btn.disabled = true; }
+  try {
+    const url = GAS_URL + '?action=export&salon_id=' + encodeURIComponent(salon.salon_id);
+    const res = await fetch(url).then(r => r.json());
+    if (res.success) {
+      window.open(res.url, '_blank');
+    } else {
+      alert('スプレッドシートの作成に失敗しました: ' + (res.error || ''));
+    }
+  } catch (e) {
+    alert('エラーが発生しました: ' + e.message);
+  } finally {
+    if (btn) { btn.textContent = 'スプレッドシート'; btn.disabled = false; }
+  }
 }
 
 function handleLogout() {
