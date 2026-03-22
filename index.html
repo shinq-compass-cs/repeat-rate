@@ -855,13 +855,32 @@ function updateSaveBtn(sec) {
 // 顧客入力
 // ===================================================================
 
-// フィールドごとのバリデーション設定
-const FIELD_VALIDATORS = {
-  last_name:  { pattern: /^[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\s\u3000]*$/, msg: '氏名（漢字）は漢字のみ入力してください' },
-  first_name: { pattern: /^[\u3041-\u3096\u30FC\s\u3000]*$/,                       msg: '氏名（かな）はひらがなのみ入力してください' },
-  phone:      { pattern: /^[\d\-\(\)\+\s]*$/,                                      msg: '電話番号は数字・ハイフンのみ入力してください' },
-  email_addr: { fn: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),                    msg: 'メールアドレスの形式が正しくありません' }
+// フィールドごとの入力制限（不正文字をリアルタイム除去）
+const FIELD_RESTRICTORS = {
+  first_name: /[^\u3041-\u3096\u30FC\s\u3000]/g,                                  // ひらがな・長音符・スペース以外を除去
+  last_name:  /[^\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u3005\s\u3000]/g,        // 漢字（々含む）・スペース以外を除去
+  phone:      /[^\d\-\(\)\+\s]/g,                                                  // 数字・ハイフン・括弧・プラス以外を除去
 };
+
+// フィールドごとのバリデーション設定（保存前チェック・メール形式確認）
+const FIELD_VALIDATORS = {
+  email_addr: { fn: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), msg: 'メールアドレスの形式が正しくありません' }
+};
+
+// 入力制限（oninput / oncompositionend 共通ハンドラ）
+// IME変換中（isComposing=true）はスキップし、確定後に不正文字を除去する
+function restrictInput(input, event) {
+  if (event && event.isComposing) return;
+  const pattern = FIELD_RESTRICTORS[input.dataset.field];
+  if (!pattern) return;
+  const pos = input.selectionStart;
+  const newVal = input.value.replace(pattern, '');
+  if (newVal === input.value) return;
+  // カーソル位置より前の有効文字数を計算してカーソルを正しく戻す
+  const beforeCursor = input.value.slice(0, pos).replace(pattern, '').length;
+  input.value = newVal;
+  input.setSelectionRange(beforeCursor, beforeCursor);
+}
 
 function validateField(input) {
   const field = input.dataset.field;
