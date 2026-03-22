@@ -890,10 +890,8 @@ const FIELD_VALIDATORS = {
   email_addr: { fn: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), msg: 'メールアドレスの形式が正しくありません' }
 };
 
-// 入力制限（oninput / oncompositionend 共通ハンドラ）
-// IME変換中（isComposing=true）はスキップし、確定後に不正文字を除去する
-function restrictInput(input, event) {
-  if (event && event.isComposing) return;
+// 入力制限（不正文字を除去し、除去が発生した場合は注意書きを表示）
+function doRestrict(input) {
   const field = input.dataset.field;
   const pattern = FIELD_RESTRICTORS[field];
   if (!pattern) return;
@@ -904,8 +902,16 @@ function restrictInput(input, event) {
   const beforeCursor = input.value.slice(0, pos).replace(pattern, '').length;
   input.value = newVal;
   input.setSelectionRange(beforeCursor, beforeCursor);
-  // 除去が発生した場合に注意書きを表示
   if (FIELD_HINT_MSGS[field]) showFieldHint(input, FIELD_HINT_MSGS[field]);
+}
+
+// IME composing 状態をクロージャで管理し、確定後に確実に制限を適用する
+// （event.isComposing は CompositionEvent では undefined になる場合があるため使用しない）
+function attachRestrict(input) {
+  let composing = false;
+  input.addEventListener('compositionstart', () => { composing = true; });
+  input.addEventListener('compositionend',   () => { composing = false; doRestrict(input); });
+  input.addEventListener('input',            () => { if (!composing) doRestrict(input); });
 }
 
 function validateField(input) {
