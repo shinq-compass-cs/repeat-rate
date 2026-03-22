@@ -894,7 +894,8 @@ const FIELD_VALIDATORS = {
 // IME変換中（isComposing=true）はスキップし、確定後に不正文字を除去する
 function restrictInput(input, event) {
   if (event && event.isComposing) return;
-  const pattern = FIELD_RESTRICTORS[input.dataset.field];
+  const field = input.dataset.field;
+  const pattern = FIELD_RESTRICTORS[field];
   if (!pattern) return;
   const pos = input.selectionStart;
   const newVal = input.value.replace(pattern, '');
@@ -903,6 +904,8 @@ function restrictInput(input, event) {
   const beforeCursor = input.value.slice(0, pos).replace(pattern, '').length;
   input.value = newVal;
   input.setSelectionRange(beforeCursor, beforeCursor);
+  // 除去が発生した場合に注意書きを表示
+  if (FIELD_HINT_MSGS[field]) showFieldHint(input, FIELD_HINT_MSGS[field]);
 }
 
 function validateField(input) {
