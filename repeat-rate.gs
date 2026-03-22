@@ -665,6 +665,50 @@ function handleCsv(p) {
     .setMimeType(ContentService.MimeType.CSV);
 }
 
+// ─── Googleスプレッドシート エクスポート ────────────────────────────
+// 呼び出し毎に新規 Spreadsheet を作成し、誰でも閲覧可能なリンクを返す
+
+function handleExport(p) {
+  const sid    = String(p.salon_id || '').trim();
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const idx    = master.getSheetByName(INDEX_TAB);
+  if (!idx) return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'インデックスなし' })).setMimeType(ContentService.MimeType.JSON);
+
+  const rows = idx.getDataRange().getValues();
+  let ssId = null, salonName = '';
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); salonName = String(rows[i][2] || ''); break; }
+  }
+  if (!ssId) return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'サロンデータなし' })).setMimeType(ContentService.MimeType.JSON);
+
+  const src      = SpreadsheetApp.openById(ssId);
+  const cusSheet = src.getSheetByName('顧客');
+  const daySheet = src.getSheetByName('日次');
+  if (!cusSheet || !daySheet) return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'シートなし' })).setMimeType(ContentService.MimeType.JSON);
+
+  // 新規スプレッドシートを作成
+  const now     = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd_HHmmss');
+  const newSs   = SpreadsheetApp.create(salonName + '_リピート率データ_' + now);
+
+  // 顧客タブをコピー
+  const newCus  = newSs.getSheets()[0];
+  newCus.setName('顧客');
+  const cusData = cusSheet.getDataRange().getValues();
+  if (cusData.length > 0) newCus.getRange(1, 1, cusData.length, cusData[0].length).setValues(cusData);
+
+  // 日次タブをコピー
+  const newDay  = newSs.insertSheet('日次');
+  const dayData = daySheet.getDataRange().getValues();
+  if (dayData.length > 0) newDay.getRange(1, 1, dayData.length, dayData[0].length).setValues(dayData);
+
+  // 誰でも閲覧可能に設定
+  newSs.setSpreadsheetLocale('ja');
+  DriveApp.getFileById(newSs.getId()).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  return ContentService.createTextOutput(JSON.stringify({ success: true, url: newSs.getUrl() }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
 // ─── 重複行クリーンアップ（同日付は最後の行だけ残す）────────────────
 // handleSaveDay の冒頭で呼ぶことで既存重複も解消する
 
