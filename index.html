@@ -969,7 +969,7 @@ async function saveData(sec, date) {
 // ===================================================================
 function switchChart(mode) {
   chartMode = mode;
-  document.getElementById('btn-daily').classList.toggle('active',   mode === 'daily');
+  document.getElementById('btn-weekly').classList.toggle('active',  mode === 'weekly');
   document.getElementById('btn-monthly').classList.toggle('active', mode === 'monthly');
   renderChart();
 }
