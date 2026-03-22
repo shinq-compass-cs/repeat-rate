@@ -970,6 +970,10 @@ function createCustomerRow(sec, num) {
         <div class="detail-field full"><label>メールアドレス</label><input type="email" placeholder="info@example.com" data-field="email_addr" onblur="validateField(this)"></div>
       </div>
     </div>`;
+  // 入力制限を各フィールドにアタッチ（addEventListener方式でIME確定後に確実に除去）
+  div.querySelectorAll('input[data-field]').forEach(input => {
+    if (input.dataset.field in FIELD_RESTRICTORS) attachRestrict(input);
+  });
   return div;
 }
 
