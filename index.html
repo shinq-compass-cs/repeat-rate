@@ -559,6 +559,19 @@ async function handleLogin() {
   } finally { showLoading(false); }
 }
 
+function downloadCsv() {
+  if (!salon) return;
+  // GAS の handleCsv（GET）を呼び出してCSVをダウンロード
+  const url = GAS_URL + '?action=csv&salon_id=' + encodeURIComponent(salon.salon_id);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'customers_' + salon.salon_id + '.csv';
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 function handleLogout() {
   clearSession(); salon = null; allDays = []; allCustomers = [];
   // buf をリセット（再ログイン時に前回の入力値が残らないよう）
