@@ -231,7 +231,7 @@ input.count-display-today:focus { border-color: var(--primary-light); background
 #loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,.7); display: none; align-items: center; justify-content: center; z-index: 200; }
 .spinner { width: 40px; height: 40px; border: 3px solid var(--gray-200); border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--gray-800); color: #fff; padding: 12px 24px; border-radius: 24px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 300; }
+#toast { position: fixed; bottom: 24px; left: 0; right: 0; width: fit-content; max-width: calc(100% - 48px); margin: 0 auto; background: var(--gray-800); color: #fff; padding: 12px 24px; border-radius: 24px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 300; }
 #toast.show { opacity: 1; }
 
 @media (max-width: 380px) {
