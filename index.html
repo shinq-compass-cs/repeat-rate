@@ -901,7 +901,8 @@ function doRestrict(input) {
   // カーソル位置より前の有効文字数を計算してカーソルを正しく戻す
   const beforeCursor = input.value.slice(0, pos).replace(pattern, '').length;
   input.value = newVal;
-  input.setSelectionRange(beforeCursor, beforeCursor);
+  // type="email" 等は setSelectionRange が InvalidStateError を投げるため try/catch
+  try { input.setSelectionRange(beforeCursor, beforeCursor); } catch (_) {}
   if (FIELD_HINT_MSGS[field]) showFieldHint(input, FIELD_HINT_MSGS[field]);
 }
 
