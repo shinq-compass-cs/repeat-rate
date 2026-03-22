@@ -931,10 +931,10 @@ function createCustomerRow(sec, num) {
     </div>
     <div class="customer-detail">
       <div class="detail-grid">
-        <div class="detail-field full"><label>氏名（漢字）</label><input type="text" placeholder="山田太郎" data-field="last_name" onblur="validateField(this)"></div>
+        <div class="detail-field full"><label>氏名（漢字）</label><input type="text" placeholder="山田太郎" data-field="last_name" oninput="restrictInput(this,event)" oncompositionend="restrictInput(this,event)"></div>
         <div class="detail-field"><label>メニュー</label><input type="text" placeholder="例：鍼灸60分" data-field="menu"></div>
         <div class="detail-field"><label>性別</label><select data-field="gender"><option value="">—</option><option>男</option><option>女</option></select></div>
-        <div class="detail-field"><label>電話番号</label><input type="tel" placeholder="090-xxxx-xxxx" data-field="phone" onblur="validateField(this)"></div>
+        <div class="detail-field"><label>電話番号</label><input type="tel" placeholder="090-xxxx-xxxx" data-field="phone" oninput="restrictInput(this,event)" oncompositionend="restrictInput(this,event)"></div>
         <div class="detail-field full"><label>メールアドレス</label><input type="email" placeholder="info@example.com" data-field="email_addr" onblur="validateField(this)"></div>
       </div>
     </div>`;
