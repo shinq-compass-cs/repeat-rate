@@ -608,9 +608,8 @@ async function loadData() {
   try {
     const res = await gasPost({ action: 'getData', salon_id: salon.salon_id });
     if (!res.success) throw new Error(res.error);
-    allDays       = (res.days || []).sort((a, b) => a.date > b.date ? -1 : 1);
-    allCustomers  = res.customers || [];
-    spreadsheetId = res.spreadsheet_id || null;
+    allDays      = (res.days || []).sort((a, b) => a.date > b.date ? -1 : 1);
+    allCustomers = res.customers || [];
     // 過去セクションをカレンダー表示にリセット（ログアウト→再ログイン時の状態残りを防ぐ）
     calMonthOffset = 0;
     document.getElementById('past-form').style.display     = 'none';
