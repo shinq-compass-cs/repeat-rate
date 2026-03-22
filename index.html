@@ -838,7 +838,7 @@ function updateLiveRate(sec) {
   if (v <= 0) { el.style.display = 'none'; return; }
   const rate = Math.round(r / v * 100);
   el.style.display = 'block'; el.textContent = 'リピート率：' + rate + '%';
-  el.className = 'live-rate ' + (rate >= 70 ? 'good' : rate >= 50 ? 'ok' : 'low');
+  el.className = 'live-rate ' + rateClass(rate);
 }
 
 function updateSaveBtn(sec) {
