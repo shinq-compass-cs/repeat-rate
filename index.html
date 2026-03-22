@@ -966,6 +966,7 @@ async function saveData(sec, date) {
   if (r > v) { showToast('次回予約数が施術回数を超えています'); return false; }
   // 施術0回 かつ 既存データなし → 入力を促すだけ（「削除しました」メッセージを出さない）
   if (v === 0 && !allDays.some(d => d.date === date)) { showToast('施術回数を入力してください'); return false; }
+  if (!validateCustomers(sec)) { showToast('入力内容を確認してください（赤枠のフィールドを修正してください）'); return false; }
   showLoading(true);
   try {
     const res = await gasPost({
