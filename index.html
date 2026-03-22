@@ -861,7 +861,29 @@ const FIELD_RESTRICTORS = {
   first_name: /[^\u3041-\u3096\u30FC\s\u3000]/g,                                  // ひらがな・長音符・スペース以外を除去
   last_name:  /[^\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u3005\s\u3000]/g,        // 漢字（々含む）・スペース以外を除去
   phone:      /[^\d\-\(\)\+\s]/g,                                                  // 数字・ハイフン・括弧・プラス以外を除去
+  email_addr: /[^a-zA-Z0-9@._\-+%]/g,                                             // メールアドレスで使用できる文字以外を除去
 };
+
+// 入力制限時の注意書き
+const FIELD_HINT_MSGS = {
+  first_name: 'ひらがなのみ入力できます',
+  last_name:  '漢字のみ入力できます',
+  phone:      '数字・ハイフン（-）のみ入力できます',
+  email_addr: '半角英数字・記号（@ . - _）のみ入力できます',
+};
+
+function showFieldHint(input, msg) {
+  let hint = input.parentElement.querySelector('.field-hint');
+  if (!hint) {
+    hint = document.createElement('div');
+    hint.className = 'field-hint';
+    input.after(hint);
+  }
+  hint.textContent = msg;
+  hint.style.display = 'block';
+  clearTimeout(hint._timer);
+  hint._timer = setTimeout(() => { hint.style.display = 'none'; }, 2000);
+}
 
 // フィールドごとのバリデーション設定（保存前チェック・メール形式確認）
 const FIELD_VALIDATORS = {
