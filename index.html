@@ -919,7 +919,7 @@ function createCustomerRow(sec, num) {
     <div class="customer-row-top">
       <span class="customer-num">${num}</span>
       <div class="customer-name-inputs">
-        <input class="customer-name-input" type="text" placeholder="（かな）やまだたろう" data-field="first_name" onblur="validateField(this)">
+        <input class="customer-name-input" type="text" placeholder="（かな）やまだたろう" data-field="first_name" oninput="restrictInput(this,event)" oncompositionend="restrictInput(this,event)">
       </div>
     </div>
     <div class="customer-row-bottom">
