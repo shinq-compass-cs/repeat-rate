@@ -574,6 +574,11 @@ function downloadCsv() {
   document.body.removeChild(a);
 }
 
+function openSpreadsheet() {
+  if (!spreadsheetId) return;
+  window.open('https://docs.google.com/spreadsheets/d/' + spreadsheetId, '_blank');
+}
+
 function handleLogout() {
   clearSession(); salon = null; allDays = []; allCustomers = [];
   // buf をリセット（再ログイン時に前回の入力値が残らないよう）
