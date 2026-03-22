@@ -931,12 +931,9 @@ async function saveData(sec, date) {
   if (v === 0 && !allDays.some(d => d.date === date)) { showToast('施術回数を入力してください'); return false; }
   showLoading(true);
   try {
-    const _custs = v > 0 ? collectCustomers(sec) : [];
-    showToast('[DEBUG] 送信件数: ' + _custs.length + '件 / v=' + v);
-    await new Promise(r => setTimeout(r, 2000));
     const res = await gasPost({
       action: 'saveDay', salon_id: salon.salon_id, salon_name: salon.salon_name,
-      date, visitors: v, reservations: r, customers: _custs
+      date, visitors: v, reservations: r, customers: v > 0 ? collectCustomers(sec) : []
     });
     if (!res.success) throw new Error(res.error);
     // 来店0回 → 未記入に戻す（allDaysから削除、カレンダーを空白に）
