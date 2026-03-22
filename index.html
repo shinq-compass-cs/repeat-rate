@@ -1042,7 +1042,7 @@ function renderChart() {
     labels = months.map(m => parseInt(m.slice(5), 10) + '月');
     dataPoints = months.map(m => byM[m].v > 0 ? Math.round(byM[m].r / byM[m].v * 100) : null);
   }
-  const bgColors = dataPoints.map(r => r === null ? 'transparent' : r >= 70 ? 'rgba(46,138,110,.75)' : r >= 50 ? 'rgba(176,122,58,.75)' : 'rgba(168,69,69,.75)');
+  const bgColors = dataPoints.map(r => r === null ? 'transparent' : r >= 90 ? 'rgba(46,138,110,.75)' : r >= 70 ? 'rgba(176,122,58,.75)' : 'rgba(168,69,69,.75)');
   // バー上部に「〇%」を表示するカスタムプラグイン
   const datalabelPlugin = {
     id: 'datalabel',
