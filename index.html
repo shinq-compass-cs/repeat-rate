@@ -513,9 +513,15 @@ const buf = { t: { v: '0', r: '0', vf: true, rf: true }, p: { v: '0', r: '0', vf
 // ===================================================================
 // リピート率判定（良好:90%以上 / 標準:70%以上 / 課題:70%未満）
 // ===================================================================
+// 判断基準: 優秀≥90% / 良好≥70% / 標準≥50% / 課題あり<50%
 function rateClass(rate) {
   if (rate === null || rate === undefined) return '';
-  return rate >= 90 ? 'good' : rate >= 70 ? 'ok' : 'low';
+  return rate >= 90 ? 'best' : rate >= 70 ? 'good' : rate >= 50 ? 'ok' : 'low';
+}
+
+function rateLabel(rate) {
+  if (rate === null || rate === undefined) return '';
+  return rate >= 90 ? '◎ 優秀' : rate >= 70 ? '○ 良好' : rate >= 50 ? '△ 標準' : '✕ 課題あり';
 }
 
 // ===================================================================
