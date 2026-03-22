@@ -600,7 +600,7 @@ function initTodaySection() {
 }
 
 function showTodaySaved(rec) {
-  const cls = rec.rate !== null ? (rec.rate >= 70 ? 'good' : rec.rate >= 50 ? 'ok' : 'low') : '';
+  const cls = rateClass(rec.rate);
   document.getElementById('t-res-v').textContent    = rec.visitors;
   document.getElementById('t-res-r').textContent    = rec.reservations;
   const el = document.getElementById('t-res-rate');
