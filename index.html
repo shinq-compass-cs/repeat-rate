@@ -1195,11 +1195,21 @@ function renderChart() {
 }
 
 // ===================================================================
-// CSV（16列 — しんきゅう予約 user_list 形式）
+// CSV ダウンロード（顧客タブ そのまま）
 // ===================================================================
-function downloadCsv() {
+async function downloadCsv() {
   if (!salon) return;
-  window.open(GAS_URL + '?action=csv&salon_id=' + encodeURIComponent(salon.salon_id), '_blank');
+  const url = GAS_URL + '?action=csv&salon_id=' + encodeURIComponent(salon.salon_id);
+  const text = await fetch(url).then(r => r.text());
+  const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+  const d    = new Date();
+  const ymd  = d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate());
+  const name = (salon.salon_name || salon.salon_id) + '_リピート率データ_' + ymd + '.csv';
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
 }
 
 // ===================================================================
