@@ -78,15 +78,98 @@ function doGet(e) {
 
 // ─── 仕様書更新（Google Docs） ─────────────────────────────────────────
 function updateSpecDoc() {
-  const DOC_ID = '11XSRU6LHA4iatiQuUTFJQBIAA96qeNB-OXOoCp-GU24';
+  const DOC_ID  = '11XSRU6LHA4iatiQuUTFJQBIAA96qeNB-OXOoCp-GU24';
+  const C_NAVY  = '#2c4a72'; // ネイビー（見出し）
+  const C_GREEN = '#2e8a6e'; // グリーン（サブ見出し）
+  const C_LIGHT = '#e8f0fb'; // ライトブルー（テーブルヘッダー背景）
+  const C_WHITE = '#ffffff';
+  const C_GRAY  = '#f8fafc'; // 交互行背景
+
   const doc  = DocumentApp.openById(DOC_ID);
   const body = doc.getBody();
   body.clear();
 
-  function h1(t)   { body.appendParagraph(t).setHeading(DocumentApp.ParagraphHeading.HEADING1); }
-  function h2(t)   { body.appendParagraph(t).setHeading(DocumentApp.ParagraphHeading.HEADING2); }
-  function h3(t)   { body.appendParagraph(t).setHeading(DocumentApp.ParagraphHeading.HEADING3); }
-  function p(t)    { body.appendParagraph(t || '').setHeading(DocumentApp.ParagraphHeading.NORMAL); }
+  // ── ヘルパー ──────────────────────────────────────────────────────────
+
+  // H1：大見出し（ネイビー・下余白大）
+  function h1(t) {
+    const pg = body.appendParagraph(t);
+    pg.setHeading(DocumentApp.ParagraphHeading.HEADING1);
+    pg.setSpacingBefore(20).setSpacingAfter(6);
+    pg.editAsText().setForegroundColor(C_NAVY).setFontSize(16).setBold(true);
+    return pg;
+  }
+
+  // H2：中見出し（グリーン）
+  function h2(t) {
+    const pg = body.appendParagraph(t);
+    pg.setHeading(DocumentApp.ParagraphHeading.HEADING2);
+    pg.setSpacingBefore(14).setSpacingAfter(4);
+    pg.editAsText().setForegroundColor(C_GREEN).setFontSize(13).setBold(true);
+    return pg;
+  }
+
+  // H3：小見出し（ネイビー細字）
+  function h3(t) {
+    const pg = body.appendParagraph(t);
+    pg.setHeading(DocumentApp.ParagraphHeading.HEADING3);
+    pg.setSpacingBefore(10).setSpacingAfter(3);
+    pg.editAsText().setForegroundColor(C_NAVY).setFontSize(11).setBold(true);
+    return pg;
+  }
+
+  // 通常段落
+  function p(t, opts) {
+    const pg = body.appendParagraph(t || '');
+    pg.setHeading(DocumentApp.ParagraphHeading.NORMAL);
+    pg.setSpacingBefore(0).setSpacingAfter(2);
+    pg.editAsText().setFontSize(10).setForegroundColor('#333333');
+    if (opts && opts.indent) pg.setIndentStart(18);
+    return pg;
+  }
+
+  // 箇条書き行（インデント付き・グリーン「・」）
+  function li(t) {
+    const pg = body.appendParagraph('');
+    pg.setHeading(DocumentApp.ParagraphHeading.NORMAL);
+    pg.setSpacingBefore(1).setSpacingAfter(1).setIndentStart(12);
+    const txt = pg.editAsText();
+    txt.insertText(0, '・ ' + t);
+    txt.setForegroundColor(0, 1, C_GREEN).setBold(0, 1, true);
+    txt.setForegroundColor(2, t.length + 1, '#333333');
+    txt.setFontSize(10);
+    return pg;
+  }
+
+  // テーブル（ヘッダー行あり）
+  function tbl(headers, rows) {
+    const data = [headers, ...rows];
+    const table = body.appendTable(data);
+    table.setBorderColor('#c8d8e8');
+
+    // ヘッダー行スタイル
+    const hRow = table.getRow(0);
+    for (let c = 0; c < headers.length; c++) {
+      const cell = hRow.getCell(c);
+      cell.setBackgroundColor(C_LIGHT);
+      const txt = cell.getChild(0).asParagraph().editAsText();
+      txt.setForegroundColor(C_NAVY).setFontSize(10).setBold(true);
+    }
+
+    // データ行スタイル（交互）
+    for (let r = 1; r < data.length; r++) {
+      const row = table.getRow(r);
+      const bg  = (r % 2 === 0) ? C_GRAY : C_WHITE;
+      for (let c = 0; c < data[r].length; c++) {
+        const cell = row.getCell(c);
+        cell.setBackgroundColor(bg);
+        cell.getChild(0).asParagraph().editAsText().setFontSize(10).setForegroundColor('#333333');
+      }
+    }
+    return table;
+  }
+
+  function sp() { p(''); } // 空行
 
   // タイトル
   body.appendParagraph('次回予約率ツール 仕様書').setHeading(DocumentApp.ParagraphHeading.TITLE);
