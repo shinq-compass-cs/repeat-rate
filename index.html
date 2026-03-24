@@ -740,6 +740,8 @@ function openPastForm(dateStr) {
   // フォームを開いたらフレッシュ状態にリセット
   buf.p.vf = true; buf.p.rf = true;
   setDisplay('p');
+  // 日付切り替え時に前日付の行データ・UI状態をリセット（残留データ混入防止）
+  document.getElementById('p-customer-rows').innerHTML = '';
   updateCustomerRows('p', parseInt(buf.p.v, 10));
   const cust = allCustomers.filter(c => c.date === dateStr);
   if (cust.length) prefillCustomers('p', cust, parseInt(buf.p.v, 10));
