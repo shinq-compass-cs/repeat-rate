@@ -625,9 +625,14 @@ function handleCsv(p) {
   const ss      = SpreadsheetApp.openById(ssId);
   const cusRows = ss.getSheetByName('顧客').getDataRange().getValues();
 
-  // 顧客タブをそのままCSV出力（変換なし）
+  // 顧客タブをそのままCSV出力（日付は YYYY-MM-DD 形式に変換）
   const q   = s => '"' + String(s).replace(/"/g, '""') + '"';
-  const csv = cusRows.map(row => row.map(q).join(',')).join('\n');
+  const fmt = v => (v instanceof Date)
+    ? v.getFullYear() + '-'
+      + String(v.getMonth()+1).padStart(2,'0') + '-'
+      + String(v.getDate()).padStart(2,'0')
+    : v;
+  const csv = cusRows.map(row => row.map(v => q(fmt(v))).join(',')).join('\n');
 
   return ContentService.createTextOutput('\uFEFF' + csv) // BOM付きUTF-8
     .setMimeType(ContentService.MimeType.CSV);
