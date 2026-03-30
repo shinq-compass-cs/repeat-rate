@@ -541,7 +541,7 @@ async function handleLogin() {
 
 async function openSpreadsheet() {
   if (!salon) return;
-  const btn = document.querySelector('.header-right .csv-btn:last-of-type');
+  const btn = document.querySelector('.export-btn');
   if (btn) { btn.textContent = '作成中…'; btn.disabled = true; }
   try {
     const url = GAS_URL + '?action=export&salon_id=' + encodeURIComponent(salon.salon_id);
