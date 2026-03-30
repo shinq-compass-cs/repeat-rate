@@ -876,84 +876,6 @@ function updateSaveBtn(sec) {
 // 顧客入力
 // ===================================================================
 
-// フィールドごとの入力制限（不正文字をリアルタイム除去）
-const FIELD_RESTRICTORS = {
-  first_name: /[^\u3041-\u3096\u30FC\s\u3000]/g,                                  // ひらがな・長音符・スペース以外を除去
-  last_name:  /[^\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u3005\s\u3000]/g,        // 漢字（々含む）・スペース以外を除去
-  phone:      /[^\d\-\(\)\+\s]/g,                                                  // 数字・ハイフン・括弧・プラス以外を除去
-  email_addr: /[^a-zA-Z0-9@._\-+%]/g,                                             // メールアドレスで使用できる文字以外を除去
-};
-
-// 入力制限時の注意書き
-const FIELD_HINT_MSGS = {
-  first_name: 'ひらがなのみ入力できます',
-  last_name:  '漢字のみ入力できます',
-  phone:      '数字・ハイフン（-）のみ入力できます',
-  email_addr: '半角英数字・記号（@ . - _）のみ入力できます',
-};
-
-function showFieldHint(input, msg) {
-  let hint = input.parentElement.querySelector('.field-hint');
-  if (!hint) {
-    hint = document.createElement('div');
-    hint.className = 'field-hint';
-    input.after(hint);
-  }
-  hint.textContent = msg;
-  hint.style.display = 'block';
-  clearTimeout(hint._timer);
-  hint._timer = setTimeout(() => { hint.style.display = 'none'; }, 2000);
-}
-
-// フィールドごとのバリデーション設定（保存前チェック・メール形式確認）
-const FIELD_VALIDATORS = {
-  email_addr: { fn: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), msg: 'メールアドレスの形式が正しくありません' }
-};
-
-// 入力制限（不正文字を除去し、除去が発生した場合は注意書きを表示）
-function doRestrict(input) {
-  const field = input.dataset.field;
-  const pattern = FIELD_RESTRICTORS[field];
-  if (!pattern) return;
-  const pos = input.selectionStart;
-  const newVal = input.value.replace(pattern, '');
-  if (newVal === input.value) return;
-  // カーソル位置より前の有効文字数を計算してカーソルを正しく戻す
-  const beforeCursor = input.value.slice(0, pos).replace(pattern, '').length;
-  input.value = newVal;
-  // type="email" 等は setSelectionRange が InvalidStateError を投げるため try/catch
-  try { input.setSelectionRange(beforeCursor, beforeCursor); } catch (_) {}
-  if (FIELD_HINT_MSGS[field]) showFieldHint(input, FIELD_HINT_MSGS[field]);
-}
-
-// IME composing 状態をクロージャで管理し、確定後に確実に制限を適用する
-// （event.isComposing は CompositionEvent では undefined になる場合があるため使用しない）
-function attachRestrict(input) {
-  let composing = false;
-  input.addEventListener('compositionstart', () => { composing = true; });
-  input.addEventListener('compositionend',   () => { composing = false; doRestrict(input); });
-  input.addEventListener('input',            () => { if (!composing) doRestrict(input); });
-}
-
-function validateField(input) {
-  const field = input.dataset.field;
-  const val = input.value.trim();
-  const v = FIELD_VALIDATORS[field];
-  if (!v || !val) { input.classList.remove('input-error'); input.title = ''; return true; }
-  const ok = v.fn ? v.fn(val) : v.pattern.test(val);
-  if (!ok) { input.classList.add('input-error'); input.title = v.msg; showFieldHint(input, v.msg); }
-  else      { input.classList.remove('input-error'); input.title = ''; }
-  return ok;
-}
-
-function validateCustomers(sec) {
-  let ok = true;
-  document.querySelectorAll('#' + sec + '-customer-rows input[data-field]').forEach(el => {
-    if (el.dataset.field in FIELD_VALIDATORS && !validateField(el)) ok = false;
-  });
-  return ok;
-}
-
 function updateCustomerRows(sec, n) {
   const section   = document.getElementById(sec + '-customers-section');
   const container = document.getElementById(sec + '-customer-rows');
@@ -969,38 +891,12 @@ function createCustomerRow(sec, num) {
   const div = document.createElement('div');
   div.className = 'customer-row';
   div.innerHTML = `
-    <div class="customer-row-top">
-      <span class="customer-num">${num}</span>
-      <div class="customer-name-inputs">
-        <input class="customer-name-input" type="text" placeholder="（かな）やまだたろう" data-field="first_name">
-      </div>
-    </div>
-    <div class="customer-row-bottom">
-      <label class="reserve-checkbox">
-        <input type="checkbox" data-field="reserved">
-        <span>次回予約</span>
-      </label>
-      <button class="detail-toggle-btn" onclick="toggleDetail(this)">詳細▼</button>
-    </div>
-    <div class="customer-detail">
-      <div class="detail-grid">
-        <div class="detail-field full"><label>氏名（漢字）</label><input type="text" placeholder="山田太郎" data-field="last_name"></div>
-        <div class="detail-field"><label>メニュー</label><input type="text" placeholder="例：鍼灸60分" data-field="menu"></div>
-        <div class="detail-field"><label>性別</label><select data-field="gender"><option value="">—</option><option>男</option><option>女</option></select></div>
-        <div class="detail-field"><label>電話番号</label><input type="tel" placeholder="090-xxxx-xxxx" data-field="phone"></div>
-        <div class="detail-field full"><label>メールアドレス</label><input type="email" placeholder="info@example.com" data-field="email_addr" onblur="validateField(this)"></div>
-      </div>
-    </div>`;
-  // 入力制限を各フィールドにアタッチ（addEventListener方式でIME確定後に確実に除去）
-  div.querySelectorAll('input[data-field]').forEach(input => {
-    if (input.dataset.field in FIELD_RESTRICTORS) attachRestrict(input);
-  });
+    <span class="customer-num">${num}</span>
+    <label class="reserve-checkbox">
+      <input type="checkbox" data-field="reserved">
+      <span>次回予約</span>
+    </label>`;
   return div;
-}
-
-function toggleDetail(btn) {
-  const d = btn.closest('.customer-row').querySelector('.customer-detail');
-  d.classList.toggle('open'); btn.textContent = d.classList.contains('open') ? '詳細▲' : '詳細▼';
 }
 
 function syncReserveCheckboxes(sec, n) {
@@ -1008,25 +904,19 @@ function syncReserveCheckboxes(sec, n) {
     .forEach((cb, i) => { cb.checked = i < n; });
 }
 
-// チェックボックスは個人記録のみ。②の数値は変更しない（上部数値が正）
 function prefillCustomers(sec, custs, n) {
   updateCustomerRows(sec, n);
   document.querySelectorAll('#' + sec + '-customer-rows .customer-row').forEach((row, i) => {
     const c = custs[i]; if (!c) return;
-    const s = (f, v) => { const el = row.querySelector(`[data-field="${f}"]`); if (el) el.value = v || ''; };
-    s('last_name', c.last_name); s('first_name', c.first_name);
-    s('menu', c.menu); s('gender', c.gender);
-    s('phone', c.phone); s('email_addr', c.email_addr);
     const cb = row.querySelector('[data-field="reserved"]'); if (cb) cb.checked = c.reserved;
   });
 }
 
 function collectCustomers(sec) {
   return [...document.querySelectorAll('#' + sec + '-customer-rows .customer-row')].map(row => {
-    const g = f => (row.querySelector(`[data-field="${f}"]`) || {}).value || '';
     const cb = row.querySelector('[data-field="reserved"]');
-    return { last_name: g('last_name'), first_name: g('first_name'), reserved: cb ? cb.checked : false,
-             menu: g('menu'), gender: g('gender'), phone: g('phone'), email_addr: g('email_addr') };
+    return { last_name: '', first_name: '', reserved: cb ? cb.checked : false,
+             menu: '', gender: '', phone: '', email_addr: '' };
   });
 }
 
