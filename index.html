@@ -868,8 +868,6 @@ function updateSaveBtn(sec) {
   // 予約数が施術回数を超えている場合は保存不可（0回での保存は許可）
   const dis = r > v;
   document.getElementById(sec + '-save-btn').disabled = dis;
-  const csBtn = document.getElementById(sec + '-customers-save-btn');
-  if (csBtn) csBtn.disabled = dis;
 }
 
 // ===================================================================
