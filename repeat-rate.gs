@@ -714,9 +714,7 @@ function handleLogin(d) {
   // 社内マスターログイン：あらゆるサロンIDでログイン可能
   if (getMasterLoginEmails().includes(email)) {
     const master = SpreadsheetApp.openById(MASTER_SS_ID);
-    const now  = new Date();
-    const yymm = String(now.getFullYear()).slice(2) + String(now.getMonth() + 1).padStart(2, '0');
-    for (const tabName of [yymm, '無料体験']) {
+    for (const tabName of getLoginTabCandidates()) {
       const sheet = master.getSheetByName(tabName);
       if (!sheet) continue;
       const rows = sheet.getDataRange().getValues();
