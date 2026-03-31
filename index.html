@@ -628,7 +628,7 @@ function renderRecentMonths() {
   const container = document.getElementById('recent-months');
   const now = new Date();
   let html = '';
-  for (let offset = 1; offset <= 3; offset++) {
+  for (let offset = 3; offset >= 1; offset--) {
     const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
     const ym = d.getFullYear() + '-' + pad(d.getMonth() + 1);
     const md = allDays.filter(r => r.date.startsWith(ym));
