@@ -844,7 +844,7 @@ function updateLiveRate(sec) {
   const el = document.getElementById(sec + '-live-rate');
   if (r > v) {
     el.style.display = 'block';
-    el.textContent = '次回予約数が施術回数を超えています';
+    el.textContent = '次回予約の人数が施術人数を超えています';
     el.className = 'live-rate live-rate-err';
     return;
   }
