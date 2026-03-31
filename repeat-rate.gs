@@ -671,6 +671,18 @@ function runCleanup2049() {
 // ─── ログイン ────────────────────────────────────────────────────────
 // しんきゅうコンパス マスターシートの月次タブ or 無料体験タブで照合
 
+// 当月タブがなければ前月→2ヶ月前の順にフォールバック + 無料体験
+function getLoginTabCandidates() {
+  const now = new Date();
+  const tabs = [];
+  for (let offset = 0; offset <= 2; offset++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    tabs.push(String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, '0'));
+  }
+  tabs.push('無料体験');
+  return tabs;
+}
+
 // マスターログインメールはスプレッドシートの settings タブで管理（コード変更・デプロイ不要）
 function getMasterLoginEmails() {
   try {
