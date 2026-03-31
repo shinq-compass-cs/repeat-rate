@@ -927,7 +927,7 @@ function handleGetData(d) {
     // 新フォーマット: Q(16)=来店日, R(17)=番号, S(18)=次回予約の有無, T(19)=メニュー
     cusRows.slice(1).forEach(r => {
       const d = fmtDate(r[16]);
-      if (!d) return;
+      if (!d || d > todayStr) return; // 未来日付は除外
       if (!cusMap[d]) cusMap[d] = [];
       cusMap[d].push({
         date: d, index: String(r[17] || ''),
