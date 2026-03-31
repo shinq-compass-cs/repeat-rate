@@ -914,10 +914,12 @@ function handleGetData(d) {
   const cusRows = cusTab.getDataRange().getValues();
 
   const dayMap = {};
+  const todayStr = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd');
   dayRows.slice(1).forEach(r => {
     const visitors = Number(r[1]);
     if (!visitors) return; // visitors=0は未記入扱いで除外
     const d = fmtDate(r[0]);
+    if (d > todayStr) return; // 未来日付は除外（誤入力データ対策）
     dayMap[d] = { date: d, visitors, reservations: Number(r[2]), rate: Number(r[3]) };
   });
   const cusMap = {};
