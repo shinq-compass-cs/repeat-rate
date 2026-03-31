@@ -623,6 +623,30 @@ function renderMonthlyStats() {
   document.getElementById('monthly-sub').textContent = '累計 ' + tv + '人施術 / ' + tr + '人予約（' + md.length + '日間）';
 }
 
+function renderRecentMonths() {
+  const container = document.getElementById('recent-months');
+  const now = new Date();
+  let html = '';
+  for (let offset = 1; offset <= 3; offset++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    const ym = d.getFullYear() + '-' + pad(d.getMonth() + 1);
+    const md = allDays.filter(r => r.date.startsWith(ym));
+    const tv = md.reduce((s, r) => s + (r.visitors || 0), 0);
+    const tr = md.reduce((s, r) => s + (r.reservations || 0), 0);
+    const rate = tv > 0 ? Math.round(tr / tv * 100) : null;
+    const cls = rate !== null ? rateClass(rate) : 'none';
+    const rateStr = rate !== null ? rate + '<span style="font-size:14px;font-weight:400">%</span>' : '—';
+    const sub = tv > 0 ? tv + '人施術 / ' + tr + '人予約' : 'データなし';
+    const label = (d.getMonth() + 1) + '月';
+    html += `<div class="recent-month-card">
+      <div class="recent-month-label">${label}</div>
+      <div class="recent-month-rate ${cls}">${rateStr}</div>
+      <div class="recent-month-sub">${sub}</div>
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
 // ===================================================================
 // 本日セクション
 // ===================================================================
