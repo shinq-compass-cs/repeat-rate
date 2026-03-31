@@ -944,6 +944,7 @@ function handleGetData(d) {
     // 旧フォーマット: A(0)=日付, B(1)=番号
     cusRows.slice(1).forEach(r => {
       const d = fmtDate(r[0]);
+      if (!d || d > todayStr) return; // 未来日付は除外
       if (!cusMap[d]) cusMap[d] = [];
       cusMap[d].push({
         date: d, index: Number(r[1]),
