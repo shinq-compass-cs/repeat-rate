@@ -759,10 +759,10 @@ function np(key, sec, field) {
     if (parseInt(val, 10) > 99) val = key; // オーバーフロー時は入力値に置換
     buf[sec][fk] = false; // 1文字入力したので追記モードへ
   }
-  // 予約数は施術回数を上限とする
+  // 予約人数は施術人数を上限とする
   if (field === 'r') {
     const cap = parseInt(buf[sec].v, 10) || 0;
-    if (cap === 0 && key !== 'clear' && key !== 'del') { showToast('先に①の施術回数を入力してください'); return; }
+    if (cap === 0 && key !== 'clear' && key !== 'del') { showToast('先に①の施術人数を入力してください'); return; }
     if (parseInt(val, 10) > cap) {
       const keyInt = parseInt(key, 10);
       // キー単体がcap以下 → そのキー値を採用（1回押しで変更できるUX）
