@@ -857,7 +857,7 @@ function updateLiveRate(sec) {
 function updateSaveBtn(sec) {
   const v = parseInt(buf[sec].v, 10) || 0;
   const r = parseInt(buf[sec].r, 10) || 0;
-  // 予約数が施術回数を超えている場合は保存不可（0回での保存は許可）
+  // 予約人数が施術人数を超えている場合は保存不可（0人での保存は許可）
   const dis = r > v;
   document.getElementById(sec + '-save-btn').disabled = dis;
 }
