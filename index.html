@@ -798,7 +798,6 @@ function onCountInput(sec, field, raw) {
   const elId = sec + '-' + (field === 'v' ? 'visitor' : 'reservation') + '-display';
   document.getElementById(elId).value = n;
   if (field === 'v') {
-    document.getElementById(sec + '-visitor-label').textContent = n;
     // vを下げた場合、rも連動して上限を下げる（チェックボックスも再同期）
     const r = parseInt(buf[sec].r, 10) || 0;
     if (r > n) {
