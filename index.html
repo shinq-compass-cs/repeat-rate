@@ -672,12 +672,6 @@ function showTodayInput() {
   buf.t.vf = true; buf.t.rf = true;
   // 保存済みデータなし → buf.t を保持（入力途中の値を維持）
   setDisplay('t');
-  // 本日フォームを開く際に前回の行データ・UI状態をリセット（残留データ混入防止）
-  document.getElementById('t-customer-rows').innerHTML = '';
-  updateCustomerRows('t', parseInt(buf.t.v, 10));
-  const cust = allCustomers.filter(c => c.date === todayStr());
-  if (cust.length) prefillCustomers('t', cust, parseInt(buf.t.v, 10));
-  syncReserveCheckboxes('t', parseInt(buf.t.r, 10));
   updateLiveRate('t'); updateSaveBtn('t');
 }
 
