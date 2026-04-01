@@ -880,52 +880,8 @@ function updateSaveBtn(sec) {
 // 顧客入力
 // ===================================================================
 
-function updateCustomerRows(sec, n) {
-  const section   = document.getElementById(sec + '-customers-section');
-  const container = document.getElementById(sec + '-customer-rows');
-  if (n <= 0) { section.style.display = 'none'; container.innerHTML = ''; return; }
-  section.style.display = 'block';
-  while (container.querySelectorAll('.customer-row').length < n)
-    container.appendChild(createCustomerRow(sec, container.querySelectorAll('.customer-row').length + 1));
-  while (container.querySelectorAll('.customer-row').length > n)
-    container.removeChild(container.lastChild);
-}
-
-function createCustomerRow(sec, num) {
-  const div = document.createElement('div');
-  div.className = 'customer-row';
-  div.innerHTML = `
-    <span class="customer-num">${num}</span>
-    <label class="reserve-checkbox">
-      <input type="checkbox" data-field="reserved">
-      <span>次回予約</span>
-    </label>`;
-  return div;
-}
-
-function syncReserveCheckboxes(sec, n) {
-  document.querySelectorAll('#' + sec + '-customer-rows .customer-row input[data-field="reserved"]')
-    .forEach((cb, i) => { cb.checked = i < n; });
-}
-
-function prefillCustomers(sec, custs, n) {
-  updateCustomerRows(sec, n);
-  document.querySelectorAll('#' + sec + '-customer-rows .customer-row').forEach((row, i) => {
-    const c = custs[i]; if (!c) return;
-    const cb = row.querySelector('[data-field="reserved"]'); if (cb) cb.checked = c.reserved;
-  });
-}
-
-function collectCustomers(sec) {
-  return [...document.querySelectorAll('#' + sec + '-customer-rows .customer-row')].map(row => {
-    const cb = row.querySelector('[data-field="reserved"]');
-    return { last_name: '', first_name: '', reserved: cb ? cb.checked : false,
-             menu: '', gender: '', phone: '', email_addr: '' };
-  });
-}
-
 // ===================================================================
-// 保存（①②の数値が正 — チェックボックス数より優先）
+// 保存
 // ===================================================================
 async function saveToday() { await saveData('t', todayStr()); }
 async function savePast()  { const ok = await saveData('p', pastDate); if (ok) showPastCalendar(); }
