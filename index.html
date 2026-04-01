@@ -870,7 +870,6 @@ async function saveData(sec, date) {
     allDays = allDays.filter(d => d.date !== date);
     allDays.unshift({ date, visitors: v, reservations: r, rate });
     allDays.sort((a, b) => a.date > b.date ? -1 : 1);
-    allCustomers = allCustomers.filter(c => c.date !== date);
     renderMonthlyStats(); renderCalendar(); renderChart();
     if (sec === 't') showTodaySaved({ visitors: v, reservations: r, rate });
     return true;
