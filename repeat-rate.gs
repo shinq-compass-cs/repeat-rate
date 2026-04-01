@@ -707,6 +707,173 @@ function getMasterLoginEmails() {
   }
 }
 
+// ─── A+B統合API：ログイン認証 + データ取得を1回のリクエストで完結 ────
+// B: インデックスタブにemail列を追加し、2回目以降はタブ全行スキャンを省略
+
+function handleLoginAndGetData(d) {
+  const sid   = String(d.salon_id || '').trim();
+  const email = String(d.email    || '').trim().toLowerCase();
+  if (!sid || !email) return { success: false, error: 'サロンIDとメールアドレスを入力してください' };
+
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+
+  // ── 社内マスターログイン ──
+  if (getMasterLoginEmails().includes(email)) {
+    // 院名を取得（月次タブから）
+    let salonName = '';
+    for (const tabName of getLoginTabCandidates()) {
+      const sheet = master.getSheetByName(tabName);
+      if (!sheet) continue;
+      const rows = sheet.getDataRange().getValues();
+      if (rows.length < 2) continue;
+      const h  = rows[0].map(v => String(v).trim());
+      const ci = h.findIndex(v => v === 'サロンID');
+      const ni = h.findIndex(v => v === '院名');
+      if (ci < 0) continue;
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][ci]).trim() === sid) { salonName = ni >= 0 ? String(rows[i][ni]).trim() : ''; break; }
+      }
+      if (salonName) break;
+    }
+    return mergeGetData(sid, salonName, master);
+  }
+
+  // ── B: インデックスタブで高速検索（2回目以降） ──
+  const idx = master.getSheetByName(INDEX_TAB);
+  if (idx) {
+    const idxRows = idx.getDataRange().getValues();
+    const h = idxRows[0] || [];
+    const emailCol = h.findIndex(v => String(v).trim() === 'email');
+    if (emailCol >= 0) {
+      for (let i = 1; i < idxRows.length; i++) {
+        if (String(idxRows[i][0]).trim() === sid &&
+            String(idxRows[i][emailCol]).trim().toLowerCase() === email) {
+          const salonName = String(idxRows[i][2] || '');
+          return mergeGetData(sid, salonName, master);
+        }
+      }
+    }
+  }
+
+  // ── 初回：月次タブを全行スキャンしてログイン認証 ──
+  let salonName = '';
+  let loginOk = false;
+  for (const tabName of getLoginTabCandidates()) {
+    const sheet = master.getSheetByName(tabName);
+    if (!sheet) continue;
+    const rows = sheet.getDataRange().getValues();
+    if (rows.length < 2) continue;
+    const h  = rows[0].map(v => String(v).trim());
+    const ci = h.findIndex(v => v === 'サロンID');
+    const ei = h.findIndex(v => v === 'メールアドレス');
+    const ni = h.findIndex(v => v === '院名');
+    if (ci < 0 || ei < 0) continue;
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][ci]).trim() === sid &&
+          String(rows[i][ei]).trim().toLowerCase() === email) {
+        salonName = ni >= 0 ? String(rows[i][ni]).trim() : '';
+        loginOk = true; break;
+      }
+    }
+    if (loginOk) break;
+  }
+  if (!loginOk) return { success: false, error: 'サロンIDまたはメールアドレスが一致しません' };
+
+  // ── B: インデックスにemail列を追加（次回以降の高速検索用） ──
+  cacheEmailInIndex(master, sid, email);
+
+  return mergeGetData(sid, salonName, master);
+}
+
+// インデックスにemail列を追加/更新
+function cacheEmailInIndex(master, sid, email) {
+  const idx = master.getSheetByName(INDEX_TAB);
+  if (!idx) return;
+  const rows = idx.getDataRange().getValues();
+  const h = rows[0] || [];
+  let emailCol = h.findIndex(v => String(v).trim() === 'email');
+
+  // email列がなければ追加
+  if (emailCol < 0) {
+    emailCol = h.length;
+    idx.getRange(1, emailCol + 1).setValue('email').setFontWeight('bold');
+  }
+
+  // 該当サロンの行にemail値を書き込み
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]).trim() === sid) {
+      idx.getRange(i + 1, emailCol + 1).setValue(email);
+      return;
+    }
+  }
+}
+
+// ログイン成功後、同じmasterオブジェクトを再利用してgetData相当を実行
+function mergeGetData(sid, salonName, master) {
+  const idx = master.getSheetByName(INDEX_TAB);
+  if (!idx) return { success: true, salon_name: salonName, days: [], customers: [] };
+
+  const rows = idx.getDataRange().getValues();
+  let ssId = null;
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); break; }
+  }
+  if (!ssId) return { success: true, salon_name: salonName, days: [], customers: [] };
+
+  const ss     = SpreadsheetApp.openById(ssId);
+  const dayTab = ss.getSheetByName('日次');
+  const cusTab = ss.getSheetByName('顧客');
+  const fmt    = getSheetFormat(cusTab);
+
+  const dayRows = dayTab.getDataRange().getValues();
+  const cusRows = cusTab.getDataRange().getValues();
+
+  const dayMap = {};
+  const todayS = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd');
+  dayRows.slice(1).forEach(r => {
+    const visitors = Number(r[1]);
+    if (!visitors) return;
+    const d = fmtDate(r[0]);
+    if (d > todayS) return;
+    dayMap[d] = { date: d, visitors, reservations: Number(r[2]), rate: Number(r[3]) };
+  });
+
+  const cusMap = {};
+  if (fmt.type === 'new') {
+    cusRows.slice(1).forEach(r => {
+      const d = fmtDate(r[16]);
+      if (!d || d > todayS) return;
+      if (!cusMap[d]) cusMap[d] = [];
+      cusMap[d].push({
+        date: d, index: String(r[17] || ''),
+        last_name: String(r[0] || '').trim(), first_name: String(r[1] || '').trim(),
+        reserved: Number(r[18]) === 1, menu: String(r[19] || ''),
+        price: String(r[12] || ''), gender: String(r[2] || ''),
+        phone: String(r[5] || ''), email_addr: String(r[8] || '')
+      });
+    });
+  } else {
+    cusRows.slice(1).forEach(r => {
+      const d = fmtDate(r[0]);
+      if (!d || d > todayS) return;
+      if (!cusMap[d]) cusMap[d] = [];
+      cusMap[d].push({
+        date: d, index: Number(r[1]),
+        last_name: String(r[2] || ''), first_name: String(r[3] || ''),
+        reserved: r[4] === '○', menu: String(r[5] || ''), price: String(r[6] || ''),
+        gender: String(r[7] || ''), phone: String(r[8] || ''), email_addr: String(r[9] || '')
+      });
+    });
+  }
+
+  return {
+    success: true, salon_name: salonName, spreadsheet_id: ssId,
+    days: Object.values(dayMap), customers: Object.values(cusMap).flat()
+  };
+}
+
+// ─── ログイン認証（旧API・後方互換） ──────────────────────────────────
+
 function handleLogin(d) {
   const sid   = String(d.salon_id || '').trim();
   const email = String(d.email    || '').trim().toLowerCase();
