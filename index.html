@@ -525,8 +525,7 @@ function handleLogout() {
 // データ適用（API応答を画面に反映）
 // ===================================================================
 function applyData(res) {
-  allDays      = (res.days || []).sort((a, b) => a.date > b.date ? -1 : 1);
-  allCustomers = res.customers || [];
+  allDays = (res.days || []).sort((a, b) => a.date > b.date ? -1 : 1);
   calMonthOffset = 0;
   document.getElementById('past-form').style.display     = 'none';
   document.getElementById('past-calendar').style.display = 'block';
