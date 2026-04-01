@@ -820,16 +820,12 @@ function onCountInput(sec, field, raw) {
   const elId = sec + '-' + (field === 'v' ? 'visitor' : 'reservation') + '-display';
   document.getElementById(elId).value = n;
   if (field === 'v') {
-    // vを下げた場合、rも連動して上限を下げる（チェックボックスも再同期）
     const r = parseInt(buf[sec].r, 10) || 0;
     if (r > n) {
       buf[sec].r = String(n);
       document.getElementById(sec + '-reservation-display').value = n;
-      syncReserveCheckboxes(sec, n);
     }
-    updateCustomerRows(sec, n);
   }
-  if (field === 'r') syncReserveCheckboxes(sec, n);
   updateLiveRate(sec); updateSaveBtn(sec);
 }
 
