@@ -857,7 +857,6 @@ async function saveData(sec, date) {
     if (v === 0) {
       showToast('施術0回のため記録を削除しました');
       allDays = allDays.filter(d => d.date !== date);
-      allCustomers = allCustomers.filter(c => c.date !== date);
       renderMonthlyStats(); renderCalendar(); renderChart();
       if (sec === 't') {
         document.getElementById('today-empty').style.display = 'block';
