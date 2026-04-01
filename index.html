@@ -511,24 +511,30 @@ function rateLabel(rate) {
 // ===================================================================
 // ログイン
 // ===================================================================
+// A: loginとgetDataを1回のAPI呼び出しで統合
 async function handleLogin() {
   const sid   = document.getElementById('sid-input').value.trim();
   const email = document.getElementById('email-input').value.trim().toLowerCase();
   const errEl = document.getElementById('login-error');
   errEl.style.display = 'none';
   if (!sid || !email) { errEl.textContent = 'サロンIDとメールアドレスを入力してください'; errEl.style.display = 'block'; return; }
+  // D: 先に画面枠を表示（プログレッシブ表示）
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display  = 'block';
+  document.getElementById('header-salon-name').textContent = 'ログイン中…';
+  document.getElementById('today-date-label').textContent  = fmtDate(todayStr());
   showLoading(true);
   try {
-    const res = await gasPost({ action: 'login', salon_id: sid, email });
+    const res = await gasPost({ action: 'loginAndGetData', salon_id: sid, email });
     if (!res.success) throw new Error(res.error || 'ログイン失敗');
     salon = { salon_id: sid, salon_name: res.salon_name, email };
     saveSession(salon);
     document.getElementById('header-salon-name').textContent = res.salon_name || 'サロンID: ' + sid;
-    document.getElementById('today-date-label').textContent  = fmtDate(todayStr());
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-screen').style.display  = 'block';
-    await loadData();
+    applyData(res);
   } catch (err) {
+    // ログイン失敗時はログイン画面に戻す
+    document.getElementById('main-screen').style.display  = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
     errEl.textContent = err.message; errEl.style.display = 'block';
   } finally { showLoading(false); }
 }
