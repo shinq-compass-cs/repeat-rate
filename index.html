@@ -797,17 +797,14 @@ function np(key, sec, field) {
     }
   }
   buf[sec][field] = val;
-  // vを下げた場合、rも連動して上限を下げる（チェックボックスも再同期）
+  // vを下げた場合、rも連動して上限を下げる
   if (field === 'v') {
     const newV = parseInt(val, 10) || 0;
     if ((parseInt(buf[sec].r, 10) || 0) > newV) {
       buf[sec].r = String(newV);
-      syncReserveCheckboxes(sec, newV);
     }
   }
   setDisplay(sec);
-  if (field === 'v') updateCustomerRows(sec, parseInt(val, 10));
-  if (field === 'r') syncReserveCheckboxes(sec, parseInt(val, 10));
   updateLiveRate(sec); updateSaveBtn(sec);
 }
 
