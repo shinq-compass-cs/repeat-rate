@@ -844,14 +844,12 @@ function npPm(sec, field, delta) {
   if (field === 'r') next = Math.min(next, parseInt(buf[sec].v, 10) || 0);
   buf[sec][field] = String(next);
   buf[sec][field + 'f'] = true; // ±後は次の数字キーで置換モードに戻す
-  // vを下げた場合、rも連動して上限を下げる（チェックボックスも再同期）
+  // vを下げた場合、rも連動して上限を下げる
   if (field === 'v') {
     const r = parseInt(buf[sec].r, 10) || 0;
-    if (r > next) { buf[sec].r = String(next); syncReserveCheckboxes(sec, next); }
+    if (r > next) { buf[sec].r = String(next); }
   }
   setDisplay(sec);
-  if (field === 'v') updateCustomerRows(sec, next);
-  if (field === 'r') syncReserveCheckboxes(sec, next);
   updateLiveRate(sec); updateSaveBtn(sec);
 }
 
