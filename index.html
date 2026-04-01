@@ -1060,22 +1060,28 @@ function restoreSession() { try { const s = JSON.parse(localStorage.getItem('rr_
 // ===================================================================
 // 起動
 // ===================================================================
+// C: セッション復元時はloginをスキップし、getDataのみ呼ぶ（通信1回に削減）
 document.addEventListener('DOMContentLoaded', async () => {
   ['sid-input','email-input'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => { if (e.key==='Enter') handleLogin(); });
   });
   const s = restoreSession(); if (!s) return;
+  // D: 先に画面枠を表示（プログレッシブ表示）
+  salon = { salon_id: s.salon_id, salon_name: s.salon_name || '', email: s.email };
+  document.getElementById('header-salon-name').textContent = s.salon_name || 'サロンID: ' + s.salon_id;
+  document.getElementById('today-date-label').textContent  = fmtDate(todayStr());
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display  = 'block';
   showLoading(true);
   try {
-    const res = await gasPost({ action:'login', salon_id: s.salon_id, email: s.email });
+    const res = await gasPost({ action: 'getData', salon_id: s.salon_id });
     if (!res.success) throw new Error('expired');
-    salon = { salon_id: s.salon_id, salon_name: res.salon_name, email: s.email };
-    document.getElementById('header-salon-name').textContent = res.salon_name || 'サロンID: ' + s.salon_id;
-    document.getElementById('today-date-label').textContent  = fmtDate(todayStr());
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-screen').style.display  = 'block';
-    await loadData();
-  } catch(_) { clearSession(); }
+    applyData(res);
+  } catch(_) {
+    clearSession(); salon = null;
+    document.getElementById('main-screen').style.display  = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
   finally { showLoading(false); }
 });
 </script>
