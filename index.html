@@ -539,25 +539,6 @@ async function handleLogin() {
   } finally { showLoading(false); }
 }
 
-async function openSpreadsheet() {
-  if (!salon) return;
-  const btn = document.querySelector('.export-btn');
-  if (btn) { btn.textContent = '作成中…'; btn.disabled = true; }
-  try {
-    const url = GAS_URL + '?action=export&salon_id=' + encodeURIComponent(salon.salon_id);
-    const res = await fetch(url).then(r => r.json());
-    if (res.success) {
-      window.open(res.url, '_blank');
-    } else {
-      alert('スプレッドシートの作成に失敗しました: ' + (res.error || ''));
-    }
-  } catch (e) {
-    alert('エラーが発生しました: ' + e.message);
-  } finally {
-    if (btn) { btn.textContent = 'スプレッドシート'; btn.disabled = false; }
-  }
-}
-
 function handleLogout() {
   clearSession(); salon = null; allDays = []; allCustomers = [];
   // buf をリセット（再ログイン時に前回の入力値が残らないよう）
