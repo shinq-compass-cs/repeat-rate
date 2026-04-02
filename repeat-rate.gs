@@ -863,8 +863,8 @@ function handleLogin(d) {
   if (!sid || !email) return { success: false, error: 'サロンIDとメールアドレスを入力してください' };
 
   // 社内マスターログイン：あらゆるサロンIDでログイン可能
-  if (getMasterLoginEmails().includes(email)) {
-    const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  if (getMasterLoginEmails(master).includes(email)) {
     for (const tabName of getLoginTabCandidates()) {
       const sheet = master.getSheetByName(tabName);
       if (!sheet) continue;
