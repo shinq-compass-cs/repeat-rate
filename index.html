@@ -1026,10 +1026,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-screen').style.display  = 'block';
 
-  // キャッシュがあれば即表示（体感0秒）
+  // キャッシュまたは空データで即座にUI表示（スピナーなし）
   const cache = loadDataCache(s.salon_id);
-  if (cache) applyData({ days: cache.days });
-  else showLoading(true);
+  applyData({ days: cache ? cache.days : [] });
 
   // バックグラウンドで最新データを取得して差分更新
   try {
@@ -1043,7 +1042,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('login-screen').style.display = 'flex';
     }
   }
-  finally { showLoading(false); }
 });
 </script>
 </body>
