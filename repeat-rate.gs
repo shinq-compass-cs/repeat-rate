@@ -992,7 +992,7 @@ function handleGetData(d) {
 
   const sc = CacheService.getScriptCache();
 
-  // 日次データキャッシュを確認（60秒TTL）
+  // 日次データキャッシュを確認（600秒TTL。saveDay時に明示的に無効化するため整合性は保たれる）
   const dayCacheKey = 'days_' + sid;
   const cached = sc.get(dayCacheKey);
   if (cached) {
