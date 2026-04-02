@@ -519,7 +519,7 @@ async function handleLogin() {
     applyData(res);
   } catch (err) {
     // キャッシュ表示済みでなければログイン画面に戻す
-    if (!cache || !prevSession || prevSession.salon_id !== sid) {
+    if (!cache) {
       document.getElementById('main-screen').style.display  = 'none';
       document.getElementById('login-screen').style.display = 'flex';
     }
