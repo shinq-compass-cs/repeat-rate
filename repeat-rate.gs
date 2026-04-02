@@ -884,8 +884,6 @@ function handleLogin(d) {
     return { success: true, salon_name: '' };
   }
 
-  const master = SpreadsheetApp.openById(MASTER_SS_ID);
-
   for (const tabName of getLoginTabCandidates()) {
     const sheet = master.getSheetByName(tabName);
     if (!sheet) continue;
