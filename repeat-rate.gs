@@ -1014,14 +1014,31 @@ function deleteRowsByDate(sheet, date, col) {
 // ─── データ取得 ──────────────────────────────────────────────────────
 
 // フロントエンドは日次データのみ使用（顧客タブ読み込みを廃止して高速化）
+// CacheServiceで日次データ自体をキャッシュ（SS openを完全回避・60秒TTL）
 function handleGetData(d) {
   const sid = String(d.salon_id || '').trim();
   if (!sid) return { success: false, error: 'salon_id が未指定です' };
 
-  // CacheServiceでインデックスをキャッシュ
   const sc = CacheService.getScriptCache();
+
+  // 日次データキャッシュを確認（60秒TTL）
+  const dayCacheKey = 'days_' + sid;
+  const cached = sc.get(dayCacheKey);
+  if (cached) {
+    try { return JSON.parse(cached); } catch(_) {}
+  }
+
+  // キャッシュなし → SSから読み込み
+  const result = readDaysFromSS(sid, sc);
+  // キャッシュに保存（60秒。saveDay時に明示的に無効化する）
+  try { sc.put(dayCacheKey, JSON.stringify(result), 60); } catch(_) {}
+  return result;
+}
+
+// SSから日次データを読み込む共通関数
+function readDaysFromSS(sid, sc) {
   const cacheKey = 'idx_' + sid;
-  let ssId = sc.get(cacheKey);
+  let ssId = sc ? sc.get(cacheKey) : null;
 
   if (!ssId) {
     const master = SpreadsheetApp.openById(MASTER_SS_ID);
@@ -1032,7 +1049,7 @@ function handleGetData(d) {
       if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); break; }
     }
     if (!ssId) return { success: true, days: [] };
-    sc.put(cacheKey, ssId, 21600);
+    if (sc) sc.put(cacheKey, ssId, 21600);
   }
 
   const ss     = SpreadsheetApp.openById(ssId);
