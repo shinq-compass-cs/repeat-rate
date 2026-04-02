@@ -1033,7 +1033,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('main-screen').style.display  = 'block';
 
   // キャッシュがあれば即表示（体感0秒）
-  const cache = loadDataCache();
+  const cache = loadDataCache(s.salon_id);
   if (cache) applyData({ days: cache.days });
   else showLoading(true);
 
