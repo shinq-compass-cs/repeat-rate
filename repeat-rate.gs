@@ -1013,80 +1013,43 @@ function deleteRowsByDate(sheet, date, col) {
 
 // ─── データ取得 ──────────────────────────────────────────────────────
 
+// フロントエンドは日次データのみ使用（顧客タブ読み込みを廃止して高速化）
 function handleGetData(d) {
   const sid = String(d.salon_id || '').trim();
   if (!sid) return { success: false, error: 'salon_id が未指定です' };
 
-  const master = SpreadsheetApp.openById(MASTER_SS_ID);
-  const idx    = master.getSheetByName(INDEX_TAB);
-  if (!idx) return { success: true, days: [], customers: [] };
+  // CacheServiceでインデックスをキャッシュ
+  const sc = CacheService.getScriptCache();
+  const cacheKey = 'idx_' + sid;
+  let ssId = sc.get(cacheKey);
 
-  const rows = idx.getDataRange().getValues();
-  let ssId = null;
-  for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); break; }
+  if (!ssId) {
+    const master = SpreadsheetApp.openById(MASTER_SS_ID);
+    const idx    = master.getSheetByName(INDEX_TAB);
+    if (!idx) return { success: true, days: [] };
+    const rows = idx.getDataRange().getValues();
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); break; }
+    }
+    if (!ssId) return { success: true, days: [] };
+    sc.put(cacheKey, ssId, 21600);
   }
-  if (!ssId) return { success: true, days: [], customers: [] };
 
-  const ss      = SpreadsheetApp.openById(ssId);
-  const dayTab  = ss.getSheetByName('日次');
-  const cusTab  = ss.getSheetByName('顧客');
-
-  const fmt = getSheetFormat(cusTab);
-
+  const ss     = SpreadsheetApp.openById(ssId);
+  const dayTab = ss.getSheetByName('日次');
   const dayRows = dayTab.getDataRange().getValues();
-  const cusRows = cusTab.getDataRange().getValues();
 
   const dayMap = {};
   const todayStr = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd');
   dayRows.slice(1).forEach(r => {
     const visitors = Number(r[1]);
-    if (!visitors) return; // visitors=0は未記入扱いで除外
+    if (!visitors) return;
     const d = fmtDate(r[0]);
-    if (d > todayStr) return; // 未来日付は除外（誤入力データ対策）
+    if (d > todayStr) return;
     dayMap[d] = { date: d, visitors, reservations: Number(r[2]), rate: Number(r[3]) };
   });
-  const cusMap = {};
-  if (fmt.type === 'new') {
-    // 新フォーマット: Q(16)=来店日, R(17)=番号, S(18)=次回予約の有無, T(19)=メニュー
-    cusRows.slice(1).forEach(r => {
-      const d = fmtDate(r[16]);
-      if (!d || d > todayStr) return; // 未来日付は除外
-      if (!cusMap[d]) cusMap[d] = [];
-      cusMap[d].push({
-        date: d, index: String(r[17] || ''),
-        last_name:  String(r[0]  || '').trim(), first_name: String(r[1]  || '').trim(),
-        reserved:   Number(r[18]) === 1,         // S: 1=あり, 0=なし
-        menu:       String(r[19] || ''),         // T: メニュー
-        price:      String(r[12] || ''),         // M: 顧客単価
-        gender:     String(r[2]  || ''),         // C: 性別
-        phone:      String(r[5]  || ''),         // F: 電話番号
-        email_addr: String(r[8]  || '')          // I: メールアドレス
-      });
-    });
-  } else {
-    // 旧フォーマット: A(0)=日付, B(1)=番号
-    cusRows.slice(1).forEach(r => {
-      const d = fmtDate(r[0]);
-      if (!d || d > todayStr) return; // 未来日付は除外
-      if (!cusMap[d]) cusMap[d] = [];
-      cusMap[d].push({
-        date: d, index: Number(r[1]),
-        last_name:  String(r[2] || ''), first_name: String(r[3] || ''),
-        reserved:   r[4] === '○',
-        menu:       String(r[5] || ''), price:    String(r[6] || ''),
-        gender:     String(r[7] || ''), phone:    String(r[8] || ''),
-        email_addr: String(r[9] || '')
-      });
-    });
-  }
 
-  return {
-    success: true,
-    spreadsheet_id: ssId,
-    days: Object.values(dayMap),
-    customers: Object.values(cusMap).flat()
-  };
+  return { success: true, spreadsheet_id: ssId, days: Object.values(dayMap) };
 }
 
 // ─── CSV ダウンロード ────────────────────────────────────────────────
