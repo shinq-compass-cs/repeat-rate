@@ -791,43 +791,12 @@ function cacheEmailInIndex(master, sid, email) {
   }
 }
 
-// ログイン成功後、同じmasterオブジェクトを再利用して日次データを取得
-// ※ 顧客タブはフロントエンドで使用しないため読み込みを省略（1〜2秒短縮）
+// ログイン成功後、日次データを取得してsalon_nameを付与
 function mergeGetData(sid, salonName, master) {
-  // CacheServiceでインデックスをキャッシュ（SS openを回避）
-  const cache = CacheService.getScriptCache();
-  const cacheKey = 'idx_' + sid;
-  let ssId = cache.get(cacheKey);
-
-  if (!ssId) {
-    const idx = master.getSheetByName(INDEX_TAB);
-    if (!idx) return { success: true, salon_name: salonName, days: [] };
-    const rows = idx.getDataRange().getValues();
-    for (let i = 1; i < rows.length; i++) {
-      if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); break; }
-    }
-    if (!ssId) return { success: true, salon_name: salonName, days: [] };
-    cache.put(cacheKey, ssId, 21600); // 6時間キャッシュ
-  }
-
-  const ss     = SpreadsheetApp.openById(ssId);
-  const dayTab = ss.getSheetByName('日次');
-  const dayRows = dayTab.getDataRange().getValues();
-
-  const dayMap = {};
-  const todayS = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd');
-  dayRows.slice(1).forEach(r => {
-    const visitors = Number(r[1]);
-    if (!visitors) return;
-    const d = fmtDate(r[0]);
-    if (d > todayS) return;
-    dayMap[d] = { date: d, visitors, reservations: Number(r[2]), rate: Number(r[3]) };
-  });
-
-  return {
-    success: true, salon_name: salonName, spreadsheet_id: ssId,
-    days: Object.values(dayMap)
-  };
+  const sc = CacheService.getScriptCache();
+  const result = readDaysFromSS(sid, sc);
+  result.salon_name = salonName;
+  return result;
 }
 
 // ─── ログイン認証（旧API・後方互換） ──────────────────────────────────
