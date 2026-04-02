@@ -497,12 +497,12 @@ async function handleLogin() {
   document.getElementById('main-screen').style.display  = 'block';
   document.getElementById('today-date-label').textContent = fmtDate(todayStr());
 
-  // キャッシュがあれば即表示（再ログイン時・同一サロン）
-  const cache = loadDataCache();
-  const prevSession = restoreSession();
-  if (cache && prevSession && prevSession.salon_id === sid) {
-    salon = { salon_id: sid, salon_name: prevSession.salon_name || '', email };
-    document.getElementById('header-salon-name').textContent = prevSession.salon_name || 'サロンID: ' + sid;
+  // キャッシュがあれば即表示（再ログイン時）
+  const cache = loadDataCache(sid);
+  if (cache) {
+    const prevSession = restoreSession();
+    salon = { salon_id: sid, salon_name: (prevSession && prevSession.salon_name) || '', email };
+    document.getElementById('header-salon-name').textContent = salon.salon_name || 'サロンID: ' + sid;
     applyData({ days: cache.days });
   } else {
     document.getElementById('header-salon-name').textContent = 'ログイン中…';
