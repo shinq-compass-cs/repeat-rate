@@ -540,7 +540,7 @@ function handleLogout() {
 // ===================================================================
 function applyData(res) {
   allDays = (res.days || []).sort((a, b) => a.date > b.date ? -1 : 1);
-  saveDataCache(res);
+  if (salon) saveDataCache(salon.salon_id, res);
   calMonthOffset = 0;
   document.getElementById('past-form').style.display     = 'none';
   document.getElementById('past-calendar').style.display = 'block';
