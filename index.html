@@ -840,37 +840,45 @@ async function saveData(sec, date) {
   const v = parseInt(buf[sec].v, 10) || 0;
   const r = parseInt(buf[sec].r, 10) || 0;
   if (r > v) { showToast('次回予約の人数が施術人数を超えています'); return false; }
-  // 施術0人 かつ 既存データなし → 入力を促すだけ（「削除しました」メッセージを出さない）
   if (v === 0 && !allDays.some(d => d.date === date)) { showToast('施術人数を入力してください'); return false; }
-  showLoading(true);
-  try {
-    const res = await gasPost({
-      action: 'saveDay', salon_id: salon.salon_id, salon_name: salon.salon_name,
-      date, visitors: v, reservations: r, customers: []
-    });
-    if (!res.success) throw new Error(res.error);
-    // 来店0回 → 未記入に戻す（allDaysから削除、カレンダーを空白に）
-    if (v === 0) {
-      showToast('施術0回のため記録を削除しました');
-      allDays = allDays.filter(d => d.date !== date);
-      renderMonthlyStats(); renderCalendar(); renderChart();
-      if (sec === 't') {
-        document.getElementById('today-empty').style.display = 'block';
-        document.getElementById('today-saved').style.display = 'none';
-        document.getElementById('today-input').style.display = 'none';
-      }
-      return true;
+
+  // 楽観的更新：APIレスポンスを待たずに即座にUIを更新する
+  const prevDays = [...allDays]; // ロールバック用バックアップ
+  if (v === 0) {
+    allDays = allDays.filter(d => d.date !== date);
+    renderMonthlyStats(); renderCalendar(); renderChart();
+    if (sec === 't') {
+      document.getElementById('today-empty').style.display = 'block';
+      document.getElementById('today-saved').style.display = 'none';
+      document.getElementById('today-input').style.display = 'none';
     }
-    showToast('保存しました');
+    showToast('削除しました');
+  } else {
     const rate = Math.round(r / v * 100);
     allDays = allDays.filter(d => d.date !== date);
     allDays.unshift({ date, visitors: v, reservations: r, rate });
     allDays.sort((a, b) => a.date > b.date ? -1 : 1);
     renderMonthlyStats(); renderCalendar(); renderChart();
     if (sec === 't') showTodaySaved({ visitors: v, reservations: r, rate });
+    showToast('保存しました');
+  }
+
+  // バックグラウンドでGAS APIを呼び出し、失敗時のみ巻き戻す
+  try {
+    const res = await gasPost({
+      action: 'saveDay', salon_id: salon.salon_id, salon_name: salon.salon_name,
+      date, visitors: v, reservations: r, customers: []
+    });
+    if (!res.success) throw new Error(res.error);
     return true;
-  } catch (err) { showToast('保存エラー: ' + err.message); return false; }
-  finally { showLoading(false); }
+  } catch (err) {
+    // 失敗時：楽観的更新を巻き戻す
+    allDays = prevDays;
+    renderMonthlyStats(); renderCalendar(); renderChart();
+    if (sec === 't') initTodaySection();
+    showToast('保存エラー: ' + err.message);
+    return false;
+  }
 }
 
 // ===================================================================
