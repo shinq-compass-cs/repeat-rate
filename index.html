@@ -881,6 +881,8 @@ async function saveData(sec, date) {
     if (sec === 't') initTodaySection();
     showToast('保存エラー: ' + err.message);
     return false;
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
   }
 }
 
