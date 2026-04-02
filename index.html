@@ -841,6 +841,9 @@ async function saveData(sec, date) {
   const r = parseInt(buf[sec].r, 10) || 0;
   if (r > v) { showToast('次回予約の人数が施術人数を超えています'); return false; }
   if (v === 0 && !allDays.some(d => d.date === date)) { showToast('施術人数を入力してください'); return false; }
+  // 連打防止
+  const saveBtn = document.getElementById(sec + '-save-btn');
+  if (saveBtn) saveBtn.disabled = true;
 
   // 楽観的更新：APIレスポンスを待たずに即座にUIを更新する
   const prevDays = [...allDays]; // ロールバック用バックアップ
