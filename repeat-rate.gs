@@ -668,9 +668,9 @@ function getLoginTabCandidates() {
 }
 
 // マスターログインメールはスプレッドシートの settings タブで管理（コード変更・デプロイ不要）
-function getMasterLoginEmails() {
+function getMasterLoginEmails(masterOpt) {
   try {
-    const master = SpreadsheetApp.openById(MASTER_SS_ID);
+    const master = masterOpt || SpreadsheetApp.openById(MASTER_SS_ID);
     let sheet = master.getSheetByName('settings');
     if (!sheet) {
       // 初回：settingsタブを自動作成
