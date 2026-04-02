@@ -903,6 +903,8 @@ function handleSaveDay(d) {
   const sid   = String(d.salon_id   || '').trim();
   const sname = String(d.salon_name || '').trim();
   if (!sid) return { success: false, error: 'salon_id が未指定です' };
+  // saveDay後はgetDataキャッシュを無効化（古いデータを返さないよう）
+  try { CacheService.getScriptCache().remove('days_' + sid); } catch(_) {}
 
   const ss      = getOrCreateSalonSS(sid, sname);
   const dayTab  = ss.getSheetByName('日次');
