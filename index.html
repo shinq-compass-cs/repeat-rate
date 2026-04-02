@@ -1012,7 +1012,7 @@ async function gasPost(payload) {
 function showLoading(v) { document.getElementById('loading-overlay').style.display = v ? 'flex' : 'none'; }
 function showToast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2800); }
 function saveSession(s)   { localStorage.setItem('rr_session', JSON.stringify(s)); }
-function clearSession()   { localStorage.removeItem('rr_session'); localStorage.removeItem('rr_cache'); }
+function clearSession()   { localStorage.removeItem('rr_session'); }
 function restoreSession() { try { const s = JSON.parse(localStorage.getItem('rr_session')||'null'); if (s&&s.salon_id) return s; } catch(_){} return null; }
 function saveDataCache(data) { try { localStorage.setItem('rr_cache', JSON.stringify({ ts: Date.now(), days: data.days || [] })); } catch(_){} }
 function loadDataCache() { try { return JSON.parse(localStorage.getItem('rr_cache')||'null'); } catch(_){} return null; }
