@@ -497,19 +497,14 @@ async function handleLogin() {
   document.getElementById('main-screen').style.display  = 'block';
   document.getElementById('today-date-label').textContent = fmtDate(todayStr());
 
-  // キャッシュがあれば即表示（再ログイン時）
+  // キャッシュまたは空データで即座にUI表示（スピナーでブロックしない）
   const cache = loadDataCache(sid);
-  if (cache) {
-    const prevSession = restoreSession();
-    salon = { salon_id: sid, salon_name: (prevSession && prevSession.salon_name) || '', email };
-    document.getElementById('header-salon-name').textContent = salon.salon_name || 'サロンID: ' + sid;
-    applyData({ days: cache.days });
-  } else {
-    document.getElementById('header-salon-name').textContent = 'ログイン中…';
-    showLoading(true);
-  }
+  const prevSession = restoreSession();
+  salon = { salon_id: sid, salon_name: (cache && prevSession && prevSession.salon_name) || '', email };
+  document.getElementById('header-salon-name').textContent = salon.salon_name || 'サロンID: ' + sid;
+  applyData({ days: cache ? cache.days : [] });
 
-  // バックグラウンドでGAS API呼び出し → 最新データで差分更新
+  // バックグラウンドでGAS API呼び出し → 認証＋最新データで差分更新
   try {
     const res = await gasPost({ action: 'loginAndGetData', salon_id: sid, email });
     if (!res.success) throw new Error(res.error || 'ログイン失敗');
@@ -518,13 +513,12 @@ async function handleLogin() {
     document.getElementById('header-salon-name').textContent = res.salon_name || 'サロンID: ' + sid;
     applyData(res);
   } catch (err) {
-    // キャッシュ表示済みでなければログイン画面に戻す
-    if (!cache) {
-      document.getElementById('main-screen').style.display  = 'none';
-      document.getElementById('login-screen').style.display = 'flex';
-    }
+    // 認証失敗 → ログイン画面に戻す
+    salon = null; allDays = [];
+    document.getElementById('main-screen').style.display  = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
     errEl.textContent = err.message; errEl.style.display = 'block';
-  } finally { showLoading(false); }
+  }
 }
 
 function handleLogout() {
