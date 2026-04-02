@@ -485,7 +485,7 @@ function rateLabel(rate) {
 // ===================================================================
 // ログイン
 // ===================================================================
-// A: loginとgetDataを1回のAPI呼び出しで統合
+// A: loginとgetDataを1回のAPI呼び出しで統合 + キャッシュから即表示
 async function handleLogin() {
   const sid   = document.getElementById('sid-input').value.trim();
   const email = document.getElementById('email-input').value.trim().toLowerCase();
@@ -495,9 +495,21 @@ async function handleLogin() {
   // D: 先に画面枠を表示（プログレッシブ表示）
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('main-screen').style.display  = 'block';
-  document.getElementById('header-salon-name').textContent = 'ログイン中…';
-  document.getElementById('today-date-label').textContent  = fmtDate(todayStr());
-  showLoading(true);
+  document.getElementById('today-date-label').textContent = fmtDate(todayStr());
+
+  // キャッシュがあれば即表示（再ログイン時・同一サロン）
+  const cache = loadDataCache();
+  const prevSession = restoreSession();
+  if (cache && prevSession && prevSession.salon_id === sid) {
+    salon = { salon_id: sid, salon_name: prevSession.salon_name || '', email };
+    document.getElementById('header-salon-name').textContent = prevSession.salon_name || 'サロンID: ' + sid;
+    applyData({ days: cache.days });
+  } else {
+    document.getElementById('header-salon-name').textContent = 'ログイン中…';
+    showLoading(true);
+  }
+
+  // バックグラウンドでGAS API呼び出し → 最新データで差分更新
   try {
     const res = await gasPost({ action: 'loginAndGetData', salon_id: sid, email });
     if (!res.success) throw new Error(res.error || 'ログイン失敗');
@@ -506,9 +518,11 @@ async function handleLogin() {
     document.getElementById('header-salon-name').textContent = res.salon_name || 'サロンID: ' + sid;
     applyData(res);
   } catch (err) {
-    // ログイン失敗時はログイン画面に戻す
-    document.getElementById('main-screen').style.display  = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
+    // キャッシュ表示済みでなければログイン画面に戻す
+    if (!cache || !prevSession || prevSession.salon_id !== sid) {
+      document.getElementById('main-screen').style.display  = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+    }
     errEl.textContent = err.message; errEl.style.display = 'block';
   } finally { showLoading(false); }
 }
