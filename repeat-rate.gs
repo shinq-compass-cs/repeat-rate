@@ -700,8 +700,8 @@ function handleLoginAndGetData(d) {
 
   const master = SpreadsheetApp.openById(MASTER_SS_ID);
 
-  // ── 社内マスターログイン ──
-  if (getMasterLoginEmails().includes(email)) {
+  // ── 社内マスターログイン（masterオブジェクトを再利用して重複openを防ぐ） ──
+  if (getMasterLoginEmails(master).includes(email)) {
     // 院名を取得（月次タブから）
     let salonName = '';
     for (const tabName of getLoginTabCandidates()) {
