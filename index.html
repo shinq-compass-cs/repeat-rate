@@ -834,7 +834,7 @@ function updateSaveBtn(sec) {
 // 保存
 // ===================================================================
 async function saveToday() { await saveData('t', todayStr()); }
-async function savePast()  { const ok = await saveData('p', pastDate); if (ok) showPastCalendar(); }
+async function savePast()  { showPastCalendar(); await saveData('p', pastDate); }
 
 async function saveData(sec, date) {
   const v = parseInt(buf[sec].v, 10) || 0;
