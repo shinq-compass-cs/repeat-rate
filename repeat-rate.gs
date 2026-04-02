@@ -1002,7 +1002,7 @@ function handleGetData(d) {
   // キャッシュなし → SSから読み込み
   const result = readDaysFromSS(sid, sc);
   // キャッシュに保存（60秒。saveDay時に明示的に無効化する）
-  try { sc.put(dayCacheKey, JSON.stringify(result), 60); } catch(_) {}
+  try { sc.put(dayCacheKey, JSON.stringify(result), 600); } catch(_) {}
   return result;
 }
 
