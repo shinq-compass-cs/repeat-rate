@@ -791,25 +791,28 @@ function cacheEmailInIndex(master, sid, email) {
   }
 }
 
-// ログイン成功後、同じmasterオブジェクトを再利用してgetData相当を実行
+// ログイン成功後、同じmasterオブジェクトを再利用して日次データを取得
+// ※ 顧客タブはフロントエンドで使用しないため読み込みを省略（1〜2秒短縮）
 function mergeGetData(sid, salonName, master) {
-  const idx = master.getSheetByName(INDEX_TAB);
-  if (!idx) return { success: true, salon_name: salonName, days: [], customers: [] };
+  // CacheServiceでインデックスをキャッシュ（SS openを回避）
+  const cache = CacheService.getScriptCache();
+  const cacheKey = 'idx_' + sid;
+  let ssId = cache.get(cacheKey);
 
-  const rows = idx.getDataRange().getValues();
-  let ssId = null;
-  for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); break; }
+  if (!ssId) {
+    const idx = master.getSheetByName(INDEX_TAB);
+    if (!idx) return { success: true, salon_name: salonName, days: [] };
+    const rows = idx.getDataRange().getValues();
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); break; }
+    }
+    if (!ssId) return { success: true, salon_name: salonName, days: [] };
+    cache.put(cacheKey, ssId, 21600); // 6時間キャッシュ
   }
-  if (!ssId) return { success: true, salon_name: salonName, days: [], customers: [] };
 
   const ss     = SpreadsheetApp.openById(ssId);
   const dayTab = ss.getSheetByName('日次');
-  const cusTab = ss.getSheetByName('顧客');
-  const fmt    = getSheetFormat(cusTab);
-
   const dayRows = dayTab.getDataRange().getValues();
-  const cusRows = cusTab.getDataRange().getValues();
 
   const dayMap = {};
   const todayS = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd');
@@ -821,37 +824,9 @@ function mergeGetData(sid, salonName, master) {
     dayMap[d] = { date: d, visitors, reservations: Number(r[2]), rate: Number(r[3]) };
   });
 
-  const cusMap = {};
-  if (fmt.type === 'new') {
-    cusRows.slice(1).forEach(r => {
-      const d = fmtDate(r[16]);
-      if (!d || d > todayS) return;
-      if (!cusMap[d]) cusMap[d] = [];
-      cusMap[d].push({
-        date: d, index: String(r[17] || ''),
-        last_name: String(r[0] || '').trim(), first_name: String(r[1] || '').trim(),
-        reserved: Number(r[18]) === 1, menu: String(r[19] || ''),
-        price: String(r[12] || ''), gender: String(r[2] || ''),
-        phone: String(r[5] || ''), email_addr: String(r[8] || '')
-      });
-    });
-  } else {
-    cusRows.slice(1).forEach(r => {
-      const d = fmtDate(r[0]);
-      if (!d || d > todayS) return;
-      if (!cusMap[d]) cusMap[d] = [];
-      cusMap[d].push({
-        date: d, index: Number(r[1]),
-        last_name: String(r[2] || ''), first_name: String(r[3] || ''),
-        reserved: r[4] === '○', menu: String(r[5] || ''), price: String(r[6] || ''),
-        gender: String(r[7] || ''), phone: String(r[8] || ''), email_addr: String(r[9] || '')
-      });
-    });
-  }
-
   return {
     success: true, salon_name: salonName, spreadsheet_id: ssId,
-    days: Object.values(dayMap), customers: Object.values(cusMap).flat()
+    days: Object.values(dayMap)
   };
 }
 
