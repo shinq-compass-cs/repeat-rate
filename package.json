@@ -1,0 +1,24 @@
+{
+  "name": "repeat-rate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shinq-compass-cs/repeat-rate.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/shinq-compass-cs/repeat-rate/issues"
+  },
+  "homepage": "https://github.com/shinq-compass-cs/repeat-rate#readme",
+  "dependencies": {
+    "playwright": "^1.58.2"
+  }
+}

@@ -1,0 +1,27 @@
+# 依存関係
+node_modules/
+
+# テスト成果物
+test-results/
+playwright-report/
+
+# ローカル設定
+.clasp.json
+.claspignore.local
+
+# 環境変数・秘密情報
+.env
+.env.local
+*.key
+*.pem
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# ビルド出力
+dist/
+build/

@@ -1,3 +1,16 @@
 index.html
 README.md
 .gitignore
+node_modules/**
+test.js
+test-pc.js
+state-transition.test.js
+e2e.test.js
+package.json
+package-lock.json
+*.test.js
+update-doc.js
+gas-api.test.js
+kpi-tool-test.js
+robots.txt
+test-results/**
