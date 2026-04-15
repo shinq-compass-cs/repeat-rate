@@ -30,7 +30,6 @@ function doPost(e) {
       case 'loginAndGetData': return ok(handleLoginAndGetData(d));
       case 'saveDay':         return ok(handleSaveDay(d));
       case 'getData':         return ok(handleGetData(d));
-      case 'cleanup':         return ok(runCleanup2049());
       default:                return ok({ success: false, error: 'unknown action: ' + d.action });
     }
   } catch (err) {
