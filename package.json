@@ -1,18 +1,28 @@
 {
   "name": "repeat-rate",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "しんきゅうコンパス加盟サロン向け 次回予約率管理ツール（GAS Web App + SPA）",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node state-transition.test.js",
+    "test:e2e": "node e2e.test.js",
+    "test:gas": "node gas-api.test.js",
+    "test:kpi": "node kpi-tool-test.js",
+    "test:pc": "node test-pc.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/shinq-compass-cs/repeat-rate.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "gas",
+    "google-apps-script",
+    "repeat-rate",
+    "shinkyu-compass",
+    "salon-kpi"
+  ],
+  "author": "shinq-compass-cs",
+  "license": "UNLICENSED",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/shinq-compass-cs/repeat-rate/issues"
