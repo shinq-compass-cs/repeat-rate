@@ -62,6 +62,10 @@ function doGet(e) {
   if (e.parameter.action === 'updateDoc' && e.parameter.key === 'shinqdoc2026') {
     return ContentService.createTextOutput(JSON.stringify(updateSpecDoc()));
   }
+  // warmupトリガー自動登録（初回セットアップ時専用。実行後このブロックは削除すること）
+  if (e.parameter.action === 'setupTriggers' && e.parameter.key === 'shinqsetup2026') {
+    return ContentService.createTextOutput(JSON.stringify(setupTriggers()));
+  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
