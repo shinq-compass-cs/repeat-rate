@@ -40,42 +40,7 @@ function doPost(e) {
 function doGet(e) {
   if ((e.parameter.action || '') === 'csv')    return handleCsv(e.parameter);
   if ((e.parameter.action || '') === 'export') return handleExport(e.parameter);
-  if (e.parameter.action === 'cleanup' && e.parameter.key === 'shinq2049cleanup') {
-    return ContentService.createTextOutput(JSON.stringify(runCleanup2049()));
-  }
-  // 顧客タブマイグレーション（一時エンドポイント）
-  if (e.parameter.action === 'migrate' && e.parameter.key === 'shinqmigrate2026') {
-    return ContentService.createTextOutput(JSON.stringify({ result: runMigrationAll() }));
-  }
-  // 2049サロン 3/21 顧客行クリーンアップ（一時エンドポイント）
-  if (e.parameter.action === 'fix2049mar21' && e.parameter.key === 'shinqfix2026') {
-    return ContentService.createTextOutput(JSON.stringify(fix2049Mar21()));
-  }
-  // 既存シートにT列（メニュー）ヘッダー追加
-  if (e.parameter.action === 'addMenuCol' && e.parameter.key === 'shinqmenu2026') {
-    return ContentService.createTextOutput(JSON.stringify(addMenuColumnToExistingSheets()));
-  }
-  // 既存シートのR列・S列フォーマット移行
-  if (e.parameter.action === 'migrateRS' && e.parameter.key === 'shinqrs2026') {
-    return ContentService.createTextOutput(JSON.stringify(migrateRSColumns()));
-  }
-  // 既存シートのL列（物販）の0を空欄にクリア
-  if (e.parameter.action === 'clearBuhanCol' && e.parameter.key === 'shinqbuhan2026') {
-    return ContentService.createTextOutput(JSON.stringify(clearBuhanColumn()));
-  }
-  // 既存シートの日次D列にパーセント表記フォーマット適用
-  if (e.parameter.action === 'formatRateCol' && e.parameter.key === 'shinqrate2026') {
-    return ContentService.createTextOutput(JSON.stringify(formatRateColumn()));
-  }
-  // 2049スプレッドシート J/L/O/P列クリア + R/S再マイグレーション
-  if (e.parameter.action === 'fixCols2049' && e.parameter.key === 'shinqfix2049jop') {
-    return ContentService.createTextOutput(JSON.stringify(fixColumns2049()));
-  }
-  // 2049サロン 3/5 顧客行クリーンアップ（一時エンドポイント）
-  if (e.parameter.action === 'fix2049mar5' && e.parameter.key === 'shinqfix2026') {
-    return ContentService.createTextOutput(JSON.stringify(fix2049Mar5()));
-  }
-  // 仕様書更新（一時エンドポイント）
+  // 仕様書更新（再利用可能。関連関数: updateSpecDoc()）
   if (e.parameter.action === 'updateDoc' && e.parameter.key === 'shinqdoc2026') {
     return ContentService.createTextOutput(JSON.stringify(updateSpecDoc()));
   }
