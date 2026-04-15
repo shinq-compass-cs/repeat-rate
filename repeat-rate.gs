@@ -20,6 +20,24 @@ function warmup() {
   SpreadsheetApp.openById(MASTER_SS_ID).getSheetByName(INDEX_TAB);
 }
 
+// ─── トリガー自動登録（初回セットアップ時にGASエディタから1回だけ実行） ──
+// 既存のwarmupトリガーを一掃してから5分ごと時間駆動トリガーを登録する。
+// 重複登録を避けるため冪等化。実行結果はログに出力。
+function setupTriggers() {
+  const existing = ScriptApp.getProjectTriggers();
+  let removed = 0;
+  existing.forEach(t => {
+    if (t.getHandlerFunction() === 'warmup') {
+      ScriptApp.deleteTrigger(t);
+      removed++;
+    }
+  });
+  ScriptApp.newTrigger('warmup').timeBased().everyMinutes(5).create();
+  const msg = `warmupトリガー登録完了 (既存${removed}件を削除→5分ごと再登録)`;
+  Logger.log(msg);
+  return { success: true, message: msg };
+}
+
 // ─── エントリーポイント ──────────────────────────────────────────────
 
 function doPost(e) {
