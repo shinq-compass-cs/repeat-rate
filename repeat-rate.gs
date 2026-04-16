@@ -686,13 +686,15 @@ function getMasterLoginEmails(masterOpt) {
 // B: インデックスタブにemail列を追加し、2回目以降はタブ全行スキャンを省略
 
 function handleLoginAndGetData(d) {
-  const sid   = String(d.salon_id || '').trim();
-  const email = String(d.email    || '').trim().toLowerCase();
+  const sid    = String(d.salon_id || '').trim();
+  const email  = String(d.email    || '').trim().toLowerCase();
+  const device = String(d.device   || '').trim();
   if (!sid || !email) return { success: false, error: 'サロンIDとメールアドレスを入力してください' };
 
   const master = SpreadsheetApp.openById(MASTER_SS_ID);
 
   // ── 社内マスターログイン（masterオブジェクトを再利用して重複openを防ぐ） ──
+  // 社内ログインはログ対象外（実際の院の利用状況のみ記録するため）
   if (getMasterLoginEmails(master).includes(email)) {
     // 院名を取得（月次タブから）
     let salonName = '';
