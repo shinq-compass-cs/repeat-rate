@@ -66,10 +66,6 @@ function doGet(e) {
   if (e.parameter.action === 'updateDoc' && e.parameter.key === 'shinqdoc2026') {
     return ContentService.createTextOutput(JSON.stringify(updateSpecDoc()));
   }
-  // 推定ログイン履歴バックフィル（初回セットアップ時専用。実行後このブロックは削除すること）
-  if (e.parameter.action === 'backfillLog' && e.parameter.key === 'shinqbackfill2026') {
-    return ContentService.createTextOutput(JSON.stringify(backfillLoginLog()));
-  }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
 
