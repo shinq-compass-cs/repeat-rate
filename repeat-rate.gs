@@ -14,6 +14,10 @@ const MASTER_SS_ID = '1CiuXRdYG-lI_jWA4DiR_uXvYU9dgqTE1v-JWsZF1l_g';
 const INDEX_TAB    = 'repeat_rate_index'; // マスターシートに追加される管理タブ
 const SALON_FOLDER_ID = '1hu_VB9WpaKa-Cz-kmrvCV3KeynWlYjIp'; // サロン別SSの保存先フォルダ
 
+// ─── ログ記録設定（KPIツールと同一スプレッドシートの別タブ） ──
+const LOG_SHEET_ID = '16g2oaMd0Z7ATpNQBbUliRYx-06nbMertF0zLPKdnbQg';
+const LOG_TAB_NAME = 'リピート率ログ';
+
 // ─── ウォームアップ（タイムドリガーで5分ごとに実行→コールドスタート回避） ──
 function warmup() {
   // GASのコンテナを起動状態に保つ。処理内容は最小限。
