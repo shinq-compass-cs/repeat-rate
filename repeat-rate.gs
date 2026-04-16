@@ -1207,6 +1207,71 @@ function logLoginEvent_(salonId, salonName, device) {
   }
 }
 
+// 過去ログイン履歴の推定バックフィル。
+// 各サロンSSの「日次」タブの日付を「その日はログインして保存した」とみなして記録する。
+// 冪等: 既存行（同じサロンID+日時+種別="推定(日次保存)"）はスキップする。
+// 時刻不明のため 00:00:00 固定。端末列は空。
+function backfillLoginLog() {
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const idx = master.getSheetByName(INDEX_TAB);
+  if (!idx) return { success: false, error: 'INDEX_TAB が見つかりません' };
+  const idxRows = idx.getDataRange().getValues();
+
+  const sheet = getLogSheet_();
+  // 既存行を読み込み Set 化（重複防止）。キー: "日時|サロンID"
+  const existing = new Set();
+  const existingRows = sheet.getDataRange().getValues();
+  for (let i = 1; i < existingRows.length; i++) {
+    const key = String(existingRows[i][0]) + '|' + String(existingRows[i][1]);
+    existing.add(key);
+  }
+
+  const toAppend = [];
+  let skipped = 0, salonOk = 0, salonFail = 0;
+
+  for (let i = 1; i < idxRows.length; i++) {
+    const sid   = String(idxRows[i][0] || '').trim();
+    const ssId  = String(idxRows[i][1] || '').trim();
+    const sname = String(idxRows[i][2] || '').trim();
+    if (!sid || !ssId) continue;
+
+    try {
+      const salonSS = SpreadsheetApp.openById(ssId);
+      const dayTab = salonSS.getSheetByName('日次');
+      if (!dayTab) { salonFail++; continue; }
+      const dayRows = dayTab.getDataRange().getValues();
+      for (let j = 1; j < dayRows.length; j++) {
+        const dateStr = fmtDate(dayRows[j][0]);
+        if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) continue;
+        const dt = dateStr + ' 00:00:00';
+        const key = dt + '|' + sid;
+        if (existing.has(key)) { skipped++; continue; }
+        existing.add(key);
+        toAppend.push([dt, sid, sname, '', '推定(日次保存)']);
+      }
+      salonOk++;
+    } catch (e) {
+      Logger.log('backfill salon ' + sid + ' failed: ' + e.message);
+      salonFail++;
+    }
+  }
+
+  // 一括書込み（個別 appendRow より高速）
+  if (toAppend.length > 0) {
+    const startRow = sheet.getLastRow() + 1;
+    sheet.getRange(startRow, 1, toAppend.length, 5).setValues(toAppend);
+    // 日時昇順ソート（実ログインと推定履歴が時系列で並ぶよう）
+    const lastRow = sheet.getLastRow();
+    if (lastRow > 2) {
+      sheet.getRange(2, 1, lastRow - 1, 5).sort({ column: 1, ascending: true });
+    }
+  }
+
+  const msg = `バックフィル完了: 追加=${toAppend.length}行 / 重複スキップ=${skipped}件 / サロン成功=${salonOk} / 失敗=${salonFail}`;
+  Logger.log(msg);
+  return { success: true, appended: toAppend.length, skipped: skipped, salonOk: salonOk, salonFail: salonFail, message: msg };
+}
+
 // ─── 管理用関数（GAS エディタから直接実行）──────────────────────────
 
 // repeat_rate_index にサロン2049を登録 + 既存重複データをクリーンアップ
