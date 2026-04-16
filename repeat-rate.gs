@@ -1176,6 +1176,33 @@ function ok(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+// ─── ログイン履歴記録 ────────────────────────────────────────────────
+// 5列固定: A=日時 / B=サロンID / C=サロン名 / D=端末 / E=種別
+// 種別: "ログイン"（通常）/ "推定(日次保存)"（バックフィル由来）
+
+function getLogSheet_() {
+  const ss = SpreadsheetApp.openById(LOG_SHEET_ID);
+  let sheet = ss.getSheetByName(LOG_TAB_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(LOG_TAB_NAME);
+    sheet.appendRow(['日時', 'サロンID', 'サロン名', '端末', '種別']);
+    sheet.setFrozenRows(1);
+    sheet.getRange('A1:E1').setFontWeight('bold');
+  }
+  return sheet;
+}
+
+// 通常ログイン記録（handleLoginAndGetData から呼ぶ。失敗しても本体の成功は妨げない）
+function logLoginEvent_(salonId, salonName, device) {
+  try {
+    const sheet = getLogSheet_();
+    const dt = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+    sheet.appendRow([dt, String(salonId || ''), String(salonName || ''), String(device || ''), 'ログイン']);
+  } catch (e) {
+    Logger.log('logLoginEvent_ failed: ' + e.message);
+  }
+}
+
 // ─── 管理用関数（GAS エディタから直接実行）──────────────────────────
 
 // repeat_rate_index にサロン2049を登録 + 既存重複データをクリーンアップ
