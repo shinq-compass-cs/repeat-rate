@@ -760,6 +760,7 @@ function handleLoginAndGetData(d) {
   // ── B: インデックスにemail列を追加（次回以降の高速検索用） ──
   cacheEmailInIndex(master, sid, email);
 
+  logLoginEvent_(sid, salonName, device);
   return mergeGetData(sid, salonName, master);
 }
 
