@@ -512,7 +512,7 @@ async function handleLogin() {
 
   // バックグラウンドでGAS API呼び出し → 認証＋最新データで差分更新
   try {
-    const res = await gasPost({ action: 'loginAndGetData', salon_id: sid, email });
+    const res = await gasPost({ action: 'loginAndGetData', salon_id: sid, email, device: getDeviceInfo() });
     if (!res.success) throw new Error(res.error || 'ログイン失敗');
     salon = { salon_id: sid, salon_name: res.salon_name, email };
     saveSession(salon);
