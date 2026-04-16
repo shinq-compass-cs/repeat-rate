@@ -726,6 +726,7 @@ function handleLoginAndGetData(d) {
         if (String(idxRows[i][0]).trim() === sid &&
             String(idxRows[i][emailCol]).trim().toLowerCase() === email) {
           const salonName = String(idxRows[i][2] || '');
+          logLoginEvent_(sid, salonName, device);
           return mergeGetData(sid, salonName, master);
         }
       }
