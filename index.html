@@ -1004,6 +1004,16 @@ function renderChart() {
 function todayStr() { const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
 function pad(n) { return String(n).padStart(2, '0'); }
 function fmtDate(s) { return s.replace(/(\d{4})-(\d{2})-(\d{2})/, '$1年$2月$3日'); }
+function getDeviceInfo() {
+  const ua = navigator.userAgent;
+  const type = /iPhone|Android.*Mobile/.test(ua) ? 'スマホ'
+    : /iPad|Android/.test(ua) ? 'タブレット' : 'PC';
+  const browser = /Edg\//.test(ua) ? 'Edge'
+    : /Chrome\//.test(ua) ? 'Chrome'
+    : /Safari\//.test(ua) ? 'Safari'
+    : /Firefox\//.test(ua) ? 'Firefox' : 'その他';
+  return type + '/' + browser;
+}
 async function gasPost(payload) {
   const res = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(payload) });
   if (!res.ok) throw new Error('通信エラー: ' + res.status);
