@@ -11,6 +11,7 @@
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbw5teJV0bHH5PREhswvYyvx9OInMHL48Gzshq7kwLUpzGWLNuksKXp3l75vzLXX2mw4AA/exec';
 const TEST_SALON_ID   = '2049';
 const TEST_SALON_NAME = 'テスト院（自動テスト）';
+const TEST_EMAIL      = 'info@shinq-compass.jp';
 const TEST_DATE       = '2025-01-01';
 const TEST_DATE2      = '2025-01-02';
 
@@ -49,7 +50,7 @@ async function getDayForDate(date) {
 // テストデータをクリーンアップ（v=0 で削除）
 async function cleanup(date) {
   await gasPost({
-    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME,
+    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME, email: TEST_EMAIL,
     date, visitors: 0, reservations: 0, customers: []
   });
 }
@@ -69,7 +70,7 @@ async function runTests() {
   // ─────────────────────────────────────────────
   console.log('【TC-01】新規保存・日次データ検証');
   const saveRes01 = await gasPost({
-    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME,
+    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME, email: TEST_EMAIL,
     date: TEST_DATE, visitors: 5, reservations: 3,
     customers: []
   });
@@ -88,7 +89,7 @@ async function runTests() {
   // ─────────────────────────────────────────────
   console.log('\n【TC-02】上書き保存');
   await gasPost({
-    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME,
+    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME, email: TEST_EMAIL,
     date: TEST_DATE, visitors: 10, reservations: 8, customers: []
   });
   const day02 = await getDayForDate(TEST_DATE);
@@ -101,12 +102,12 @@ async function runTests() {
   // ─────────────────────────────────────────────
   console.log('\n【TC-03】他日付への非干渉');
   await gasPost({
-    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME,
+    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME, email: TEST_EMAIL,
     date: TEST_DATE2, visitors: 2, reservations: 1, customers: []
   });
   // TEST_DATE を再保存
   await gasPost({
-    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME,
+    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME, email: TEST_EMAIL,
     date: TEST_DATE, visitors: 7, reservations: 7, customers: []
   });
   const day03_other = await getDayForDate(TEST_DATE2);
@@ -124,7 +125,7 @@ async function runTests() {
   assert('TC-04-0', '削除前にデータが存在', before04 !== null);
 
   await gasPost({
-    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME,
+    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME, email: TEST_EMAIL,
     date: TEST_DATE, visitors: 0, reservations: 0, customers: []
   });
   const day04 = await getDayForDate(TEST_DATE);
@@ -138,7 +139,7 @@ async function runTests() {
   // ─────────────────────────────────────────────
   console.log('\n【TC-05】getData ラウンドトリップ');
   await gasPost({
-    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME,
+    action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME, email: TEST_EMAIL,
     date: TEST_DATE, visitors: 3, reservations: 2, customers: []
   });
   const res05 = await gasPost({ action: 'getData', salon_id: TEST_SALON_ID });
