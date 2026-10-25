@@ -659,6 +659,44 @@ function getLoginTabCandidates() {
   return tabs;
 }
 
+// サロンIDとメールアドレスの組み合わせでアクセス権を検証する共通関数。
+// 社内マスターメールは全サロンにアクセス可能。
+// 戻り値: { ok: true } または { ok: false, error: '...' }
+function authenticateSalon(sid, email, masterOpt) {
+  if (!sid || !email) return { ok: false, error: 'サロンIDとメールアドレスが必要です' };
+  const master = masterOpt || SpreadsheetApp.openById(MASTER_SS_ID);
+  if (getMasterLoginEmails(master).includes(email)) return { ok: true };
+  // インデックスタブで高速検索
+  const idx = master.getSheetByName(INDEX_TAB);
+  if (idx) {
+    const idxRows = idx.getDataRange().getValues();
+    const h = idxRows[0] || [];
+    const emailCol = h.findIndex(v => String(v).trim() === 'email');
+    if (emailCol >= 0) {
+      for (let i = 1; i < idxRows.length; i++) {
+        if (String(idxRows[i][0]).trim() === sid &&
+            String(idxRows[i][emailCol]).trim().toLowerCase() === email) return { ok: true };
+      }
+    }
+  }
+  // 月次タブで照合
+  for (const tabName of getLoginTabCandidates()) {
+    const sheet = master.getSheetByName(tabName);
+    if (!sheet) continue;
+    const rows = sheet.getDataRange().getValues();
+    if (rows.length < 2) continue;
+    const hd = rows[0].map(v => String(v).trim());
+    const ci = hd.findIndex(v => v === 'サロンID');
+    const ei = hd.findIndex(v => v === 'メールアドレス');
+    if (ci < 0 || ei < 0) continue;
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][ci]).trim() === sid &&
+          String(rows[i][ei]).trim().toLowerCase() === email) return { ok: true };
+    }
+  }
+  return { ok: false, error: '認証に失敗しました' };
+}
+
 // マスターログインメールはスプレッドシートの settings タブで管理（コード変更・デプロイ不要）
 function getMasterLoginEmails(masterOpt) {
   try {
@@ -898,7 +936,11 @@ function getOrCreateSalonSS(sid, sname) {
 function handleSaveDay(d) {
   const sid   = String(d.salon_id   || '').trim();
   const sname = String(d.salon_name || '').trim();
+  const email = String(d.email      || '').trim().toLowerCase();
   if (!sid) return { success: false, error: 'salon_id が未指定です' };
+  // 操作対象サロンへのアクセス権を検証
+  const auth = authenticateSalon(sid, email);
+  if (!auth.ok) return { success: false, error: auth.error };
   // saveDay後はgetDataキャッシュを無効化（古いデータを返さないよう）
   try { CacheService.getScriptCache().remove('days_' + sid); } catch(_) {}
 
@@ -1040,6 +1082,9 @@ function readDaysFromSS(sid, sc) {
 
 function handleCsv(p) {
   const sid    = String(p.salon_id || '').trim();
+  const email  = String(p.email   || '').trim().toLowerCase();
+  const auth   = authenticateSalon(sid, email);
+  if (!auth.ok) return ContentService.createTextOutput('認証エラー: ' + auth.error);
   const master = SpreadsheetApp.openById(MASTER_SS_ID);
   const idx    = master.getSheetByName(INDEX_TAB);
   if (!idx) return ContentService.createTextOutput('データなし');
@@ -1072,6 +1117,9 @@ function handleCsv(p) {
 
 function handleExport(p) {
   const sid    = String(p.salon_id || '').trim();
+  const email  = String(p.email   || '').trim().toLowerCase();
+  const auth   = authenticateSalon(sid, email);
+  if (!auth.ok) return ContentService.createTextOutput(JSON.stringify({ success: false, error: auth.error })).setMimeType(ContentService.MimeType.JSON);
   const master = SpreadsheetApp.openById(MASTER_SS_ID);
   const idx    = master.getSheetByName(INDEX_TAB);
   if (!idx) return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'インデックスなし' })).setMimeType(ContentService.MimeType.JSON);

@@ -884,7 +884,7 @@ async function saveData(sec, date) {
   // バックグラウンドでGAS APIを呼び出し、失敗時のみ巻き戻す
   try {
     const res = await gasPost({
-      action: 'saveDay', salon_id: salon.salon_id, salon_name: salon.salon_name,
+      action: 'saveDay', salon_id: salon.salon_id, salon_name: salon.salon_name, email: salon.email,
       date, visitors: v, reservations: r, customers: []
     });
     if (!res.success) throw new Error(res.error);
