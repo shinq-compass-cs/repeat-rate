@@ -63,7 +63,7 @@ function doGet(e) {
   if ((e.parameter.action || '') === 'csv')    return handleCsv(e.parameter);
   if ((e.parameter.action || '') === 'export') return handleExport(e.parameter);
   // 仕様書更新（再利用可能。関連関数: updateSpecDoc()）
-  if (e.parameter.action === 'updateDoc' && e.parameter.key === 'shinqdoc2026') {
+  if (e.parameter.action === 'updateDoc' && e.parameter.key === getUpdateDocKey_()) {
     return ContentService.createTextOutput(JSON.stringify(updateSpecDoc()));
   }
   return ContentService.createTextOutput('repeat-rate GAS OK');
@@ -695,6 +695,18 @@ function authenticateSalon(sid, email, masterOpt) {
     }
   }
   return { ok: false, error: '認証に失敗しました' };
+}
+
+// 仕様書更新キーをスクリプトプロパティから取得（未設定なら自動生成して保存）
+function getUpdateDocKey_() {
+  const props = PropertiesService.getScriptProperties();
+  let key = props.getProperty('updateDocKey');
+  if (!key) {
+    key = Utilities.getUuid().replace(/-/g, '');
+    props.setProperty('updateDocKey', key);
+    Logger.log('updateDocKey を自動生成しました: ' + key);
+  }
+  return key;
 }
 
 // マスターログインメールはスプレッドシートの settings タブで管理（コード変更・デプロイ不要）

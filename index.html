@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
 <style>
 :root {
   --primary: #2c4a72;
@@ -475,6 +475,9 @@ let calMonthOffset = 0; // 0=今月, -1=先月, etc.
 const buf = { t: { v: '0', r: '0', vf: true, rf: true }, p: { v: '0', r: '0', vf: true, rf: true } };
 
 // ===================================================================
+// HTMLエスケープ
+function esc(s) { const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+
 // リピート率判定（良好:90%以上 / 標準:70%以上 / 課題:70%未満）
 // ===================================================================
 // 判断基準: 優秀≥90% / 良好≥70% / 標準≥50% / 課題あり<50%
@@ -598,9 +601,9 @@ function renderRecentMonths() {
     const sub = tv > 0 ? tv + '人施術 / ' + tr + '人予約' : 'データなし';
     const label = (d.getMonth() + 1) + '月';
     html += `<div class="recent-month-card">
-      <div class="recent-month-label">${label}</div>
-      <div class="recent-month-rate ${cls}">${rateStr}</div>
-      <div class="recent-month-sub">${sub}</div>
+      <div class="recent-month-label">${esc(label)}</div>
+      <div class="recent-month-rate ${esc(cls)}">${rateStr}</div>
+      <div class="recent-month-sub">${esc(sub)}</div>
     </div>`;
   }
   container.innerHTML = html;
@@ -1021,9 +1024,9 @@ async function gasPost(payload) {
 }
 function showLoading(v) { document.getElementById('loading-overlay').style.display = v ? 'flex' : 'none'; }
 function showToast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2800); }
-function saveSession(s)   { localStorage.setItem('rr_session', JSON.stringify(s)); }
+function saveSession(s)   { s._ts = Date.now(); localStorage.setItem('rr_session', JSON.stringify(s)); }
 function clearSession()   { localStorage.removeItem('rr_session'); }
-function restoreSession() { try { const s = JSON.parse(localStorage.getItem('rr_session')||'null'); if (s&&s.salon_id) return s; } catch(_){} return null; }
+function restoreSession() { try { const s = JSON.parse(localStorage.getItem('rr_session')||'null'); if (!s||!s.salon_id) return null; if (s._ts && Date.now()-s._ts > 24*60*60*1000) { clearSession(); return null; } return s; } catch(_){} return null; }
 function saveDataCache(sid, data) { try { localStorage.setItem('rr_cache_' + sid, JSON.stringify({ ts: Date.now(), days: data.days || [] })); } catch(_){} }
 function loadDataCache(sid) { try { return JSON.parse(localStorage.getItem('rr_cache_' + sid)||'null'); } catch(_){} return null; }
 
