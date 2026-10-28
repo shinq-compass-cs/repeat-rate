@@ -10,13 +10,25 @@
 // 4. デプロイURLをindex.htmlの GAS_URL に貼り付け
 // ============================================================
 
-const MASTER_SS_ID = '1CiuXRdYG-lI_jWA4DiR_uXvYU9dgqTE1v-JWsZF1l_g';
-const INDEX_TAB    = 'repeat_rate_index'; // マスターシートに追加される管理タブ
-const SALON_FOLDER_ID = '1hu_VB9WpaKa-Cz-kmrvCV3KeynWlYjIp'; // サロン別SSの保存先フォルダ
+// ScriptPropertiesから設定値を取得（初回は initScriptProperties() で登録）
+const PROPS_        = PropertiesService.getScriptProperties();
+const MASTER_SS_ID    = PROPS_.getProperty('MASTER_SS_ID');
+const INDEX_TAB       = 'repeat_rate_index';
+const SALON_FOLDER_ID = PROPS_.getProperty('SALON_FOLDER_ID');
+const LOG_SHEET_ID    = PROPS_.getProperty('LOG_SHEET_ID');
+const LOG_TAB_NAME    = 'リピート率ログ';
 
-// ─── ログ記録設定（KPIツールと同一スプレッドシートの別タブ） ──
-const LOG_SHEET_ID = '16g2oaMd0Z7ATpNQBbUliRYx-06nbMertF0zLPKdnbQg';
-const LOG_TAB_NAME = 'リピート率ログ';
+// 初回セットアップ：GASエディタから1回だけ実行してScriptPropertiesに値を登録する
+function initScriptProperties() {
+  const props = PropertiesService.getScriptProperties();
+  props.setProperties({
+    'MASTER_SS_ID':    '1CiuXRdYG-lI_jWA4DiR_uXvYU9dgqTE1v-JWsZF1l_g',
+    'SALON_FOLDER_ID': '1hu_VB9WpaKa-Cz-kmrvCV3KeynWlYjIp',
+    'LOG_SHEET_ID':    '16g2oaMd0Z7ATpNQBbUliRYx-06nbMertF0zLPKdnbQg'
+  });
+  Logger.log('ScriptProperties を登録しました');
+  return { success: true };
+}
 
 // ─── ウォームアップ（タイムドリガーで5分ごとに実行→コールドスタート回避） ──
 function warmup() {
