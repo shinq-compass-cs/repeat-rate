@@ -56,9 +56,24 @@ function setupTriggers() {
 
 // ─── エントリーポイント ──────────────────────────────────────────────
 
+// リクエスト頻度制限（salon_id単位、60秒あたり30回まで）
+function checkRateLimit_(salonId) {
+  if (!salonId) return true;
+  const cache = CacheService.getScriptCache();
+  const key = 'rl_' + salonId;
+  const count = parseInt(cache.get(key) || '0', 10);
+  if (count >= 30) return false;
+  cache.put(key, String(count + 1), 60);
+  return true;
+}
+
 function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents);
+    const sid = String(d.salon_id || '').trim();
+    if (!checkRateLimit_(sid)) {
+      return ok({ success: false, error: 'リクエスト回数の上限に達しました。しばらく待ってから再試行してください' });
+    }
     switch (d.action) {
       case 'login':           return ok(handleLogin(d));
       case 'loginAndGetData': return ok(handleLoginAndGetData(d));
