@@ -1032,7 +1032,6 @@ function handleSaveDay(d) {
   sortSheetByDate(dayTab, 1);
 
   // 施術人数分の行をそのまま保存（詳細未入力行も含む — index番号が来訪記録として機能する）
-  const customers = (d.customers || []);
   if (fmt.type === 'new') {
     customers.forEach((c, i) => {
       const price = c.price || '';
