@@ -18,16 +18,14 @@ const SALON_FOLDER_ID = PROPS_.getProperty('SALON_FOLDER_ID');
 const LOG_SHEET_ID    = PROPS_.getProperty('LOG_SHEET_ID');
 const LOG_TAB_NAME    = 'リピート率ログ';
 
-// 初回セットアップ：GASエディタから1回だけ実行してScriptPropertiesに値を登録する
-function initScriptProperties() {
+// ScriptPropertiesの状態確認用（値の登録はGASエディタのプロジェクト設定から手動で行う）
+function checkScriptProperties() {
   const props = PropertiesService.getScriptProperties();
-  props.setProperties({
-    'MASTER_SS_ID':    '1CiuXRdYG-lI_jWA4DiR_uXvYU9dgqTE1v-JWsZF1l_g',
-    'SALON_FOLDER_ID': '1hu_VB9WpaKa-Cz-kmrvCV3KeynWlYjIp',
-    'LOG_SHEET_ID':    '16g2oaMd0Z7ATpNQBbUliRYx-06nbMertF0zLPKdnbQg'
-  });
-  Logger.log('ScriptProperties を登録しました');
-  return { success: true };
+  const keys = ['MASTER_SS_ID', 'SALON_FOLDER_ID', 'LOG_SHEET_ID'];
+  const result = {};
+  keys.forEach(k => { const v = props.getProperty(k); result[k] = v ? '設定済(' + v.slice(0, 6) + '...)' : '未設定'; });
+  Logger.log(JSON.stringify(result));
+  return result;
 }
 
 // ─── ウォームアップ（タイムドリガーで5分ごとに実行→コールドスタート回避） ──
