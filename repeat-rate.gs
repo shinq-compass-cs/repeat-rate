@@ -894,6 +894,8 @@ function handleLogin(d) {
   const sid   = String(d.salon_id || '').trim();
   const email = String(d.email    || '').trim().toLowerCase();
   if (!sid || !email) return { success: false, error: 'サロンIDとメールアドレスを入力してください' };
+  if (!/^\d{1,10}$/.test(sid)) return { success: false, error: 'サロンIDの形式が不正です' };
+  if (email.length > 254) return { success: false, error: 'メールアドレスが長すぎます' };
 
   // 社内マスターログイン：あらゆるサロンIDでログイン可能
   const master = SpreadsheetApp.openById(MASTER_SS_ID);
