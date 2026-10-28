@@ -62,7 +62,7 @@ function checkRateLimit_(salonId) {
   const cache = CacheService.getScriptCache();
   const key = 'rl_' + salonId;
   const count = parseInt(cache.get(key) || '0', 10);
-  if (count >= 30) return false;
+  if (count >= 60) return false;
   cache.put(key, String(count + 1), 60);
   return true;
 }
