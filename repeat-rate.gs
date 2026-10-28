@@ -788,9 +788,7 @@ function handleLoginAndGetData(d) {
   const master = SpreadsheetApp.openById(MASTER_SS_ID);
 
   // ── 社内マスターログイン（masterオブジェクトを再利用して重複openを防ぐ） ──
-  // 社内ログインはログ対象外（実際の院の利用状況のみ記録するため）
   if (getMasterLoginEmails(master).includes(email)) {
-    // 院名を取得（月次タブから）
     let salonName = '';
     for (const tabName of getLoginTabCandidates()) {
       const sheet = master.getSheetByName(tabName);
@@ -806,6 +804,7 @@ function handleLoginAndGetData(d) {
       }
       if (salonName) break;
     }
+    logLoginEvent_(sid, salonName, device + '(master)');
     return mergeGetData(sid, salonName, master);
   }
 
