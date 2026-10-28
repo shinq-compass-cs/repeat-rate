@@ -1037,8 +1037,14 @@ function deleteRowsByDate(sheet, date, col) {
 // フロントエンドは日次データのみ使用（顧客タブ読み込みを廃止して高速化）
 // CacheServiceで日次データ自体をキャッシュ（SS openを完全回避・60秒TTL）
 function handleGetData(d) {
-  const sid = String(d.salon_id || '').trim();
+  const sid   = String(d.salon_id || '').trim();
+  const email = String(d.email    || '').trim().toLowerCase();
   if (!sid) return { success: false, error: 'salon_id が未指定です' };
+  if (!email) return { success: false, error: 'email が未指定です' };
+
+  // 認証チェック（salon_id + email の組み合わせを検証）
+  const auth = authenticateSalon(sid, email);
+  if (!auth.ok) return { success: false, error: auth.error };
 
   const sc = CacheService.getScriptCache();
 
@@ -1051,7 +1057,7 @@ function handleGetData(d) {
 
   // キャッシュなし → SSから読み込み
   const result = readDaysFromSS(sid, sc);
-  // キャッシュに保存（60秒。saveDay時に明示的に無効化する）
+  // キャッシュに保存（600秒。saveDay時に明示的に無効化する）
   try { sc.put(dayCacheKey, JSON.stringify(result), 600); } catch(_) {}
   return result;
 }
