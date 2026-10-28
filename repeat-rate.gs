@@ -1182,6 +1182,80 @@ function handleExport(p) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+// ─── CSV ダウンロード（POST版）─────────────────────────────────────────
+// 認証情報をリクエストボディで受け取り、URLパラメータへの露出を防止
+
+function handleCsvPost(d) {
+  const sid    = String(d.salon_id || '').trim();
+  const email  = String(d.email   || '').trim().toLowerCase();
+  const auth   = authenticateSalon(sid, email);
+  if (!auth.ok) return ok({ success: false, error: auth.error });
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const idx    = master.getSheetByName(INDEX_TAB);
+  if (!idx) return ok({ success: false, error: 'データなし' });
+
+  const rows = idx.getDataRange().getValues();
+  let ssId = null;
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); break; }
+  }
+  if (!ssId) return ok({ success: false, error: 'データなし' });
+
+  const ss      = SpreadsheetApp.openById(ssId);
+  const cusRows = ss.getSheetByName('顧客').getDataRange().getValues();
+
+  const q   = s => '"' + String(s).replace(/"/g, '""') + '"';
+  const fmt = v => (v instanceof Date)
+    ? v.getFullYear() + '-'
+      + String(v.getMonth()+1).padStart(2,'0') + '-'
+      + String(v.getDate()).padStart(2,'0')
+    : v;
+  const csv = cusRows.map(row => row.map(v => q(fmt(v))).join(',')).join('\n');
+
+  return ok({ success: true, csv: '﻿' + csv });
+}
+
+// ─── Googleスプレッドシート エクスポート（POST版）──────────────────────
+
+function handleExportPost(d) {
+  const sid    = String(d.salon_id || '').trim();
+  const email  = String(d.email   || '').trim().toLowerCase();
+  const auth   = authenticateSalon(sid, email);
+  if (!auth.ok) return ok({ success: false, error: auth.error });
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const idx    = master.getSheetByName(INDEX_TAB);
+  if (!idx) return ok({ success: false, error: 'インデックスなし' });
+
+  const rows = idx.getDataRange().getValues();
+  let ssId = null, salonName = '';
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]).trim() === sid) { ssId = String(rows[i][1]); salonName = String(rows[i][2] || ''); break; }
+  }
+  if (!ssId) return ok({ success: false, error: 'サロンデータなし' });
+
+  const src      = SpreadsheetApp.openById(ssId);
+  const cusSheet = src.getSheetByName('顧客');
+  const daySheet = src.getSheetByName('日次');
+  if (!cusSheet || !daySheet) return ok({ success: false, error: 'シートなし' });
+
+  const now     = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd_HHmmss');
+  const newSs   = SpreadsheetApp.create(salonName + '_リピート率データ_' + now);
+
+  const newCus  = newSs.getSheets()[0];
+  newCus.setName('顧客');
+  const cusData = cusSheet.getDataRange().getValues();
+  if (cusData.length > 0) newCus.getRange(1, 1, cusData.length, cusData[0].length).setValues(cusData);
+
+  const newDay  = newSs.insertSheet('日次');
+  const dayData = daySheet.getDataRange().getValues();
+  if (dayData.length > 0) newDay.getRange(1, 1, dayData.length, dayData[0].length).setValues(dayData);
+
+  newSs.setSpreadsheetLocale('ja');
+  DriveApp.getFileById(newSs.getId()).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  return ok({ success: true, url: newSs.getUrl() });
+}
+
 // ─── 重複行クリーンアップ（同日付は最後の行だけ残す）────────────────
 // handleSaveDay の冒頭で呼ぶことで既存重複も解消する
 
