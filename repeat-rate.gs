@@ -62,8 +62,11 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  if ((e.parameter.action || '') === 'csv')    return handleCsv(e.parameter);
-  if ((e.parameter.action || '') === 'export') return handleExport(e.parameter);
+  // csv/export は POST に移行済み（認証情報のURL露出を防止）
+  if ((e.parameter.action || '') === 'csv' || (e.parameter.action || '') === 'export') {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'この機能はPOSTリクエストに移行しました' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
   // 仕様書更新（再利用可能。関連関数: updateSpecDoc()）
   if (e.parameter.action === 'updateDoc' && e.parameter.key === getUpdateDocKey_()) {
     return ContentService.createTextOutput(JSON.stringify(updateSpecDoc()));
