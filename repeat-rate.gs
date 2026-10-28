@@ -762,7 +762,6 @@ function getMasterLoginEmails(masterOpt) {
       sheet = master.insertSheet('settings');
       sheet.appendRow(['master_login_email']);
       sheet.appendRow(['info@shinq-compass.jp']);
-      sheet.appendRow(['test']);
       sheet.getRange('A1').setFontWeight('bold');
       sheet.setFrozenRows(1);
     }
