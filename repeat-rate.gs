@@ -1006,8 +1006,14 @@ function handleSaveDay(d) {
   const fmt = getSheetFormat(custTab);
 
   const date         = String(d.date         || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { success: false, error: '日付の形式が不正です（YYYY-MM-DD）' };
   const visitors     = parseInt(d.visitors,     10) || 0;
   const reservations = parseInt(d.reservations, 10) || 0;
+  if (visitors < 0 || visitors > 9999) return { success: false, error: '来店人数の値が範囲外です' };
+  if (reservations < 0 || reservations > 9999) return { success: false, error: '予約数の値が範囲外です' };
+  if (reservations > visitors && visitors > 0) return { success: false, error: '予約数が来店人数を超えています' };
+  const customers = d.customers || [];
+  if (!Array.isArray(customers) || customers.length > 500) return { success: false, error: '顧客データの件数が上限を超えています' };
 
   // 同日付を削除（上書き保存 or 未記入に戻す）
   deleteRowsByDate(dayTab,  date, 0);
