@@ -731,6 +731,15 @@ function authenticateSalon(sid, email, masterOpt) {
   return { ok: false, error: '認証に失敗しました' };
 }
 
+// updateDoc POST版（キーはリクエスト本文で渡す）
+function handleUpdateDocPost(d) {
+  const key = String(d.key || '').trim();
+  if (!key || key !== getUpdateDocKey_()) {
+    return ok({ success: false, error: '認証キーが無効です' });
+  }
+  return ok(updateSpecDoc());
+}
+
 // 仕様書更新キーをスクリプトプロパティから取得（未設定なら自動生成して保存）
 function getUpdateDocKey_() {
   const props = PropertiesService.getScriptProperties();
