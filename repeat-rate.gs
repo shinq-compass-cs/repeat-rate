@@ -783,6 +783,8 @@ function handleLoginAndGetData(d) {
   const email  = String(d.email    || '').trim().toLowerCase();
   const device = String(d.device   || '').trim();
   if (!sid || !email) return { success: false, error: 'サロンIDとメールアドレスを入力してください' };
+  if (!/^\d{1,10}$/.test(sid)) return { success: false, error: 'サロンIDの形式が不正です' };
+  if (email.length > 254) return { success: false, error: 'メールアドレスが長すぎます' };
 
   const master = SpreadsheetApp.openById(MASTER_SS_ID);
 
