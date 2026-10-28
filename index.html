@@ -558,7 +558,7 @@ function applyData(res) {
 async function loadData() {
   showLoading(true);
   try {
-    const res = await gasPost({ action: 'getData', salon_id: salon.salon_id });
+    const res = await gasPost({ action: 'getData', salon_id: salon.salon_id, email: salon.email });
     if (!res.success) throw new Error(res.error);
     applyData(res);
   } catch (err) { showToast('データ読み込みエラー: ' + err.message); }
