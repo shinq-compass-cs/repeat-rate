@@ -42,7 +42,7 @@ async function gasPost(payload) {
 
 // 指定日付の日次データを取得
 async function getDayForDate(date) {
-  const res = await gasPost({ action: 'getData', salon_id: TEST_SALON_ID });
+  const res = await gasPost({ action: 'getData', salon_id: TEST_SALON_ID, email: TEST_EMAIL });
   if (!res.success) throw new Error('getData failed: ' + res.error);
   return (res.days || []).find(d => d.date === date) || null;
 }
@@ -142,7 +142,7 @@ async function runTests() {
     action: 'saveDay', salon_id: TEST_SALON_ID, salon_name: TEST_SALON_NAME, email: TEST_EMAIL,
     date: TEST_DATE, visitors: 3, reservations: 2, customers: []
   });
-  const res05 = await gasPost({ action: 'getData', salon_id: TEST_SALON_ID });
+  const res05 = await gasPost({ action: 'getData', salon_id: TEST_SALON_ID, email: TEST_EMAIL });
   assert('TC-05-1', 'getData が success:true', res05.success === true);
   const days05 = (res05.days || []).filter(d => d.date === TEST_DATE || d.date === TEST_DATE2);
   assert('TC-05-2', 'テスト日付のデータが2件取得できる', days05.length === 2, `実際: ${days05.length}件`);
