@@ -81,6 +81,7 @@ function doPost(e) {
       case 'getData':         return ok(handleGetData(d));
       case 'csv':             return handleCsvPost(d);
       case 'export':          return handleExportPost(d);
+      case 'updateDoc':       return handleUpdateDocPost(d);
       default:                return ok({ success: false, error: 'unknown action: ' + d.action });
     }
   } catch (err) {
