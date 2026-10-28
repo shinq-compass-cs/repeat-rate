@@ -598,7 +598,7 @@ function renderRecentMonths() {
     const tr = md.reduce((s, r) => s + (r.reservations || 0), 0);
     const rate = tv > 0 ? Math.round(tr / tv * 100) : null;
     const cls = rate !== null ? rateClass(rate) : 'none';
-    const rateStr = rate !== null ? rate + '<span style="font-size:14px;font-weight:400">%</span>' : '—';
+    const rateStr = rate !== null ? esc(String(rate)) + '<span style="font-size:14px;font-weight:400">%</span>' : '—';
     const sub = tv > 0 ? tv + '人施術 / ' + tr + '人予約' : 'データなし';
     const label = (d.getMonth() + 1) + '月';
     html += `<div class="recent-month-card">
