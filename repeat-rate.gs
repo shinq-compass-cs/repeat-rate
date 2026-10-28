@@ -52,6 +52,8 @@ function doPost(e) {
       case 'loginAndGetData': return ok(handleLoginAndGetData(d));
       case 'saveDay':         return ok(handleSaveDay(d));
       case 'getData':         return ok(handleGetData(d));
+      case 'csv':             return handleCsvPost(d);
+      case 'export':          return handleExportPost(d);
       default:                return ok({ success: false, error: 'unknown action: ' + d.action });
     }
   } catch (err) {
