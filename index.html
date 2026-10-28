@@ -1051,7 +1051,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // バックグラウンドで最新データを取得して差分更新
   try {
-    const res = await gasPost({ action: 'getData', salon_id: s.salon_id });
+    const res = await gasPost({ action: 'getData', salon_id: s.salon_id, email: s.email });
     if (!res.success) throw new Error('expired');
     applyData(res);
   } catch(_) {
