@@ -1026,6 +1026,7 @@ function showLoading(v) { document.getElementById('loading-overlay').style.displ
 function showToast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2800); }
 function saveSession(s)   { s._ts = Date.now(); localStorage.setItem('rr_session', JSON.stringify(s)); }
 function clearSession()   { localStorage.removeItem('rr_session'); }
+function clearDataCache() { try { const keys = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('rr_cache_')) keys.push(k); } keys.forEach(k => localStorage.removeItem(k)); } catch(_){} }
 function restoreSession() { try { const s = JSON.parse(localStorage.getItem('rr_session')||'null'); if (!s||!s.salon_id) return null; if (s._ts && Date.now()-s._ts > 24*60*60*1000) { clearSession(); return null; } return s; } catch(_){} return null; }
 function saveDataCache(sid, data) { try { localStorage.setItem('rr_cache_' + sid, JSON.stringify({ ts: Date.now(), days: data.days || [] })); } catch(_){} }
 function loadDataCache(sid) { try { return JSON.parse(localStorage.getItem('rr_cache_' + sid)||'null'); } catch(_){} return null; }
