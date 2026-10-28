@@ -95,9 +95,10 @@ function doGet(e) {
     return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'この機能はPOSTリクエストに移行しました' }))
       .setMimeType(ContentService.MimeType.JSON);
   }
-  // 仕様書更新（再利用可能。関連関数: updateSpecDoc()）
-  if (e.parameter.action === 'updateDoc' && e.parameter.key === getUpdateDocKey_()) {
-    return ContentService.createTextOutput(JSON.stringify(updateSpecDoc()));
+  // updateDoc は POST に移行済み
+  if ((e.parameter.action || '') === 'updateDoc') {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'この機能はPOSTリクエストに移行しました' }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
   return ContentService.createTextOutput('repeat-rate GAS OK');
 }
