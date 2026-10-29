@@ -18,6 +18,22 @@ const SALON_FOLDER_ID = PROPS_.getProperty('SALON_FOLDER_ID');
 const LOG_SHEET_ID    = PROPS_.getProperty('LOG_SHEET_ID');
 const LOG_TAB_NAME    = 'リピート率ログ';
 
+// settingsタブから test メールを削除（一時関数・実行後にコードごと削除する）
+function removeTestEmail_() {
+  const master = SpreadsheetApp.openById(MASTER_SS_ID);
+  const sheet = master.getSheetByName('settings');
+  if (!sheet) return { success: false, error: 'settings タブが存在しません' };
+  const rows = sheet.getDataRange().getValues();
+  let removed = 0;
+  for (let i = rows.length - 1; i >= 1; i--) {
+    if (String(rows[i][0]).trim().toLowerCase() === 'test') {
+      sheet.deleteRow(i + 1);
+      removed++;
+    }
+  }
+  return { success: true, removed: removed };
+}
+
 // ScriptPropertiesの状態確認用（値の登録はGASエディタのプロジェクト設定から手動で行う）
 function checkScriptProperties() {
   const props = PropertiesService.getScriptProperties();
