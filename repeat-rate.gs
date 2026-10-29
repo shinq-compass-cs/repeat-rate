@@ -96,7 +96,6 @@ function doPost(e) {
       case 'csv':             return handleCsvPost(d);
       case 'export':          return handleExportPost(d);
       case 'updateDoc':       return handleUpdateDocPost(d);
-      case '_removeTestEmail': return ok(removeTestEmail_());
       default:                return ok({ success: false, error: 'unknown action: ' + d.action });
     }
   } catch (err) {
