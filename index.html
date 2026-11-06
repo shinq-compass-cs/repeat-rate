@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot-news" content="noindex">
+<meta name="CCBot" content="noindex, nofollow">
+<meta name="GPTBot" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://script.google.com https://script.googleusercontent.com; img-src 'self' data:; frame-ancestors 'none';">
+<title>次回予約率ツール｜しんきゅうコンパス</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
+<style>
+:root {
+  --primary: #2c4a72;
+  --primary-light: #3d6699;
+  --accent: #2e8a6e;
+  --accent-light: #e4f2ee;
+  --warning: #b07a3a;
+  --warning-light: #f4ede0;
+  --danger: #a84545;
+  --danger-light: #f0e8e8;
+  --best: #c49b20;
+  --best-light: #fef9e7;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-400: #94a3b8;
+  --gray-600: #475569;
+  --gray-800: #1e293b;
+  --white: #ffffff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { overflow-x: hidden; width: 100%; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--gray-50); color: var(--gray-800); min-height: 100vh; }
+
+/* ===== ログイン ===== */
+#login-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #2c4a72 0%, #3d6699 50%, #2e8a6e 100%); padding: 20px;
+}
+.login-card {
+  background: var(--white); border-radius: 20px; padding: 48px 40px;
+  width: 100%; max-width: 400px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); text-align: center;
+}
+.login-logo { font-family: 'Inter',sans-serif; font-size: 13px; font-weight: 600; color: var(--gray-400); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+.login-title { font-size: 22px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+.login-subtitle { font-size: 12px; color: var(--gray-400); margin-bottom: 32px; }
+.login-label { display: block; text-align: left; font-size: 12px; font-weight: 400; color: var(--gray-600); margin-bottom: 6px; }
+.login-input {
+  width: 100%; padding: 12px 16px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm);
+  font-size: 15px; font-family: inherit; outline: none; transition: border-color .2s; margin-bottom: 16px;
+}
+.login-input:focus { border-color: var(--primary-light); }
+.login-btn {
+  width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none;
+  border-radius: var(--radius-sm); font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px;
+}
+.login-btn:hover { background: var(--primary-light); }
+.login-error { color: var(--danger); font-size: 13px; margin-top: 12px; display: none; }
+
+/* ===== メイン ===== */
+#main-screen { display: none; }
+.app-header {
+  background: var(--white); border-bottom: 1px solid var(--gray-200);
+  padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.app-header-logo { font-size: 12px; color: var(--gray-400); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.app-header-salon { font-size: 14px; font-weight: 700; color: var(--primary); }
+.logout-btn { font-size: 12px; color: var(--gray-400); background: none; border: 1px solid var(--gray-200); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+.header-right { display: flex; align-items: center; }
+
+.main-content { padding: 16px; max-width: 600px; margin: 0 auto; width: 100%; }
+
+/* ===== 今月リピート率 ===== */
+.monthly-stat-card {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  border-radius: 18px; padding: 24px; margin-bottom: 14px; color: #fff; text-align: center;
+}
+.monthly-label { font-size: 13px; opacity: .8; margin-bottom: 4px; }
+.monthly-rate { font-family: 'Inter',sans-serif; font-size: 64px; font-weight: 700; line-height: 1; }
+.monthly-sub { font-size: 12px; opacity: .75; margin-top: 6px; }
+.monthly-badge { display: inline-block; padding: 3px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-top: 8px; }
+.monthly-badge.best { background: rgba(212,160,23,.4); }
+.monthly-badge.good { background: rgba(255,255,255,.25); }
+.monthly-badge.ok   { background: rgba(255,200,0,.3); }
+.monthly-badge.low  { background: rgba(255,80,80,.3); }
+
+/* ===== 直近3ヶ月 ===== */
+.recent-months { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+.recent-month-card {
+  background: var(--white); border-radius: var(--radius-sm); padding: 14px 8px;
+  text-align: center; box-shadow: var(--shadow-sm);
+}
+.recent-month-label { font-size: 12px; color: var(--gray-400); margin-bottom: 4px; }
+.recent-month-rate { font-family: 'Inter',sans-serif; font-size: 28px; font-weight: 700; color: var(--primary); line-height: 1.2; }
+.recent-month-rate.best { color: var(--best); }
+.recent-month-rate.good { color: var(--accent); }
+.recent-month-rate.ok   { color: var(--warning); }
+.recent-month-rate.low  { color: var(--danger); }
+.recent-month-rate.none { color: var(--gray-400); font-size: 20px; }
+.recent-month-sub { font-size: 10px; color: var(--gray-400); margin-top: 4px; }
+
+/* ===== セクションカード ===== */
+.section-card { background: var(--white); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; box-shadow: var(--shadow-sm); }
+.section-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+.section-title-date { font-size: 13px; color: var(--gray-400); font-weight: 400; }
+
+/* ===== 保存済み表示 ===== */
+.saved-result { background: var(--gray-50); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 14px; }
+.saved-result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.saved-result-item { text-align: center; }
+.saved-result-label { font-size: 11px; color: var(--gray-400); margin-bottom: 4px; }
+.saved-result-val { font-family: 'Inter',sans-serif; font-size: 28px; font-weight: 700; color: var(--primary); }
+.saved-result-val.best { color: var(--best); }
+.saved-result-val.good { color: var(--accent); }
+.saved-result-val.ok   { color: var(--warning); }
+.saved-result-val.low  { color: var(--danger); }
+.edit-btn { width: 100%; padding: 11px; background: var(--gray-100); color: var(--gray-600); border: 1px solid var(--gray-200); border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; }
+.edit-btn:hover { background: var(--gray-200); }
+
+/* ===== テンキー（過去データ用・従来グリッド） ===== */
+.count-section { margin-bottom: 18px; }
+.count-label { font-size: 13px; color: var(--gray-600); margin-bottom: 8px; font-weight: 400; }
+
+/* ===== ±ボタン + 横一列キー ===== */
+.today-counter { display: grid; grid-template-columns: 52px 1fr 52px; gap: 10px; margin-bottom: 10px; width: 100%; }
+.pm-btn {
+  width: 52px; height: 52px; border: none; border-radius: 50%;
+  font-size: 28px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .15s, transform .1s; font-family: 'Inter',sans-serif;
+}
+.pm-btn.minus { background: var(--gray-200); color: var(--gray-600); }
+.pm-btn.plus  { background: var(--primary);  color: #fff; }
+.pm-btn:hover  { opacity: .85; }
+.pm-btn:active { transform: scale(.92); }
+input.count-display-today {
+  font-family: 'Inter',sans-serif; font-size: 48px; font-weight: 700; text-align: center;
+  color: var(--primary); background: var(--gray-50); border-radius: var(--radius-sm);
+  padding: 10px; flex: 1; min-width: 0; border: 1.5px solid transparent;
+  outline: none; transition: border-color .2s, background .2s;
+}
+input.count-display-today:focus { border-color: var(--primary-light); background: #eef3fb; }
+.numrow { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-bottom: 4px; }
+@media (max-width: 600px) {
+  .numrow { grid-template-columns: repeat(5, 1fr); }
+}
+.numrow-btn {
+  background: var(--gray-100); border: none; border-radius: var(--radius-sm);
+  font-size: 16px; font-weight: 600; padding: 12px 0; cursor: pointer;
+  transition: background .15s, transform .1s; color: var(--gray-800); font-family: 'Inter',sans-serif;
+  min-width: 0;
+}
+.numrow-btn:hover  { background: var(--gray-200); }
+.numrow-btn:active { transform: scale(.95); }
+.numrow-clear-btn { width: 100%; padding: 10px 0; margin-top: 2px; font-size: 12px; font-weight: 700; color: var(--danger); background: var(--danger-light); border: none; border-radius: var(--radius-sm); cursor: pointer; transition: opacity .15s; }
+.numrow-clear-btn:hover { opacity: .8; }
+
+/* ===== ライブリピート率 ===== */
+.live-rate { text-align: center; padding: 10px; margin-bottom: 14px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 700; display: none; }
+.live-rate.best { background: var(--best-light); color: var(--best); }
+.live-rate.good { background: var(--accent-light); color: var(--accent); }
+.live-rate.ok   { background: var(--warning-light); color: var(--warning); }
+.live-rate.low  { background: var(--danger-light); color: var(--danger); }
+.live-rate-err  { background: none; color: var(--gray-400); font-size: 12px; font-weight: 400; padding: 4px 0; }
+
+/* ===== ボタン ===== */
+.save-btn {
+  width: 100%; padding: 15px; background: var(--primary); color: #fff; border: none;
+  border-radius: var(--radius-sm); font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 4px;
+}
+.save-btn:hover { background: var(--primary-light); }
+.save-btn:disabled { background: var(--gray-400); cursor: not-allowed; }
+.back-btn { width: 100%; padding: 11px; background: none; color: var(--gray-400); border: 1px solid var(--gray-200); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; margin-top: 10px; }
+.back-btn:hover { color: var(--gray-600); }
+
+.section-divider { border: none; border-top: 1px solid var(--gray-100); margin: 16px 0; }
+
+/* ===== カレンダー ===== */
+.cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.cal-month-label { font-size: 14px; font-weight: 700; color: var(--primary); }
+.cal-nav-btn { background: none; border: 1px solid var(--gray-200); border-radius: 6px; padding: 4px 12px; font-size: 14px; cursor: pointer; color: var(--gray-600); }
+.cal-nav-btn:disabled { opacity: .3; cursor: default; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal-dow { text-align: center; font-size: 10px; color: var(--gray-400); padding: 4px 0; font-weight: 600; }
+.cal-day { text-align: center; padding: 6px 2px; border-radius: 6px; font-size: 13px; cursor: pointer; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.cal-day:hover { background: var(--gray-100); }
+.cal-day.today { background: var(--primary); color: #fff; font-weight: 700; }
+.cal-day-rate { font-size: 9px; display: block; margin-top: 2px; font-weight: 700; min-height: 1em; line-height: 1; }
+.cal-day-rate.best { color: var(--best); }
+.cal-day-rate.good { color: var(--accent); }
+.cal-day-rate.ok   { color: var(--warning); }
+.cal-day-rate.low  { color: var(--danger); }
+.cal-day.today .cal-day-rate { color: rgba(255,255,255,.85); }
+.cal-day.empty  { cursor: default; pointer-events: none; }
+.cal-day.future { color: var(--gray-400); cursor: default; pointer-events: none; }
+
+/* ===== グラフ ===== */
+.chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.chart-title { font-size: 14px; font-weight: 700; color: var(--primary); }
+.chart-toggle { display: flex; gap: 4px; }
+.toggle-btn { font-size: 12px; padding: 4px 12px; border-radius: 6px; border: 1px solid var(--gray-200); background: var(--gray-100); color: var(--gray-600); cursor: pointer; }
+.toggle-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+@media (max-width: 600px) { .pc-only { display: none; } }
+/* ===== ローディング / トースト ===== */
+#loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,.7); display: none; align-items: center; justify-content: center; z-index: 200; }
+.spinner { width: 40px; height: 40px; border: 3px solid var(--gray-200); border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#toast { position: fixed; bottom: 24px; left: 0; right: 0; width: fit-content; max-width: calc(100% - 48px); margin: 0 auto; background: var(--gray-800); color: #fff; padding: 12px 24px; border-radius: 24px; font-size: 14px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 300; }
+#toast.show { opacity: 1; }
+
+@media (max-width: 380px) {
+  .login-card { padding: 36px 20px; }
+  .monthly-rate { font-size: 52px; }
+}
+</style>
+</head>
+<body>
+
+<div id="loading-overlay"><div class="spinner"></div></div>
+<div id="toast"></div>
+
+<!-- ===== ログイン ===== -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">しんきゅうコンパス</div>
+    <h1 class="login-title">次回予約率ツール</h1>
+    <p class="login-subtitle">来店・予約データを記録してリピート率を管理</p>
+    <label class="login-label">サロンID</label>
+    <input type="text"  id="sid-input"   class="login-input" placeholder="例：38290" inputmode="numeric" onkeydown="if(event.key==='Enter')handleLogin()">
+    <label class="login-label">メールアドレス</label>
+    <input type="email" id="email-input" class="login-input" placeholder="例：info@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')handleLogin()">
+    <button class="login-btn" onclick="handleLogin()">ログイン</button>
+    <div id="login-error" class="login-error"></div>
+  </div>
+</div>
+
+<!-- ===== メイン ===== -->
+<div id="main-screen">
+  <div class="app-header">
+    <div>
+      <div class="app-header-logo">しんきゅうコンパス</div>
+      <div class="app-header-salon" id="header-salon-name"></div>
+    </div>
+    <div class="header-right">
+      <button class="logout-btn" onclick="handleLogout()">ログアウト</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- 今月リピート率 -->
+    <div class="monthly-stat-card">
+      <div class="monthly-label" id="monthly-label">今月のリピート率</div>
+      <div class="monthly-rate" id="monthly-rate-val">—</div>
+      <div class="monthly-sub"  id="monthly-sub"></div>
+    </div>
+
+    <!-- 直近3ヶ月 リピート率 -->
+    <div class="recent-months" id="recent-months"></div>
+
+    <!-- ① 本日のデータ -->
+    <div class="section-card">
+      <div class="section-title">
+        本日のデータ
+        <span class="section-title-date" id="today-date-label"></span>
+      </div>
+
+      <!-- 今日データなし・過去フォーム表示中のプレースホルダー -->
+      <div id="today-empty" style="display:none;text-align:center;padding:16px 0;">
+        <div style="font-size:13px;color:var(--gray-400);margin-bottom:10px;">本日のデータはまだ入力されていません</div>
+        <button class="edit-btn" onclick="showTodayInput()">入力する</button>
+      </div>
+
+      <!-- 保存済み表示 -->
+      <div id="today-saved" style="display:none">
+        <div class="saved-result">
+          <div class="saved-result-grid">
+            <div class="saved-result-item">
+              <div class="saved-result-label">来店</div>
+              <div class="saved-result-val" id="t-res-v">0</div>
+            </div>
+            <div class="saved-result-item">
+              <div class="saved-result-label">次回予約</div>
+              <div class="saved-result-val" id="t-res-r">0</div>
+            </div>
+            <div class="saved-result-item">
+              <div class="saved-result-label">リピート率</div>
+              <div class="saved-result-val" id="t-res-rate">—</div>
+            </div>
+          </div>
+        </div>
+        <button class="edit-btn" onclick="editToday()">修正する</button>
+      </div>
+
+      <!-- 入力フォーム（±ボタン + 横一列キー） -->
+      <div id="today-input">
+        <div class="count-section">
+          <div class="count-label">① 今日は何人施術しましたか？</div>
+          <div class="today-counter">
+            <button class="pm-btn minus" onclick="npPm('t','v',-1)">−</button>
+            <input type="text" inputmode="numeric" class="count-display-today" id="t-visitor-display" value="0"
+                   oninput="onCountInput('t','v',this.value)">
+            <button class="pm-btn plus"  onclick="npPm('t','v',+1)">＋</button>
+          </div>
+          <div class="numrow">
+            <button class="numrow-btn" onclick="np('0','t','v')">0</button>
+            <button class="numrow-btn" onclick="np('1','t','v')">1</button>
+            <button class="numrow-btn" onclick="np('2','t','v')">2</button>
+            <button class="numrow-btn" onclick="np('3','t','v')">3</button>
+            <button class="numrow-btn" onclick="np('4','t','v')">4</button>
+            <button class="numrow-btn" onclick="np('5','t','v')">5</button>
+            <button class="numrow-btn" onclick="np('6','t','v')">6</button>
+            <button class="numrow-btn" onclick="np('7','t','v')">7</button>
+            <button class="numrow-btn" onclick="np('8','t','v')">8</button>
+            <button class="numrow-btn" onclick="np('9','t','v')">9</button>
+          </div>
+          <button class="numrow-clear-btn" onclick="np('clear','t','v')">消去</button>
+        </div>
+
+        <hr class="section-divider">
+
+        <div class="count-section">
+          <div class="count-label">② そのうち何人が次回の予約を取りましたか？</div>
+          <div class="today-counter">
+            <button class="pm-btn minus" onclick="npPm('t','r',-1)">−</button>
+            <input type="text" inputmode="numeric" class="count-display-today" id="t-reservation-display" value="0"
+                   oninput="onCountInput('t','r',this.value)">
+            <button class="pm-btn plus"  onclick="npPm('t','r',+1)">＋</button>
+          </div>
+          <div class="numrow">
+            <button class="numrow-btn" onclick="np('0','t','r')">0</button>
+            <button class="numrow-btn" onclick="np('1','t','r')">1</button>
+            <button class="numrow-btn" onclick="np('2','t','r')">2</button>
+            <button class="numrow-btn" onclick="np('3','t','r')">3</button>
+            <button class="numrow-btn" onclick="np('4','t','r')">4</button>
+            <button class="numrow-btn" onclick="np('5','t','r')">5</button>
+            <button class="numrow-btn" onclick="np('6','t','r')">6</button>
+            <button class="numrow-btn" onclick="np('7','t','r')">7</button>
+            <button class="numrow-btn" onclick="np('8','t','r')">8</button>
+            <button class="numrow-btn" onclick="np('9','t','r')">9</button>
+          </div>
+          <button class="numrow-clear-btn" onclick="np('clear','t','r')">消去</button>
+        </div>
+
+        <div id="t-live-rate" class="live-rate"></div>
+
+        <button class="save-btn" id="t-save-btn" onclick="saveToday()" disabled>保存する</button>
+
+      </div>
+    </div>
+
+    <!-- ② 過去データ -->
+    <div class="section-card" id="past-section-card">
+      <div class="section-title">過去データ</div>
+
+      <!-- カレンダー -->
+      <div id="past-calendar">
+        <div style="font-size:12px;color:var(--gray-400);margin-bottom:10px;">過去の日付をタップするとデータを入力・修正できます</div>
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="shiftCalMonth(-1)">＜</button>
+          <div class="cal-month-label" id="cal-month-label"></div>
+          <button class="cal-nav-btn" onclick="shiftCalMonth(+1)" id="cal-nav-next">＞</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+
+      <!-- 過去日付フォーム -->
+      <div id="past-form" style="display:none">
+        <div style="font-size:13px;color:var(--gray-600);font-weight:600;margin-bottom:16px;padding:8px 12px;background:var(--accent-light);border-radius:var(--radius-sm)" id="past-date-label"></div>
+
+        <div class="count-section">
+          <div class="count-label">① 何人施術しましたか？</div>
+          <div class="today-counter">
+            <button class="pm-btn minus" onclick="npPm('p','v',-1)">−</button>
+            <input type="text" inputmode="numeric" class="count-display-today" id="p-visitor-display" value="0"
+                   oninput="onCountInput('p','v',this.value)">
+            <button class="pm-btn plus"  onclick="npPm('p','v',+1)">＋</button>
+          </div>
+          <div class="numrow">
+            <button class="numrow-btn" onclick="np('0','p','v')">0</button>
+            <button class="numrow-btn" onclick="np('1','p','v')">1</button>
+            <button class="numrow-btn" onclick="np('2','p','v')">2</button>
+            <button class="numrow-btn" onclick="np('3','p','v')">3</button>
+            <button class="numrow-btn" onclick="np('4','p','v')">4</button>
+            <button class="numrow-btn" onclick="np('5','p','v')">5</button>
+            <button class="numrow-btn" onclick="np('6','p','v')">6</button>
+            <button class="numrow-btn" onclick="np('7','p','v')">7</button>
+            <button class="numrow-btn" onclick="np('8','p','v')">8</button>
+            <button class="numrow-btn" onclick="np('9','p','v')">9</button>
+          </div>
+          <button class="numrow-clear-btn" onclick="np('clear','p','v')">消去</button>
+        </div>
+
+        <hr class="section-divider">
+
+        <div class="count-section">
+          <div class="count-label">② そのうち何人が次回の予約を取りましたか？</div>
+          <div class="today-counter">
+            <button class="pm-btn minus" onclick="npPm('p','r',-1)">−</button>
+            <input type="text" inputmode="numeric" class="count-display-today" id="p-reservation-display" value="0"
+                   oninput="onCountInput('p','r',this.value)">
+            <button class="pm-btn plus"  onclick="npPm('p','r',+1)">＋</button>
+          </div>
+          <div class="numrow">
+            <button class="numrow-btn" onclick="np('0','p','r')">0</button>
+            <button class="numrow-btn" onclick="np('1','p','r')">1</button>
+            <button class="numrow-btn" onclick="np('2','p','r')">2</button>
+            <button class="numrow-btn" onclick="np('3','p','r')">3</button>
+            <button class="numrow-btn" onclick="np('4','p','r')">4</button>
+            <button class="numrow-btn" onclick="np('5','p','r')">5</button>
+            <button class="numrow-btn" onclick="np('6','p','r')">6</button>
+            <button class="numrow-btn" onclick="np('7','p','r')">7</button>
+            <button class="numrow-btn" onclick="np('8','p','r')">8</button>
+            <button class="numrow-btn" onclick="np('9','p','r')">9</button>
+          </div>
+          <button class="numrow-clear-btn" onclick="np('clear','p','r')">消去</button>
+        </div>
+
+        <div id="p-live-rate" class="live-rate"></div>
+
+        <button class="save-btn" id="p-save-btn" onclick="savePast()" disabled>保存する</button>
+
+        <button class="back-btn" onclick="showPastCalendar()">← カレンダーに戻る</button>
+      </div>
+    </div>
+
+    <!-- ③ リピート率グラフ -->
+    <div class="section-card" id="chart-section-card">
+      <div class="chart-header">
+        <div class="chart-title">リピート率グラフ</div>
+        <div class="chart-toggle">
+          <button class="toggle-btn pc-only" id="btn-daily"   onclick="switchChart('daily')">日次</button>
+          <button class="toggle-btn"         id="btn-weekly"  onclick="switchChart('weekly')">週次</button>
+          <button class="toggle-btn"         id="btn-monthly" onclick="switchChart('monthly')">月次</button>
+        </div>
+      </div>
+      <canvas id="rate-chart" height="180"></canvas>
+    </div>
+
+  </div>
+
+  <footer style="text-align:center;padding:24px 16px 32px;font-size:11px;color:var(--gray-400);">
+    Copyright &copy; shinq-compass.jp All Rights Reserved.
+  </footer>
+</div>
+
+<script>
+// ===================================================================
+// GAS Web App デプロイURL
+// 再デプロイ（新バージョン発行）で変わる場合のみ更新する。通常デプロイ（既存バージョン更新）ではURLは変わらない。
+// 変更手順: clasp push → GASエディタ「デプロイを管理」→ 既存デプロイを編集 → バージョン選択 → デプロイ
+// ===================================================================
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbw5teJV0bHH5PREhswvYyvx9OInMHL48Gzshq7kwLUpzGWLNuksKXp3l75vzLXX2mw4AA/exec';
+
+// ===================================================================
+// State
+// ===================================================================
+let salon = null;
+let allDays = [];
+let chartMode = window.innerWidth > 600 ? 'daily' : 'weekly';
+let chartInstance = null;
+let pastDate = '';
+let calMonthOffset = 0; // 0=今月, -1=先月, etc.
+
+// 入力バッファ（t=today, p=past / v=visitors, r=reservations）
+// vf/rf = フレッシュフラグ（true=次の数字キーで値を置換、false=追記モード）
+const buf = { t: { v: '0', r: '0', vf: true, rf: true }, p: { v: '0', r: '0', vf: true, rf: true } };
+
+// ===================================================================
+// HTMLエスケープ
+function esc(s) { const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+
+// リピート率判定（良好:90%以上 / 標準:70%以上 / 課題:70%未満）
+// ===================================================================
+// 判断基準: 優秀≥90% / 良好≥70% / 標準≥50% / 課題あり<50%
+function rateClass(rate) {
+  if (rate === null || rate === undefined) return '';
+  return rate >= 90 ? 'best' : rate >= 70 ? 'good' : rate >= 50 ? 'ok' : 'low';
+}
+
+function rateLabel(rate) {
+  if (rate === null || rate === undefined) return '';
+  return rate >= 90 ? '◎ 優秀' : rate >= 70 ? '○ 良好' : rate >= 50 ? '△ 標準' : '✕ 課題あり';
+}
+
+// ===================================================================
+// ログイン
+// ===================================================================
+// A: loginとgetDataを1回のAPI呼び出しで統合 + キャッシュから即表示
+async function handleLogin() {
+  const sid   = document.getElementById('sid-input').value.trim();
+  const email = document.getElementById('email-input').value.trim().toLowerCase();
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  if (!sid || !email) { errEl.textContent = 'サロンIDとメールアドレスを入力してください'; errEl.style.display = 'block'; return; }
+  // D: 先に画面枠を表示（プログレッシブ表示）
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display  = 'block';
+  document.getElementById('today-date-label').textContent = fmtDate(todayStr());
+
+  // キャッシュまたは空データで即座にUI表示（スピナーでブロックしない）
+  const cache = loadDataCache(sid);
+  const prevSession = restoreSession();
+  salon = { salon_id: sid, salon_name: (cache && prevSession && prevSession.salon_name) || '', email };
+  document.getElementById('header-salon-name').textContent = salon.salon_name || 'サロンID: ' + sid;
+  applyData({ days: cache ? cache.days : [] });
+
+  // バックグラウンドでGAS API呼び出し → 認証＋最新データで差分更新
+  try {
+    const res = await gasPost({ action: 'loginAndGetData', salon_id: sid, email, device: getDeviceInfo() });
+    if (!res.success) throw new Error(res.error || 'ログイン失敗');
+    salon = { salon_id: sid, salon_name: res.salon_name, email };
+    saveSession(salon);
+    document.getElementById('header-salon-name').textContent = res.salon_name || 'サロンID: ' + sid;
+    applyData(res);
+  } catch (err) {
+    // 認証失敗 → ログイン画面に戻す
+    salon = null; allDays = [];
+    document.getElementById('main-screen').style.display  = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    errEl.textContent = err.message; errEl.style.display = 'block';
+  }
+}
+
+function handleLogout() {
+  clearDataCache(); clearSession(); salon = null; allDays = [];
+  // buf をリセット（再ログイン時に前回の入力値が残らないよう）
+  buf.t.v = '0'; buf.t.r = '0'; buf.p.v = '0'; buf.p.r = '0';
+  document.getElementById('main-screen').style.display  = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+// ===================================================================
+// データ適用（API応答を画面に反映）
+// ===================================================================
+function applyData(res) {
+  allDays = (res.days || []).sort((a, b) => a.date > b.date ? -1 : 1);
+  if (salon) saveDataCache(salon.salon_id, res);
+  calMonthOffset = 0;
+  document.getElementById('past-form').style.display     = 'none';
+  document.getElementById('past-calendar').style.display = 'block';
+  renderMonthlyStats();
+  renderRecentMonths();
+  renderCalendar();
+  renderChart();
+  initTodaySection();
+}
+
+// C: セッション復元時はgetDataのみ（loginスキップ）
+async function loadData() {
+  showLoading(true);
+  try {
+    const res = await gasPost({ action: 'getData', salon_id: salon.salon_id, email: salon.email });
+    if (!res.success) throw new Error(res.error);
+    applyData(res);
+  } catch (err) { showToast('データ読み込みエラー: ' + err.message); }
+  finally { showLoading(false); }
+}
+
+// ===================================================================
+// 今月リピート率
+// ===================================================================
+function renderMonthlyStats() {
+  const ym = todayStr().slice(0, 7);
+  const md = allDays.filter(d => d.date.startsWith(ym));
+  const tv = md.reduce((s, d) => s + (d.visitors || 0), 0);
+  const tr = md.reduce((s, d) => s + (d.reservations || 0), 0);
+  const rate = tv > 0 ? Math.round(tr / tv * 100) : null;
+  const now = new Date();
+  document.getElementById('monthly-label').textContent = now.getFullYear() + '年' + (now.getMonth() + 1) + '月のリピート率';
+  if (rate === null) {
+    document.getElementById('monthly-rate-val').innerHTML = '—';
+    document.getElementById('monthly-sub').textContent = 'まだデータがありません';
+    return;
+  }
+  document.getElementById('monthly-rate-val').innerHTML = esc(String(rate)) + '<span style="font-size:22px;font-weight:400">%</span>';
+  document.getElementById('monthly-sub').textContent = '累計 ' + tv + '人施術 / ' + tr + '人予約（' + md.length + '日間）';
+}
+
+function renderRecentMonths() {
+  const container = document.getElementById('recent-months');
+  const now = new Date();
+  let html = '';
+  for (let offset = 3; offset >= 1; offset--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    const ym = d.getFullYear() + '-' + pad(d.getMonth() + 1);
+    const md = allDays.filter(r => r.date.startsWith(ym));
+    const tv = md.reduce((s, r) => s + (r.visitors || 0), 0);
+    const tr = md.reduce((s, r) => s + (r.reservations || 0), 0);
+    const rate = tv > 0 ? Math.round(tr / tv * 100) : null;
+    const cls = rate !== null ? rateClass(rate) : 'none';
+    const rateStr = rate !== null ? esc(String(rate)) + '<span style="font-size:14px;font-weight:400">%</span>' : '—';
+    const sub = tv > 0 ? tv + '人施術 / ' + tr + '人予約' : 'データなし';
+    const label = (d.getMonth() + 1) + '月';
+    html += `<div class="recent-month-card">
+      <div class="recent-month-label">${esc(label)}</div>
+      <div class="recent-month-rate ${esc(cls)}">${rateStr}</div>
+      <div class="recent-month-sub">${esc(sub)}</div>
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
+// ===================================================================
+// 本日セクション
+// ===================================================================
+function initTodaySection() {
+  const today = allDays.find(d => d.date === todayStr());
+  if (today) showTodaySaved(today); else showTodayInput();
+}
+
+function showTodaySaved(rec) {
+  const cls = rateClass(rec.rate);
+  document.getElementById('t-res-v').textContent    = rec.visitors;
+  document.getElementById('t-res-r').textContent    = rec.reservations;
+  const el = document.getElementById('t-res-rate');
+  el.textContent = rec.rate !== null ? rec.rate + '%' : '—'; el.className = 'saved-result-val ' + cls;
+  document.getElementById('today-empty').style.display = 'none';
+  document.getElementById('today-saved').style.display = 'block';
+  document.getElementById('today-input').style.display = 'none';
+}
+
+function showTodayInput() {
+  // 過去フォームが開いていたら閉じてカレンダーに戻す（相互排他）
+  document.getElementById('past-form').style.display     = 'none';
+  document.getElementById('past-calendar').style.display = 'block';
+  document.getElementById('today-empty').style.display  = 'none';
+  document.getElementById('today-saved').style.display  = 'none';
+  document.getElementById('today-input').style.display  = 'block';
+  const today = allDays.find(d => d.date === todayStr());
+  if (today) {
+    // 保存済みデータがあれば上書き
+    buf.t.v = String(today.visitors); buf.t.r = String(today.reservations);
+  }
+  // フォームを開いたらフレッシュ状態にリセット（次の数字キーで置換モード）
+  buf.t.vf = true; buf.t.rf = true;
+  // 保存済みデータなし → buf.t を保持（入力途中の値を維持）
+  setDisplay('t');
+  updateLiveRate('t'); updateSaveBtn('t');
+}
+
+function editToday() { showTodayInput(); }
+
+// ===================================================================
+// カレンダー
+// ===================================================================
+function shiftCalMonth(delta) {
+  calMonthOffset += delta;
+  // 未来月には進めない
+  if (calMonthOffset > 0) calMonthOffset = 0;
+  renderCalendar();
+  renderChart();
+}
+
+function renderCalendar() {
+  const base = new Date(); base.setDate(1); base.setMonth(base.getMonth() + calMonthOffset);
+  const year = base.getFullYear(), mon = base.getMonth();
+  const daysInMonth = new Date(year, mon + 1, 0).getDate();
+  const firstDow    = new Date(year, mon, 1).getDay();
+  const dataByDate  = {}; allDays.forEach(d => { dataByDate[d.date] = d; });
+  const today = todayStr();
+  document.getElementById('cal-month-label').textContent = year + '年' + (mon + 1) + '月';
+  // 翌月ボタン：今月より先には進めない
+  const nextBtn = document.getElementById('cal-nav-next');
+  if (nextBtn) nextBtn.disabled = calMonthOffset >= 0;
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = ['日','月','火','水','木','金','土'].map(d => `<div class="cal-dow">${d}</div>`).join('');
+  for (let i = 0; i < firstDow; i++) grid.insertAdjacentHTML('beforeend', '<div class="cal-day empty"></div>');
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = year + '-' + pad(mon + 1) + '-' + pad(d);
+    if (ds > today) {
+      grid.insertAdjacentHTML('beforeend', `<div class="cal-day future">${d}<span class="cal-day-rate"></span></div>`);
+      continue;
+    }
+    const rec = dataByDate[ds];
+    const rateCls = rec && rec.rate !== null ? rateClass(rec.rate) : '';
+    const rh = rec
+      ? (rec.rate !== null ? `<span class="cal-day-rate ${rateCls}">${esc(String(rec.rate))}%</span>` : `<span class="cal-day-rate">—</span>`)
+      : '<span class="cal-day-rate"></span>';
+    if (ds === today) {
+      // 本日：rate 表示あり・クリック不可（本日のデータは上の「本日のデータ」で入力）
+      grid.insertAdjacentHTML('beforeend', `<div class="cal-day today">${d}${rh}</div>`);
+    } else {
+      grid.insertAdjacentHTML('beforeend', `<div class="cal-day" onclick="openPastForm('${ds}')">${d}${rh}</div>`);
+    }
+  }
+}
+
+function openPastForm(dateStr) {
+  pastDate = dateStr;
+  document.getElementById('past-date-label').textContent = fmtDate(dateStr) + 'のデータ';
+  document.getElementById('past-calendar').style.display = 'none';
+  document.getElementById('past-form').style.display     = 'block';
+  // レイアウト確定後にスクロール（タイミング問題を回避）
+  setTimeout(() => scrollToCard('past-section-card'), 50);
+  // 本日入力欄を閉じる（相互排他）。initTodaySection は呼ばない（past-form が再度閉じられるのを防ぐ）
+  document.getElementById('today-input').style.display = 'none';
+  const todayRec = allDays.find(d => d.date === todayStr());
+  if (todayRec) {
+    showTodaySaved(todayRec);
+  } else {
+    // 今日データなし → プレースホルダーを表示
+    document.getElementById('today-saved').style.display = 'none';
+    document.getElementById('today-empty').style.display = 'block';
+  }
+  const existing = allDays.find(d => d.date === dateStr);
+  if (existing) { buf.p.v = String(existing.visitors); buf.p.r = String(existing.reservations); }
+  else           { buf.p.v = '0'; buf.p.r = '0'; }
+  // フォームを開いたらフレッシュ状態にリセット
+  buf.p.vf = true; buf.p.rf = true;
+  setDisplay('p');
+  updateLiveRate('p'); updateSaveBtn('p');
+}
+
+function showPastCalendar() {
+  document.getElementById('past-form').style.display     = 'none';
+  document.getElementById('past-calendar').style.display = 'block';
+  // 本日セクションを元の状態に戻す
+  initTodaySection();
+  // 過去データ見出しへスクロール
+  setTimeout(() => requestAnimationFrame(() => scrollToCard('past-section-card')), 150);
+}
+
+// ヘッダー高さを考慮してセクションカードまでスクロール
+function scrollToCard(id) {
+  const card = document.getElementById(id);
+  if (!card) return;
+  const headerH = document.querySelector('.app-header').offsetHeight;
+  let top = 0, el = card;
+  while (el) { top += el.offsetTop; el = el.offsetParent; }
+  window.scrollTo({ top: top - headerH - 8, behavior: 'smooth' });
+}
+
+// ===================================================================
+// テンキー
+// ===================================================================
+function np(key, sec, field) {
+  let val = buf[sec][field];
+  const fk = field + 'f'; // フレッシュフラグのキー
+  if (key === 'del') {
+    val = val.length > 1 ? val.slice(0, -1) : '0';
+    if (val === '0') buf[sec][fk] = true;
+  } else if (key === 'clear') {
+    val = '0'; buf[sec][fk] = true;
+  } else {
+    // フレッシュ or 現在値が'0' → 置換。そうでなければ追記（2桁入力対応）
+    val = (buf[sec][fk] || val === '0') ? key : val + key;
+    if (parseInt(val, 10) > 99) val = key; // オーバーフロー時は入力値に置換
+    buf[sec][fk] = false; // 1文字入力したので追記モードへ
+  }
+  // 予約人数は施術人数を上限とする
+  if (field === 'r') {
+    const cap = parseInt(buf[sec].v, 10) || 0;
+    if (cap === 0 && key !== 'clear' && key !== 'del') { showToast('先に①の施術人数を入力してください'); return; }
+    if (parseInt(val, 10) > cap) {
+      const keyInt = parseInt(key, 10);
+      // キー単体がcap以下 → そのキー値を採用（1回押しで変更できるUX）
+      // キー単体がcap超え → capに丸めて次の入力は置換モードに戻す
+      val = keyInt <= cap ? key : String(cap);
+      buf[sec][fk] = keyInt > cap;
+    }
+  }
+  buf[sec][field] = val;
+  // vを下げた場合、rも連動して上限を下げる
+  if (field === 'v') {
+    const newV = parseInt(val, 10) || 0;
+    if ((parseInt(buf[sec].r, 10) || 0) > newV) {
+      buf[sec].r = String(newV);
+    }
+  }
+  setDisplay(sec);
+  updateLiveRate(sec); updateSaveBtn(sec);
+}
+
+// 直接入力（input oninput）
+function onCountInput(sec, field, raw) {
+  const digits = raw.replace(/[^0-9]/g, '').slice(0, 2);
+  let n = parseInt(digits, 10) || 0;
+  // 予約人数は施術人数を上限とする
+  if (field === 'r') n = Math.min(n, parseInt(buf[sec].v, 10) || 0);
+  buf[sec][field] = String(n);
+  buf[sec][field + 'f'] = false; // テキスト直入力後のnumrowは追記モードにする
+  // inputの値を正規化
+  const elId = sec + '-' + (field === 'v' ? 'visitor' : 'reservation') + '-display';
+  document.getElementById(elId).value = n;
+  if (field === 'v') {
+    const r = parseInt(buf[sec].r, 10) || 0;
+    if (r > n) {
+      buf[sec].r = String(n);
+      document.getElementById(sec + '-reservation-display').value = n;
+    }
+  }
+  updateLiveRate(sec); updateSaveBtn(sec);
+}
+
+function setDisplay(sec) {
+  const v = parseInt(buf[sec].v, 10) || 0;
+  const r = parseInt(buf[sec].r, 10) || 0;
+  document.getElementById(sec + '-visitor-display').value          = v;
+  document.getElementById(sec + '-reservation-display').value      = r;
+}
+
+// ±ボタン用
+function npPm(sec, field, delta) {
+  const cur = parseInt(buf[sec][field], 10) || 0;
+  let next = Math.max(0, Math.min(99, cur + delta));
+  // 予約数は来店数を上限とする
+  if (field === 'r') next = Math.min(next, parseInt(buf[sec].v, 10) || 0);
+  buf[sec][field] = String(next);
+  buf[sec][field + 'f'] = true; // ±後は次の数字キーで置換モードに戻す
+  // vを下げた場合、rも連動して上限を下げる
+  if (field === 'v') {
+    const r = parseInt(buf[sec].r, 10) || 0;
+    if (r > next) { buf[sec].r = String(next); }
+  }
+  setDisplay(sec);
+  updateLiveRate(sec); updateSaveBtn(sec);
+}
+
+function updateLiveRate(sec) {
+  const v = parseInt(buf[sec].v, 10) || 0, r = parseInt(buf[sec].r, 10) || 0;
+  const el = document.getElementById(sec + '-live-rate');
+  if (r > v) {
+    el.style.display = 'block';
+    el.textContent = '次回予約の人数が施術人数を超えています';
+    el.className = 'live-rate live-rate-err';
+    return;
+  }
+  if (v <= 0) { el.style.display = 'none'; return; }
+  const rate = Math.round(r / v * 100);
+  el.style.display = 'block'; el.textContent = 'リピート率：' + rate + '%';
+  el.className = 'live-rate ' + rateClass(rate);
+}
+
+function updateSaveBtn(sec) {
+  const v = parseInt(buf[sec].v, 10) || 0;
+  const r = parseInt(buf[sec].r, 10) || 0;
+  // 予約人数が施術人数を超えている場合は保存不可（0人での保存は許可）
+  const dis = r > v;
+  document.getElementById(sec + '-save-btn').disabled = dis;
+}
+
+// ===================================================================
+// 保存
+// ===================================================================
+async function saveToday() { await saveData('t', todayStr()); }
+async function savePast()  { showPastCalendar(); await saveData('p', pastDate); }
+
+async function saveData(sec, date) {
+  const v = parseInt(buf[sec].v, 10) || 0;
+  const r = parseInt(buf[sec].r, 10) || 0;
+  if (r > v) { showToast('次回予約の人数が施術人数を超えています'); return false; }
+  if (v === 0 && !allDays.some(d => d.date === date)) { showToast('施術人数を入力してください'); return false; }
+  // 連打防止
+  const saveBtn = document.getElementById(sec + '-save-btn');
+  if (saveBtn) saveBtn.disabled = true;
+
+  // 楽観的更新：APIレスポンスを待たずに即座にUIを更新する
+  const prevDays = [...allDays]; // ロールバック用バックアップ
+  if (v === 0) {
+    allDays = allDays.filter(d => d.date !== date);
+    renderMonthlyStats(); renderCalendar(); renderChart();
+    if (sec === 't') {
+      document.getElementById('today-empty').style.display = 'block';
+      document.getElementById('today-saved').style.display = 'none';
+      document.getElementById('today-input').style.display = 'none';
+    }
+    showToast('削除しました');
+  } else {
+    const rate = Math.round(r / v * 100);
+    allDays = allDays.filter(d => d.date !== date);
+    allDays.unshift({ date, visitors: v, reservations: r, rate });
+    allDays.sort((a, b) => a.date > b.date ? -1 : 1);
+    renderMonthlyStats(); renderCalendar(); renderChart();
+    if (sec === 't') showTodaySaved({ visitors: v, reservations: r, rate });
+    showToast('保存しました');
+  }
+
+  // バックグラウンドでGAS APIを呼び出し、失敗時のみ巻き戻す
+  try {
+    const res = await gasPost({
+      action: 'saveDay', salon_id: salon.salon_id, salon_name: salon.salon_name, email: salon.email,
+      date, visitors: v, reservations: r, customers: []
+    });
+    if (!res.success) throw new Error(res.error);
+    return true;
+  } catch (err) {
+    // 失敗時：楽観的更新を巻き戻す
+    allDays = prevDays;
+    renderMonthlyStats(); renderCalendar(); renderChart();
+    if (sec === 't') initTodaySection();
+    showToast('保存エラー: ' + err.message);
+    return false;
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+  }
+}
+
+// ===================================================================
+// グラフ
+// ===================================================================
+function switchChart(mode) {
+  chartMode = mode;
+  renderChart();
+}
+
+function renderChart() {
+  // ボタン active 状態を常に chartMode と同期（初回呼び出し含む）
+  ['daily','weekly','monthly'].forEach(m => {
+    const btn = document.getElementById('btn-' + m);
+    if (btn) btn.classList.toggle('active', m === chartMode);
+  });
+  const ctx = document.getElementById('rate-chart').getContext('2d');
+  let labels, dataPoints;
+  if (chartMode === 'daily') {
+    // カレンダーの表示月に連動する（calMonthOffset を使用）
+    const base = new Date();
+    base.setDate(1);
+    base.setMonth(base.getMonth() + calMonthOffset);
+    const year = base.getFullYear(), mon = base.getMonth();
+    const daysInMonth = new Date(year, mon + 1, 0).getDate();
+    const dataByDate = {};
+    allDays.forEach(d => { dataByDate[d.date] = d.rate; });
+    labels = []; dataPoints = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const ds = year + '-' + pad(mon + 1) + '-' + pad(day);
+      labels.push(String(day));
+      dataPoints.push(dataByDate[ds] !== undefined ? dataByDate[ds] : null);
+    }
+  } else if (chartMode === 'weekly') {
+    // 直近8週（月曜起点）のリピート率
+    const dataByDate = {};
+    allDays.forEach(d => { dataByDate[d.date] = d; });
+    const todayD = new Date();
+    // 今週の月曜を起点に8週前まで
+    const dow = todayD.getDay(); // 0=日
+    const diffToMon = (dow === 0 ? -6 : 1 - dow);
+    const thisMonday = new Date(todayD);
+    thisMonday.setDate(todayD.getDate() + diffToMon);
+    labels = []; dataPoints = [];
+    for (let w = 7; w >= 0; w--) {
+      const weekStart = new Date(thisMonday);
+      weekStart.setDate(thisMonday.getDate() - w * 7);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      let tv = 0, tr = 0;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(weekStart);
+        d.setDate(weekStart.getDate() + i);
+        const ds = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+        if (dataByDate[ds]) { tv += dataByDate[ds].visitors; tr += dataByDate[ds].reservations; }
+      }
+      const mo = weekStart.getMonth() + 1, da = weekStart.getDate();
+      labels.push(mo + '/' + da + '〜');
+      dataPoints.push(tv > 0 ? Math.round(tr / tv * 100) : null);
+    }
+  } else {
+    // 直近6ヶ月の月次リピート率
+    const byM = {};
+    allDays.forEach(d => { const ym = d.date.slice(0, 7); if (!byM[ym]) byM[ym] = {v:0,r:0}; byM[ym].v += d.visitors; byM[ym].r += d.reservations; });
+    const allMonths = Object.keys(byM).sort();
+    const months = allMonths.slice(-6);
+    labels = months.map(m => parseInt(m.slice(5), 10) + '月');
+    dataPoints = months.map(m => byM[m].v > 0 ? Math.round(byM[m].r / byM[m].v * 100) : null);
+  }
+  const bgColors = dataPoints.map(r => r === null ? 'transparent' : r >= 90 ? 'rgba(46,138,110,.75)' : r >= 70 ? 'rgba(176,122,58,.75)' : 'rgba(168,69,69,.75)');
+  // バー上部に「〇%」を表示するカスタムプラグイン
+  const datalabelPlugin = {
+    id: 'datalabel',
+    afterDatasetsDraw(chart) {
+      const {ctx: c, data} = chart;
+      data.datasets[0].data.forEach((val, i) => {
+        if (val === null) return;
+        const meta = chart.getDatasetMeta(0);
+        const {x, y} = meta.data[i];
+        c.save();
+        c.font = 'bold 10px sans-serif';
+        c.fillStyle = '#334155';
+        c.textAlign = 'center';
+        c.fillText(val + '%', x, y - 6);
+        c.restore();
+      });
+    }
+  };
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    plugins: [datalabelPlugin],
+    data: { labels, datasets: [{ label: 'リピート率(%)', data: dataPoints, backgroundColor: bgColors, borderRadius: 4, borderSkipped: false }] },
+    options: { responsive: true, layout: { padding: { top: 20 } }, plugins: { legend: { display: false } },
+      scales: { y: { min:0, max:100, ticks: { callback: v => v+'%' }, grid: { color:'#e2e8f0' } },
+                x: { grid: { display:false }, ticks: { autoSkip: false, maxRotation: 0, font: { size: 10 } } } } }
+  });
+}
+
+// ===================================================================
+// ユーティリティ
+// ===================================================================
+function todayStr() { const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+function pad(n) { return String(n).padStart(2, '0'); }
+function fmtDate(s) { return s.replace(/(\d{4})-(\d{2})-(\d{2})/, '$1年$2月$3日'); }
+function getDeviceInfo() {
+  const ua = navigator.userAgent;
+  const type = /iPhone|Android.*Mobile/.test(ua) ? 'スマホ'
+    : /iPad|Android/.test(ua) ? 'タブレット' : 'PC';
+  const browser = /Edg\//.test(ua) ? 'Edge'
+    : /Chrome\//.test(ua) ? 'Chrome'
+    : /Safari\//.test(ua) ? 'Safari'
+    : /Firefox\//.test(ua) ? 'Firefox' : 'その他';
+  return type + '/' + browser;
+}
+async function gasPost(payload) {
+  const res = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error('通信エラー: ' + res.status);
+  return res.json();
+}
+function showLoading(v) { document.getElementById('loading-overlay').style.display = v ? 'flex' : 'none'; }
+function showToast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2800); }
+function saveSession(s)   { s._ts = Date.now(); localStorage.setItem('rr_session', JSON.stringify(s)); }
+function clearSession()   { localStorage.removeItem('rr_session'); }
+function clearDataCache() { try { const keys = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('rr_cache_')) keys.push(k); } keys.forEach(k => localStorage.removeItem(k)); } catch(_){} }
+function restoreSession() { try { const s = JSON.parse(localStorage.getItem('rr_session')||'null'); if (!s||!s.salon_id) return null; if (s._ts && Date.now()-s._ts > 8*60*60*1000) { clearSession(); clearDataCache(); return null; } return s; } catch(_){} return null; }
+function saveDataCache(sid, data) { try { localStorage.setItem('rr_cache_' + sid, JSON.stringify({ ts: Date.now(), days: data.days || [] })); } catch(_){} }
+function loadDataCache(sid) { try { return JSON.parse(localStorage.getItem('rr_cache_' + sid)||'null'); } catch(_){} return null; }
+
+// ===================================================================
+// 起動
+// ===================================================================
+// C: セッション復元 + キャッシュから即表示 + バックグラウンド更新
+document.addEventListener('DOMContentLoaded', async () => {
+  ['sid-input','email-input'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key==='Enter') handleLogin(); });
+  });
+  const s = restoreSession(); if (!s) return;
+  salon = { salon_id: s.salon_id, salon_name: s.salon_name || '', email: s.email };
+  document.getElementById('header-salon-name').textContent = s.salon_name || 'サロンID: ' + s.salon_id;
+  document.getElementById('today-date-label').textContent  = fmtDate(todayStr());
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display  = 'block';
+
+  // キャッシュまたは空データで即座にUI表示（スピナーなし）
+  const cache = loadDataCache(s.salon_id);
+  applyData({ days: cache ? cache.days : [] });
+
+  // バックグラウンドで最新データを取得して差分更新
+  try {
+    const res = await gasPost({ action: 'getData', salon_id: s.salon_id, email: s.email });
+    if (!res.success) throw new Error('expired');
+    applyData(res);
+  } catch(_) {
+    if (!cache) {
+      clearSession(); salon = null;
+      document.getElementById('main-screen').style.display  = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+    }
+  }
+});
+</script>
+</body>
+</html>
